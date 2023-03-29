@@ -8,6 +8,6 @@ const std::string &module_t::getName() const {
     return name;
 }
 
-std::vector<std::pair<module_t *, int>> &module_t::getConnections() {
+const std::vector<std::pair<const module_t *const, const int>> &module_t::getConnections() const {
     return connections;
 }

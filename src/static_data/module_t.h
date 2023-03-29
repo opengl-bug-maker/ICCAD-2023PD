@@ -10,23 +10,31 @@
 #include <utility>
 #include <fstream>
 #include <cmath>
+#include "utilities/rect_t.h"
+#include "utilities/bounding_rectangle_t.h"
 
 class module_t {
+    friend class chip_t;
 protected:
     std::string name;
-    std::vector<std::pair<module_t*, int>> connections;
+    std::vector<std::pair<const module_t *const, const int>> connections;
+
 public:
-    virtual int getHalfWidth() = 0;
+    virtual const int getHalfWidth() const = 0;
 
-    virtual int getHalfHeight() = 0;
+    virtual const int getHalfHeight() const = 0;
 
-    virtual int getCenterPosX() = 0;
+    virtual const int getCenterPosX() const = 0;
 
-    virtual int getCenterPosY() = 0;
+    virtual const int getCenterPosY() const = 0;
+
+    virtual bounding_rectangle_t make_bd() = 0;
+
+    virtual std::pair<bounding_rectangle_t, bool> make_bd(rect_t& rect) = 0;
 
     const std::string &getName() const;
 
-    std::vector<std::pair<module_t *, int>> &getConnections();
+    const std::vector<std::pair<const module_t *const, const int>> &getConnections() const;
 };
 
 
