@@ -4,18 +4,42 @@
 
 #include "rect_t.h"
 
-const position_t &rect_t::getLeftLower() const {
+rect_t::rect_t(const vec2d_t &center, const vec2d_t &size) : Center(center), Size(size), LeftLower(center - size / 2),
+                                                             RightUpper(center + size / 2) {
+}
+
+const vec2d_t &rect_t::get_left_lower() const {
     return LeftLower;
 }
 
-const position_t &rect_t::getRightUpper() const {
+const vec2d_t &rect_t::get_right_upper() const {
     return RightUpper;
 }
 
-const position_t &rect_t::getCenter() const {
+const vec2d_t &rect_t::get_center() const {
     return Center;
 }
 
-const position_t &rect_t::getSize() const {
+const vec2d_t &rect_t::get_size() const {
     return Size;
+}
+
+double rect_t::get_area() const {
+    return get_size().get_area();
+}
+
+bool rect_t::operator==(const rect_t &rect) const {
+    return
+            this->get_center() == rect.get_center() &&
+            this->get_size() == rect.get_size() &&
+            this->get_left_lower() == rect.get_left_lower() &&
+            this->get_right_upper() == rect.get_right_upper();
+}
+
+bool rect_t::operator!=(const rect_t &rect) const {
+    return
+            this->get_center() != rect.get_center() ||
+            this->get_size() != rect.get_size() ||
+            this->get_left_lower() != rect.get_left_lower() ||
+            this->get_right_upper() != rect.get_right_upper();
 }

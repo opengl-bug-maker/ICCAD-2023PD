@@ -5,22 +5,30 @@
 #ifndef INC_2023PD_RECT_H
 #define INC_2023PD_RECT_H
 
-#include "position_t.h"
+#include "vec2d_t.h"
 
 class rect_t {
-    position_t LeftLower;
-    position_t RightUpper;
-    position_t Center;
-    position_t Size;
+    vec2d_t LeftLower;
+    vec2d_t RightUpper;
+    vec2d_t Center;
+    vec2d_t Size;
 
 public:
-    const position_t &getLeftLower() const;
+    rect_t(const vec2d_t &center, const vec2d_t &size);
 
-    const position_t &getRightUpper() const;
+    const vec2d_t &get_left_lower() const;
 
-    const position_t &getCenter() const;
+    const vec2d_t &get_right_upper() const;
 
-    const position_t &getSize() const;
+    const vec2d_t &get_center() const;
+
+    const vec2d_t &get_size() const;
+
+    double get_area() const;
+
+    bool operator==(const rect_t& rect) const;
+
+    bool operator!=(const rect_t& rect) const;
 };
 
 
