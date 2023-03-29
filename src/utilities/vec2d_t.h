@@ -1,0 +1,46 @@
+
+//
+// Created by 林士傑 on 2023/3/9.
+//
+
+#ifndef INC_2023PD_VEC2D_T_H
+#define INC_2023PD_VEC2D_T_H
+
+#include <cmath>
+
+class vec2d_t {
+    double x, y;
+public:
+    static vec2d_t default_position;
+
+    vec2d_t();
+
+    vec2d_t(const double& x, const double& y);
+
+    double get_x() const;
+
+    double get_y() const;
+
+    double get_half_x() const;
+
+    double get_half_y() const;
+
+    double get_length() const;
+
+    double get_area() const;
+
+    vec2d_t operator+(const vec2d_t& vec2D) const;
+
+    vec2d_t operator-(const vec2d_t& vec2D) const;
+
+    vec2d_t operator*(const double& mul) const;
+
+    vec2d_t operator/(const double& div) const;
+
+    bool operator==(const vec2d_t& vec2D) const;
+
+    bool operator!=(const vec2d_t& vec2D) const;
+};
+
+
+#endif //INC_2023PD_VEC2D_T_H
