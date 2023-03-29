@@ -6,19 +6,25 @@
 #define INC_2023PD_FIXED_MODULE_T_H
 
 #include "static_data/module_t.h"
+#include "utilities/rect_t.h"
 
 class fixed_module_t : public module_t {
     int xCoord, yCoord;
     int width, height;
-
+    rect_t* rect = nullptr;
+    fixed_module_t();
 public:
-    int getHalfWidth() override;
+    const int getHalfWidth() const override;
 
-    int getHalfHeight() override;
+    const int getHalfHeight() const override;
 
-    int getCenterPosX() override;
+    const int getCenterPosX() const override;
 
-    int getCenterPosY() override;
+    const int getCenterPosY() const override;
+
+    bounding_rectangle_t make_bd() override;
+
+    std::pair<bounding_rectangle_t, bool> make_bd(rect_t& rect) override;
 
     static fixed_module_t* fileInput(std::fstream& file);
 };
