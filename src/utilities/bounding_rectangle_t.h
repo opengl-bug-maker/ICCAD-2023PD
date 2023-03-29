@@ -5,9 +5,26 @@
 #ifndef INC_2023PD_BOUNDING_RECTANGLE_T_H
 #define INC_2023PD_BOUNDING_RECTANGLE_T_H
 
+#include "utilities/rect_t.h"
+
+class module_t;
 
 class bounding_rectangle_t {
+    friend class module_t;
+    friend class fixed_module_t;
+    friend class soft_module_t;
+    module_t* link_module;
+    rect_t rect;
 
+    bounding_rectangle_t(module_t* link_module);
+
+    bounding_rectangle_t(module_t* link_module, rect_t rect);
+public:
+    bounding_rectangle_t() = delete;
+
+    const rect_t &getRect() const;
+
+    const module_t * const getLinkModule() const;
 };
 
 
