@@ -15,7 +15,17 @@ public:
 
     vec2d_t();
 
+    vec2d_t(const vec2d_t&);
+
+    vec2d_t operator=(const vec2d_t&);
+
     vec2d_t(const double& x, const double& y);
+
+    void set_x(const double& x);
+
+    void set_y(const double& y);
+
+    void set_xy(const double& x, const double& y);
 
     double get_x() const;
 
