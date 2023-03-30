@@ -3,3 +3,6 @@
 //
 
 #include "polygon_forest_t.h"
+bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
+    return true;
+}
