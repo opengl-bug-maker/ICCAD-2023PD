@@ -19,27 +19,34 @@ class soft_module_t;
 class fixed_module_t;
 
 class chip_t {
-    static int width, height;
-    static int softCount, fixedCount;
-    static std::unordered_map<std::string, int> moduleNameToIndex;
+    static uint32_t width, height;
+    static uint32_t softCount, fixedCount;
+    static size_t total_modules_count;
+    static std::unordered_map<std::string, size_t> moduleNameToIndex;
 
     static std::vector<module_t*> modules;
     static std::vector<soft_module_t*> soft_modules;
     static std::vector<fixed_module_t*> fixed_modules;
-    static std::vector<std::vector<int>> connectionTable;
+    static std::vector<std::vector<uint_fast32_t>> connectionTable;
 
 public:
     static void file_input(std::string fileName);
 
-    static const int getWidth();
+    static const size_t total_modules_n();
 
-    static const int getHeight();
+    static const uint32_t get_width();
 
-    static const std::vector<module_t *> &getModules();
+    static const uint32_t get_height();
 
-    static const std::vector<soft_module_t *> &getSoftModules();
+    static const std::vector<module_t *> &get_modules();
 
-    static const std::vector<fixed_module_t *> &getFixedModules();
+    static const std::vector<soft_module_t *> &get_soft_modules();
+
+    static const std::vector<fixed_module_t *> &get_fixed_modules();
+
+    static const std::vector<std::vector<uint_fast32_t>> &get_connection_table();
+
+    static const std::unordered_map<std::string, size_t> &get_name_to_index_mapping();
 };
 
 
