@@ -11,9 +11,13 @@
 
 
 class quadratic_t {
+    static std::vector<vec2d_t> final_position;
+    static std::vector<vec2d_t> slope;
+    static std::vector<vec2d_t> constrain;
 public:
     static vec2d_t get_coor(int index);
-    static void set_floopplanning(const std::vector<bounding_rectangle_t>& bounding_rectangles, const std::vector<bool> is_placed);
+    static vec2d_t get_coor_random(int index);
+    static void set_floopplanning(const std::vector<bounding_rectangle_t>& bounding_rectangles, const std::vector<bool>& is_placed);
 };
 
 
