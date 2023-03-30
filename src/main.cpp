@@ -12,7 +12,7 @@ int main(/*arg*/){
     std::fstream output_file;
 
     chip_t chip;
-    chip.file_input(NULL);//fstream
+    chip.file_input("");//fstream
 
     genetic_algo_t genetic_algo(chip);
     genetic_algo.run();
