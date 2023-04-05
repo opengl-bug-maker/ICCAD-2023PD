@@ -68,7 +68,7 @@ void chip_t::file_input(std::string fileName) {
     }
 }
 
-const size_t chip_t::total_modules_n(){
+const size_t chip_t::get_total_module_n(){
     return chip_t::total_modules_count;
 }
 

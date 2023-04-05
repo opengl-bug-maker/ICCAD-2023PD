@@ -32,7 +32,7 @@ class chip_t {
 public:
     static void file_input(std::string fileName);
 
-    static const size_t total_modules_n();
+    static const size_t get_total_module_n();
 
     static const uint32_t get_width();
 
