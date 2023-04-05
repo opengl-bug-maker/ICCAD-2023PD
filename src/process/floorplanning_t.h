@@ -29,7 +29,7 @@ class floorplanning_t {
     //status
     fp_status_t fp_status = in_progress;
     //status(structure)
-    const size_t module_n = chip_t::total_modules_n();
+    const size_t module_n = chip_t::get_total_module_n();
     size_t soft_rect_n;
     size_t fixed_rect_n;
     vector<bounding_rectangle_t> soft_rects;
@@ -46,7 +46,7 @@ class floorplanning_t {
     float wirelength;
     void calculate_wirelength();
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
-    uint64_t floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
+    uint64_t VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
 
     
 public:
