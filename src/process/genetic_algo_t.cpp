@@ -5,7 +5,7 @@
 #include "genetic_algo_t.h"
 
 floorplanning_t &genetic_algo_t::get_best_fp() {
-
+	return floorplanning_t();
 }
 
 void genetic_algo_t::run() {
