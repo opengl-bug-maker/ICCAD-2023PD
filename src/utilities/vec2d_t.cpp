@@ -11,6 +11,8 @@ vec2d_t::vec2d_t() : x(default_position.get_x()), y(default_position.get_y()) {}
 vec2d_t::vec2d_t(const vec2d_t &vec2d) : x(vec2d.x), y(vec2d.y) {}
 
 vec2d_t vec2d_t::operator=(const vec2d_t &vec2d) {
+    this->x = vec2d.get_x();
+    this->y = vec2d.get_y();
     return vec2d_t(vec2d);
 }
 
