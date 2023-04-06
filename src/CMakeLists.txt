@@ -19,10 +19,10 @@ add_executable(iccad2023PD main.cpp)
 #target_compile_definitions(utilities PUBLIC DEBUG_DEF)
 
 target_link_libraries(iccad2023PD
+        process
         output_data
         plugin
         polygon
-        process
         quadratic
         static_data
         utilities

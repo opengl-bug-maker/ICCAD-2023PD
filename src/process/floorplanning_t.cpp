@@ -1,6 +1,3 @@
-#include "floorplanning_t.h"
-#include "floorplanning_t.h"
-#include "floorplanning_t.h"
 //
 // Created by 林士傑 on 2023/3/27.
 //
@@ -23,9 +20,9 @@ float floorplanning_t::bd_distance(const bounding_rectangle_t& a, const bounding
 #ifdef FP_DEBUG
 	cerr << a.getLinkModule()->getName()<<" "<< b.getLinkModule()->getName() <<" "<< abs(dis.get_x()) + abs(dis.get_y()) << endl;
 #endif
-	return abs(dis.get_x()) + abs(dis.get_y());
+	return fabs(dis.get_x()) + fabs(dis.get_y()); //must be fabs
 }
-uint64_t floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor) {
+float floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor) {
 	const module_t* neighbor_module = neighbor.first;
 	const bounding_rectangle_t* neighbor_rect;
 	int neigbor_rect_i = -1;

@@ -9,7 +9,6 @@
 #include "polygon/polygon_forest_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "static_data/chip_t.h"
-#include "polygon/polygon_forest_t.h"
 #include"static_data/fixed_module_t.h"
 #include"static_data/soft_module_t.h"
 
@@ -46,7 +45,7 @@ class floorplanning_t {
     float wirelength;
     void calculate_wirelength();
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
-    uint64_t VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
+    float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
 
     
 public:
