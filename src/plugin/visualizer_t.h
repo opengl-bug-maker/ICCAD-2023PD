@@ -5,9 +5,12 @@
 #ifndef INC_2023PD_VISUALIZER_T_H
 #define INC_2023PD_VISUALIZER_T_H
 
+#include <vector>
+#include "utilities/bounding_rectangle_t.h"
 
 class visualizer_t {
-
+public:
+    static void show_fp(std::vector<bounding_rectangle_t>&);
 };
 
 
