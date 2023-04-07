@@ -13,12 +13,68 @@ using std::endl;
 using std::cerr;
 
 
+size_t floorplanning_t::module_n;
+size_t floorplanning_t::soft_rect_n;
+size_t floorplanning_t::fixed_rect_n;
+unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
+unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
+vector<bounding_rectangle_t> floorplanning_t::fixed_rects;
+floorplanning_t::floorplanning_t() {
+    wirelength = 0;
+    floorplanning_t::soft_rect_n = chip_t::get_soft_modules().size();
+    floorplanning_t::fixed_rect_n = chip_t::get_fixed_modules().size();
+    floorplanning_t::module_n = floorplanning_t::soft_rect_n+floorplanning_t::fixed_rect_n;
+    const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
+
+    const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
+
+    //load and make the soft module (undefined shape)
+    soft_is_placed.resize(soft_rect_n);
+
+    for (int i = 0; i < soft_rect_n; ++i) {
+        soft_is_placed[i] = false;
+        bounding_rectangle_t bd = soft_modules[i]->make_bd();
+        floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
+        soft_rects.push_back(bd);
+    }
+
+
+    //load and place the fixed modules
+    for (int i = 0; i < fixed_rect_n; ++i) {
+        bounding_rectangle_t bd = fixed_modules[i]->make_bd();
+        floorplanning_t::module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;
+        fixed_rects.push_back(bd);
+
+        bool success = polygons.add_rect(fixed_rects[i]);
+        if ( success== false) {  //if the fixed modules can't be placed, must be wrong.
+            fp_status = fail_on_placing_fixed_modules;
+            cerr << "fail on placing fixed modules" << endl;
+            return;
+        }
+    }
+
+    /*
+    * for(each soft_rect_i in soft_rects){ //V^2
+    *	for(each soft_rect_j in soft_rects){
+    *		 sum+=|soft_rect_i.center-soft_rect_j.center|*connectivity
+    *	}
+    * }
+    *
+    * for(each soft_rect in soft_rects){ // V*E
+    *		for(each neighbor in soft_rect){
+    *		 sum+=|soft_rect.center-"neighbor.center" |*connectivity
+    *	}
+    * }
+    */
+}
+
+
 float floorplanning_t::bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b) {
 	rect_t rect_a = a.getRect();
 	rect_t rect_b = b.getRect();
 	vec2d_t dis = rect_a.get_center() - rect_b.get_center();
 #ifdef FP_DEBUG
-	cerr << a.getLinkModule()->getName()<<" "<< b.getLinkModule()->getName() <<" "<< abs(dis.get_x()) + abs(dis.get_y()) << endl;
+	//cerr << a.getLinkModule()->getName()<<" "<< b.getLinkModule()->getName() <<" "<< abs(dis.get_x()) + abs(dis.get_y()) << endl;
 #endif
 	return fabs(dis.get_x()) + fabs(dis.get_y()); //must be fabs
 }
@@ -67,74 +123,35 @@ void floorplanning_t::calculate_wirelength(){
 	wirelength = sum / 2;
 	//wirelength = sum;
 }
-void floorplanning_t::print_info(){
+void floorplanning_t::print_info(bool position){
 	if (fp_status == fail_on_placing_fixed_modules) {
 		cerr << "fail on placing fixed modules" << endl;
 		return;
 	}
-	cerr << "fixed module : " << endl;
-	for (int i = 0; i < fixed_rect_n; ++i) {
-		cerr << i << " : " << fixed_rects[i].getLinkModule()->getName() << endl;
-	}
+    if(position){
+        cerr << "fixed module : " << endl;
+        for (int i = 0; i < fixed_rect_n; ++i) {
+            cerr << i << " : " << fixed_rects[i].getLinkModule()->getName() << endl;
+        }
 
-	cerr << "soft module : " << endl;
-	for (int i = 0; i < soft_rect_n; ++i) {
-		string placed = soft_is_placed[i] ? "placed" : "not placed";
-		cerr << i << " : " << soft_rects[i].getLinkModule()->getName()<<" "<<placed << endl;
-	}
-	cerr << endl;
+        cerr << "soft module : " << endl;
+        for (int i = 0; i < soft_rect_n; ++i) {
+            cerr << i << " : " << soft_rects[i].getLinkModule()->getName()<<" "<<soft_rects[i].getRect().get_size()<<" ";
+            if(soft_is_placed[i]){
+                cerr<<"placed at "<<soft_rects[i].getRect().get_center()<<endl;
+            }
+            else{
+                cerr<<"not placed"<<endl;
+            }
+        }
+        cerr << endl;
+    }
+
 	get_wirelength();
 	cerr << "current wirelength : " << wirelength << endl;;
 }
 //
-floorplanning_t::floorplanning_t() {
-	wirelength = 0;
-	soft_rect_n = chip_t::get_soft_modules().size();
-	fixed_rect_n = chip_t::get_fixed_modules().size();
-	
-	const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
 
-	const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
-
-	//load and make the soft module (undefined shape)
-	soft_is_placed.resize(soft_rect_n);
-
-	for (int i = 0; i < soft_rect_n; ++i) {
-		soft_is_placed[i] = false;
-		bounding_rectangle_t bd = soft_modules[i]->make_bd();
-		module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
-		soft_rects.push_back(bd);
-	}
-
-
-	//load and place the fixed modules
-	for (int i = 0; i < fixed_rect_n; ++i) {
-		bounding_rectangle_t bd = fixed_modules[i]->make_bd();
-		module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;
-		fixed_rects.push_back(bd);
-
-		bool success = polygons.add_rect(fixed_rects[i]);
-		if ( success== false) {  //if the fixed modules can't be placed, must be wrong.
-			fp_status = fail_on_placing_fixed_modules;
-			cerr << "fail on placing fixed modules" << endl;
-			return;
-		}
-	}
-
-	/*
-	* for(each soft_rect_i in soft_rects){ //V^2
-	*	for(each soft_rect_j in soft_rects){
-	*		 sum+=|soft_rect_i.center-soft_rect_j.center|*connectivity
-	*	}
-	* }
-	* 
-	* for(each soft_rect in soft_rects){ // V*E
-	*		for(each neighbor in soft_rect){
-	*		 sum+=|soft_rect.center-"neighbor.center" |*connectivity
-	*	}
-	* }
-	*/
-}
 
 // adj(module* a, module* b) = connectivity
 float floorplanning_t::get_wirelength()

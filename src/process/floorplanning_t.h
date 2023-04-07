@@ -25,19 +25,17 @@ enum fp_status_t {
     success_to_place_all_modules = 3
 };
 class floorplanning_t {
+    static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
+    static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
+    static size_t module_n;
+    static size_t soft_rect_n;
+    static size_t fixed_rect_n;
+    static vector<bounding_rectangle_t> fixed_rects;
+
+    vector<bounding_rectangle_t> soft_rects;
+    vector<bool> soft_is_placed;
     //status
     fp_status_t fp_status = in_progress;
-    //status(structure)
-    const size_t module_n = chip_t::get_total_module_n();
-    size_t soft_rect_n;
-    size_t fixed_rect_n;
-    vector<bounding_rectangle_t> soft_rects;
-    vector<bounding_rectangle_t> fixed_rects;
-    vector<bool> soft_is_placed;
-  
-    unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
-    unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
-
     // to keep fp valid (the area restriction)
     polygon_forest_t polygons;
     
@@ -49,7 +47,7 @@ class floorplanning_t {
 
     
 public:
-    void print_info();
+    void print_info(bool);
     floorplanning_t();
     bool place_soft_module(size_t i, vec2d_t center, vec2d_t size);
     const size_t& get_soft_rect_n();
