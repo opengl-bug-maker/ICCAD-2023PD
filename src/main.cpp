@@ -11,10 +11,9 @@ int main(/*arg*/){
     std::fstream input_file;
     std::fstream output_file;
 
-    chip_t chip;
-    chip.file_input("");//fstream
+    chip_t::file_input("");//fstream
 
-    genetic_algo_t genetic_algo(chip);
+    genetic_algo_t genetic_algo;
     genetic_algo.run();
     output_handler_t::set_FP(genetic_algo.get_best_fp());
     output_file << "WHPL " << output_handler_t::WHPL() << std::endl;

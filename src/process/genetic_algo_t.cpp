@@ -13,6 +13,6 @@ void genetic_algo_t::run() {
 
 }
 
-genetic_algo_t::genetic_algo_t(chip_t &chip) {
+genetic_algo_t::genetic_algo_t() {
 
 }

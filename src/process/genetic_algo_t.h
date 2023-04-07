@@ -9,10 +9,9 @@
 #include "process/floorplanning_t.h"
 #include "static_data/chip_t.h"
 
-
 class genetic_algo_t {
 public:
-    explicit genetic_algo_t(chip_t& chip);
+    genetic_algo_t();
     void run();
     floorplanning_t& get_best_fp();
 };
