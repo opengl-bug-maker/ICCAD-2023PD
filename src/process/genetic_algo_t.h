@@ -8,11 +8,25 @@
 #include "polygon/polygon_forest_t.h"
 #include "process/floorplanning_t.h"
 #include "static_data/chip_t.h"
+#include "quadratic/quadratic_t.h"
 
 class genetic_algo_t {
+    void growing(floorplanning_t& );
+    void crossover();
+    void mutation();
+    void selection();
+    void evaluate(const floorplanning_t&);
+    void update_best_fp();
+    vector<floorplanning_t> floorplannings;
+    const size_t floorplanning_n = 200;
+    const size_t greater_floorplanning = 20;
+    const static quadratic_t quadratic_calculator;
+    const int growing_rate = 3;
 public:
     genetic_algo_t();
     void run();
+    void print_info();
+    floorplanning_t get_fp(size_t);
     floorplanning_t& get_best_fp();
 };
 

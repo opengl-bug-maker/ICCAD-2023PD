@@ -11,7 +11,7 @@
 #include "static_data/chip_t.h"
 #include"static_data/fixed_module_t.h"
 #include"static_data/soft_module_t.h"
-
+#include "plugin/visualizer_t.h"
 
 //for debug
 #include<iostream>
@@ -25,6 +25,7 @@ enum fp_status_t {
     success_to_place_all_modules = 3
 };
 class floorplanning_t {
+
     static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
     static size_t module_n;
@@ -38,22 +39,40 @@ class floorplanning_t {
     fp_status_t fp_status = in_progress;
     // to keep fp valid (the area restriction)
     polygon_forest_t polygons;
-    
-    // evaluation & output 
+    // evaluation & output
+    float score;
     float wirelength;
     void calculate_wirelength();
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
-
+    void evaluate();
+    vector<uint32_t> soft_deg;
     
 public:
-    void print_info(bool);
     floorplanning_t();
+    void cal_soft_deg();
+
+    //need to move to private
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    vector<vec2d_t> find_w_h(uint32_t area);
+    //--
+
+    //for quadratic
+    pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
+
+
     bool place_soft_module(size_t i, vec2d_t center, vec2d_t size);
     const size_t& get_soft_rect_n();
-    
+
     //polygon_forest_t& get_polygon_forest();
     float get_wirelength();
+
+    vector<int> get_unplaced_id();
+    vector<uint32_t> get_soft_deg();
+    float get_score();
+    //debug
+    void print_info(bool);
+    void GUI_validation();
 };
 
 
