@@ -14,6 +14,8 @@ class fixed_module_t : public module_t {
     rect_t* rect = nullptr;
     fixed_module_t();
 public:
+    const uint32_t get_area() const override;
+
     const int getHalfWidth() const override;
 
     const int getHalfHeight() const override;

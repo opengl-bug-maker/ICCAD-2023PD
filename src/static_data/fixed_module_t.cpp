@@ -18,6 +18,10 @@ fixed_module_t *fixed_module_t::fileInput(std::fstream &file) {
     return fixedModule;
 }
 
+const uint32_t fixed_module_t::get_area() const {
+    return this->rect == nullptr? 0 : static_cast<const uint32_t>(this->rect->get_area());
+}
+
 const int fixed_module_t::getHalfWidth() const {
     return this->width / 2;
 }

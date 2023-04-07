@@ -14,6 +14,10 @@ soft_module_t *soft_module_t::fileInput(std::fstream &file) {
     return soft_module;
 }
 
+const uint32_t soft_module_t::get_area() const {
+    return static_cast<const uint32_t>(this->minArea);
+}
+
 const int soft_module_t::getHalfWidth() const {
     return std::sqrt(this->minArea) / 2;
 }

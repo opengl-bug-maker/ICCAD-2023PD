@@ -20,6 +20,8 @@ protected:
     std::vector<std::pair<const module_t *const, const int>> connections;
 
 public:
+    virtual const uint32_t get_area() const = 0;
+
     virtual const int getHalfWidth() const = 0;
 
     virtual const int getHalfHeight() const = 0;
