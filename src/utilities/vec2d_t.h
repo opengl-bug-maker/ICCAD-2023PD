@@ -7,8 +7,11 @@
 #define INC_2023PD_VEC2D_T_H
 
 #include <cmath>
+#include <ostream>
 
 class vec2d_t {
+    friend std::ostream& operator<<(std::ostream& os, const vec2d_t& vec);
+    friend std::ostream& operator<<(std::ostream& os, const vec2d_t&& vec);
     double x, y;
 public:
     static vec2d_t default_position;
@@ -52,5 +55,7 @@ public:
     bool operator!=(const vec2d_t& vec2D) const;
 };
 
+std::ostream& operator<<(std::ostream& os, const vec2d_t& vec);
+std::ostream& operator<<(std::ostream& os, const vec2d_t&& vec);
 
 #endif //INC_2023PD_VEC2D_T_H

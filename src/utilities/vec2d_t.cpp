@@ -2,6 +2,7 @@
 // Created by 林士傑 on 2023/3/9.
 //
 
+#include <iostream>
 #include "vec2d_t.h"
 
 vec2d_t vec2d_t::default_position = vec2d_t(-1, -1);
@@ -78,4 +79,12 @@ bool vec2d_t::operator==(const vec2d_t &vec2D) const {
 
 bool vec2d_t::operator!=(const vec2d_t &vec2D) const {
     return fabs(this->get_x() - vec2D.get_x()) > 1E-6 || fabs(this->get_y() - vec2D.get_y()) > 1E-6;
+}
+
+std::ostream &operator<<(std::ostream &os, const vec2d_t &vec) {
+    os << "vec2d_t: {" << vec.x << ", " << vec.y << "}";
+}
+
+std::ostream &operator<<(std::ostream &os, const vec2d_t &&vec) {
+    os << "vec2d_t: {" << vec.x << ", " << vec.y << "}";
 }
