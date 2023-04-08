@@ -4,6 +4,7 @@
 
 #include <random>
 #include "quadratic_t.h"
+#include "static_data/chip_t.h"
 std::vector<vec2d_t> quadratic_t::final_position;
 std::vector<vec2d_t> quadratic_t::slope;
 std::vector<vec2d_t> quadratic_t::constrain;
