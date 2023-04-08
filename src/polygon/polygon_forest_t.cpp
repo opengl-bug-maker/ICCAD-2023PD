@@ -11,6 +11,13 @@
 #include "utilities/vec2d_t.h"
 
 bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
+    if( boundingRectangle.getRect().get_left_lower().get_x() < 0 ||
+        boundingRectangle.getRect().get_left_lower().get_y() < 0 ||
+        boundingRectangle.getRect().get_right_upper().get_x() > chip_t::get_width() ||
+        boundingRectangle.getRect().get_right_upper().get_y() > chip_t::get_height()){
+        //haha got you!
+        throw std::exception();
+    }
     polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
