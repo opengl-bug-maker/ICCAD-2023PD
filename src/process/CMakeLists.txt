@@ -8,4 +8,4 @@ add_library(process ${SRC_FILE} ${HEADER_FILE})
 
 target_include_directories(process PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-target_compile_definitions(process INTERFACE)
+target_compile_definitions(process INTERFACE PROCESS_DEBUG)

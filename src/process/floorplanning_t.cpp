@@ -7,7 +7,6 @@
 using std::string;
 //for debug
 #include<iostream>
-#define FP_DEBUG
 
 using std::endl;
 using std::cerr;
@@ -88,9 +87,6 @@ float floorplanning_t::bd_distance(const bounding_rectangle_t& a, const bounding
 	rect_t rect_a = a.getRect();
 	rect_t rect_b = b.getRect();
 	vec2d_t dis = rect_a.get_center() - rect_b.get_center();
-#ifdef FP_DEBUG
-	//cerr << a.getLinkModule()->getName()<<" "<< b.getLinkModule()->getName() <<" "<< abs(dis.get_x()) + abs(dis.get_y()) << endl;
-#endif
 	return fabs(dis.get_x()) + fabs(dis.get_y()); //must be fabs
 }
 float floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor) {
