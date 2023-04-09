@@ -26,13 +26,20 @@ enum fp_status_t {
 };
 class floorplanning_t {
 
+//    static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
+//    static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
+//    static size_t module_n;
+//    static size_t soft_rect_n;
+//    static size_t fixed_rect_n;
+//    static vector<bounding_rectangle_t> fixed_rects;
+
+
     static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
     static size_t module_n;
     static size_t soft_rect_n;
     static size_t fixed_rect_n;
-    static vector<bounding_rectangle_t> fixed_rects;
-
+    vector<bounding_rectangle_t> fixed_rects;
     vector<bounding_rectangle_t> soft_rects;
     vector<bool> soft_is_placed;
     //status
@@ -51,9 +58,10 @@ class floorplanning_t {
 public:
     floorplanning_t();
     void cal_soft_deg();
-
+    static void init();
     //need to move to private
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    //static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     vector<vec2d_t> find_w_h(uint32_t area);
     //--
 

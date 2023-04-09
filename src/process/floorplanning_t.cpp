@@ -13,31 +13,41 @@ using std::endl;
 using std::cerr;
 
 
+
+unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
+unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
+//vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
 size_t floorplanning_t::module_n;
 size_t floorplanning_t::soft_rect_n;
 size_t floorplanning_t::fixed_rect_n;
-unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
-unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
-vector<bounding_rectangle_t> floorplanning_t::fixed_rects;
-vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
-
-
-floorplanning_t::floorplanning_t() {
-    wirelength = 0;
+void floorplanning_t::init() {
     floorplanning_t::soft_rect_n = chip_t::get_soft_modules().size();
     floorplanning_t::fixed_rect_n = chip_t::get_fixed_modules().size();
     floorplanning_t::module_n = floorplanning_t::soft_rect_n+floorplanning_t::fixed_rect_n;
+
+
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
 
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
 
+}
+
+floorplanning_t::floorplanning_t() {
+    wirelength = 0;
+//    floorplanning_t::soft_rect_n = chip_t::get_soft_modules().size();
+//    floorplanning_t::fixed_rect_n = chip_t::get_fixed_modules().size();
+//    floorplanning_t::module_n = floorplanning_t::soft_rect_n+floorplanning_t::fixed_rect_n;
+    const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
+//
+    const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
+
     //load and make the soft module (undefined shape)
     soft_is_placed.resize(soft_rect_n);
-
+    soft_area_to_w_h_m.resize(soft_rect_n);
     for (int i = 0; i < soft_rect_n; ++i) {
         soft_is_placed[i] = false;
         bounding_rectangle_t bd = soft_modules[i]->make_bd();
-        soft_area_to_w_h_m.push_back(find_w_h(soft_modules[i]->get_area()));
+        soft_area_to_w_h_m[i] = find_w_h(soft_modules[i]->get_area());
 
         floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
         soft_rects.push_back(bd);
@@ -175,7 +185,6 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
 	auto result = target_module->make_bd(target_rect);
 	bounding_rectangle_t target_bd = result.first;
 	bool success = false;
-	//cerr << "result :" << result.second << endl;
 
 	if (result.second == true) {
 		success = polygons.add_rect(target_bd);
@@ -183,11 +192,12 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
 	}
 	if (success) {
 		soft_is_placed[i] = true;
+        soft_rects[i] = target_bd; //error here
 	}
     else{
         soft_is_placed[i] = false;
     }
-	soft_rects[i] = target_bd; //error here
+    //cerr<<success<<endl;
 	return success;
 }
 
@@ -215,6 +225,10 @@ vector<vec2d_t> floorplanning_t::find_w_h(uint32_t area){
             int x = i, y = area/i;
             if(x*2>=y){
                 ret.push_back({x, y});
+                if(x!=y){
+                    ret.push_back({y, x});
+                }
+
             }
         }
     }
@@ -259,10 +273,10 @@ void floorplanning_t::GUI_validation() {
     vector<bounding_rectangle_t> bd;
     vector<bounding_rectangle_t> placed_soft;
     bd.insert(bd.end(), this->fixed_rects.begin(), this->fixed_rects.end());
-    cerr<<bd.size()<<endl;
+    //cerr<<bd.size()<<endl;
     for(int i = 0; i<soft_rect_n; ++i){
         if(soft_is_placed[i]){
-            cerr<<soft_rects[i].getRect().get_size()<<" "<<soft_rects[i].getRect().get_center()<<endl;
+            //cerr<<soft_rects[i].getRect().get_size()<<" "<<soft_rects[i].getRect().get_center()<<endl;
             placed_soft.push_back(soft_rects[i]);
         }
     }

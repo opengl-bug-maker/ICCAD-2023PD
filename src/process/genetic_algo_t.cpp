@@ -3,23 +3,43 @@
 //
 
 #include "genetic_algo_t.h"
-#include <algorithm>
-#include <iterator>
-#include <random>
 //for debug
 #include "iostream"
 using std::cerr;
 using std::endl;
 floorplanning_t& genetic_algo_t::get_best_fp() {
-	floorplanning_t fp;
-	return fp;
+	return floorplannings[0];
 }
 
 void genetic_algo_t::run() {
+    //test growing
+//    floorplannings[0].print_info(true);
+//    growing(floorplannings[0]);
+//    floorplannings[0].print_info(true);
+
+
+//
+//    for(int i = 0; i<10; ++i){
+//        growing(floorplannings[0]);
+//    }
+//    for(int i = 0; i<10; ++i){
+//        growing(floorplannings[1]);
+//    }
     //first, let all fp grow
-    floorplannings[0].print_info(true);
-    growing(floorplannings[0]);
-    floorplannings[0].print_info(true);
+    clock_t start = clock();
+    const int epoch = 10;
+    for(size_t t = 0; t<epoch; ++t){  //10
+        for(auto& fp:floorplannings){
+            growing(fp);
+        }
+        selection(); //2000*11
+        while(floorplannings.size()<floorplanning_n){ //2000
+            floorplannings.push_back(floorplanning_t());
+        }
+    }
+    selection();
+    clock_t end = clock();
+    cerr<<"GA execution time : "<<double(end-start)/CLOCKS_PER_SEC*1000<<" ms"<<endl;
 }
 
 genetic_algo_t::genetic_algo_t() {
@@ -27,7 +47,7 @@ genetic_algo_t::genetic_algo_t() {
     floorplannings.resize(floorplanning_n);
 }
 
-void genetic_algo_t::print_info() {
+void genetic_algo_t::print_info(bool detail) {
     cerr<<"there are "<<floorplanning_n<<" floorplannings"<<endl;
     for(size_t i =0; i<floorplanning_n; ++i){
         cerr<<"fp : "<<i<<" wirelength : "<<floorplannings[i].get_wirelength()<<" "<<endl;
@@ -59,4 +79,15 @@ void genetic_algo_t::growing(floorplanning_t& fp) {
 
 floorplanning_t genetic_algo_t::get_fp(size_t i) {
     return floorplannings[i];
+}
+
+void genetic_algo_t::selection() {
+
+
+    std::sort(floorplannings.begin(), floorplannings.end(), [&](floorplanning_t&fp1, floorplanning_t& fp2){
+        return fp1.get_score()<fp2.get_score();
+    });
+    while(floorplannings.size()>greater_floorplanning_n){
+        floorplannings.pop_back();
+    }
 }
