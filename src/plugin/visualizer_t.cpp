@@ -12,6 +12,7 @@ void visualizer_t::show_fp(std::vector<bounding_rectangle_t> & bd_rect) {
     using namespace matplot;
     int W = chip_t::get_width(), H = chip_t::get_height();
     int digit = std::pow(10, ((std::floor(std::log10(std::max(W,H))))-1));
+    if (digit <= 1){ digit = 1; }
     gcf()->size(800, int(800.0 * H / W));
     xlim({0,static_cast<double>(W)});
     ylim({0,static_cast<double>(H)});
