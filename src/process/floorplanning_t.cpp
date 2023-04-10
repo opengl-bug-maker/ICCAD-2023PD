@@ -250,7 +250,7 @@ void floorplanning_t::evaluate() {
     int wh = chip_t::get_width()+chip_t::get_height();
     for(size_t i = 0; i<soft_rect_n; ++i){
         if(soft_is_placed[i]==false){
-            deg_c+= (soft_deg[i]*wh);
+            deg_c+= (soft_deg[i]*wh)+wh;
         }
     }
     score = wirelength+deg_c;
