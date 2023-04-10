@@ -14,6 +14,7 @@ class polygon_forest_t {
     void test_without_collision();
 public:
     bool add_rect(bounding_rectangle_t& boundingRectangle);
+    void delete_rect(bounding_rectangle_t& boundingRectangle);
 };
 
 

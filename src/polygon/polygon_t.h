@@ -33,11 +33,16 @@ public:
 
     bool is_bounding_collision(bounding_rectangle_t& rect) const;
 
+    bool has_bounding_rect(const bounding_rectangle_t& rect) const;
+
     //todo detail collision
     bool is_collision(bounding_rectangle_t& rect);
 
     //todo merge, update bounding rect, update rects
     bool merge_polygon(const polygon_t& polygon) const;
+
+    //todo cut,
+    std::vector<polygon_t> cut_polygon(const bounding_rectangle_t& rect) const;
 
     void addRect(rect_t& rect);
 

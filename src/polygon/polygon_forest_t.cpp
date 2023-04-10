@@ -47,6 +47,26 @@ bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
     return true;
 }
 
+void polygon_forest_t::delete_rect(bounding_rectangle_t& boundingRectangle) {
+    int index = 0;
+    polygon_t* poly = nullptr;
+    for (int i = 0; i < polygons.size(); ++i) {
+        if(polygons[i].has_bounding_rect(boundingRectangle)){
+            index = i;
+            poly = &polygons[i];
+            break;
+        }
+    }
+    if(poly == nullptr){
+        //wtf want deleted not found.
+        throw std::exception();
+    }
+    polygons.erase(polygons.begin() + index);
+    for(auto po : poly->cut_polygon(boundingRectangle)){
+        polygons.push_back(po);
+    }
+}
+
 void polygon_forest_t::test_without_collision() {
     auto fix = chip_t::get_fixed_modules();
     auto bd = fix[0]->make_bd();
@@ -56,5 +76,7 @@ void polygon_forest_t::test_without_collision() {
     auto ttt = &bd1.first.getRect();
     auto re = this->add_rect(bd);
     auto ree =this->add_rect(bd1.first);
+    this->delete_rect(bd);
+    this->delete_rect(bd);
     int a = 0;
 }

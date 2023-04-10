@@ -28,6 +28,15 @@ bool polygon_t::is_bounding_collision(bounding_rectangle_t &rect) const {
             fabs(y_dis1) < y_length;
 }
 
+bool polygon_t::has_bounding_rect(const bounding_rectangle_t &rect) const {
+    for (auto r : rects) {
+        if(rect.getLinkModule() == r.getLinkModule()){
+            return true;
+        }
+    }
+    return false;
+}
+
 
 bool polygon_t::is_collision(bounding_rectangle_t &rect) {
     return true;
@@ -35,6 +44,10 @@ bool polygon_t::is_collision(bounding_rectangle_t &rect) {
 
 bool polygon_t::merge_polygon(const polygon_t &polygon) const {
     return false;
+}
+
+std::vector<polygon_t> polygon_t::cut_polygon(const bounding_rectangle_t &rect) const {
+    return std::vector<polygon_t>();
 }
 
 void polygon_t::addRect(rect_t &rect) {
