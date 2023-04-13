@@ -72,7 +72,7 @@ public:
     bool place_soft_module(size_t i, vec2d_t center, vec2d_t size);
     const size_t& get_soft_rect_n();
 
-    //polygon_forest_t& get_polygon_forest();
+    polygon_forest_t& get_polygon_forest();
     float get_wirelength();
 
     vector<int> get_unplaced_id();

@@ -67,19 +67,9 @@ floorplanning_t::floorplanning_t() {
     }
 
     cal_soft_deg();
-    /*
-    * for(each soft_rect_i in soft_rects){ //V^2
-    *	for(each soft_rect_j in soft_rects){
-    *		 sum+=|soft_rect_i.center-soft_rect_j.center|*connectivity
-    *	}
-    * }
-    *
-    * for(each soft_rect in soft_rects){ // V*E
-    *		for(each neighbor in soft_rect){
-    *		 sum+=|soft_rect.center-"neighbor.center" |*connectivity
-    *	}
-    * }
-    */
+
+    evaluate();
+
 }
 
 
@@ -194,6 +184,7 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
         soft_is_placed[i] = false;
     }
     //cerr<<success<<endl;
+    evaluate();
 	return success;
 }
 
@@ -253,11 +244,10 @@ void floorplanning_t::evaluate() {
             deg_c+= (soft_deg[i]*wh)+wh;
         }
     }
-    score = wirelength+deg_c;
+    score = get_wirelength()+deg_c;
 }
 
 float floorplanning_t::get_score() {
-    evaluate();
     return score;
 }
 
@@ -290,4 +280,8 @@ void floorplanning_t::cal_soft_deg() {
         }
         soft_deg[i] = deg;
     }
+}
+
+polygon_forest_t &floorplanning_t::get_polygon_forest() {
+    return this->polygons;
 }
