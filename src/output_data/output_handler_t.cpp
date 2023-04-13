@@ -4,14 +4,48 @@
 
 #include "output_handler_t.h"
 
-void output_handler_t::set_FP(floorplanning_t &floorplanning) {
+int output_handler_t::whpl;
+std::vector<output_utility_t> output_handler_t::utilities;
 
+void output_handler_t::parse_polygon(polygon_t &polygon) {
+    for (auto rect : polygon.get_rects()) {
+        utilities.push_back(output_utility_t(rect.getLinkModule()->getName(), {
+            rect.getRect().get_left_lower(),
+            vec2d_t(rect.getRect().get_right_upper().get_x(), rect.getRect().get_left_lower().get_y()),
+            rect.getRect().get_right_upper(),
+            vec2d_t(rect.getRect().get_left_lower().get_x(), rect.getRect().get_right_upper().get_y())
+        }));
+    }
+}
+
+void output_handler_t::set_FP(floorplanning_t &floorplanning) {
+    polygon_forest_t& polygonForest = floorplanning.get_polygon_forest();
+//    polygon_forest_t polygonForest;
+    output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
+    for(auto poly : polygonForest.get_polygons()){
+        output_handler_t::parse_polygon(poly);
+    }
 }
 
 int output_handler_t::WHPL() {
-    return 0;
+    return output_handler_t::whpl;
 }
 
 std::vector<output_utility_t> output_handler_t::to_real() {
-    return std::vector<output_utility_t>();
+    return output_handler_t::utilities;
+}
+
+void output_handler_t::test(polygon_forest_t& polygonForest) {
+//    polygon_forest_t& polygonForest ;
+//    output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
+    for(auto poly : polygonForest.get_polygons()){
+        output_handler_t::parse_polygon(poly);
+    }
+    auto aa = output_handler_t::to_real();
+    auto b = aa[0].to_string();
+    auto bb = aa[1].to_string();
+    std::cout << b << std::endl;
+    std::cout << bb << std::endl;
+    int i = 0;
+    i++;
 }
