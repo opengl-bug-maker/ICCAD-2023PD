@@ -10,6 +10,10 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
+std::vector<polygon_t> &polygon_forest_t::get_polygons() {
+    return this->polygons;
+}
+
 bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
     if( boundingRectangle.getRect().get_left_lower().get_x() < 0 ||
         boundingRectangle.getRect().get_left_lower().get_y() < 0 ||
@@ -76,7 +80,9 @@ void polygon_forest_t::test_without_collision() {
     auto ttt = &bd1.first.getRect();
     auto re = this->add_rect(bd);
     auto ree =this->add_rect(bd1.first);
-    this->delete_rect(bd);
-    this->delete_rect(bd);
+    auto bdd = fix[1]->make_bd();
+    ree = this->add_rect(bdd);
+//    this->delete_rect(bd);
+//    this->delete_rect(bd);
     int a = 0;
 }

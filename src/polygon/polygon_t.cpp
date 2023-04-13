@@ -8,6 +8,10 @@ polygon_t::polygon_t(bounding_rectangle_t rect) : bounding_rect(rect.getRect()) 
     this->rects.push_back(rect);
 }
 
+std::vector<bounding_rectangle_t> &polygon_t::get_rects() {
+    return this->rects;
+}
+
 int polygon_t::getSize() {
     return sumTable.back().back();
 }

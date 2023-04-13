@@ -29,6 +29,8 @@ class polygon_t {
 
 public:
 
+    std::vector<bounding_rectangle_t>& get_rects();
+
     int getSize();
 
     bool is_bounding_collision(bounding_rectangle_t& rect) const;
