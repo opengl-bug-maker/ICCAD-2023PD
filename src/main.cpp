@@ -1,4 +1,5 @@
 #include <iostream>
+#include <bits/ios_base.h>
 
 #include "fstream"
 #include "static_data/chip_t.h"
@@ -11,12 +12,17 @@ int main(/*arg*/){
     std::fstream input_file;
     std::fstream output_file;
 
-    chip_t::file_input("");//fstream
+    chip_t::file_input("../../testcase/custom-input2.txt");//fstream
 
+    floorplanning_t::init();
     genetic_algo_t genetic_algo;
     genetic_algo.run();
+    floorplanning_t fp  =genetic_algo.get_best_fp();
+    //fp.GUI_validation();
     output_handler_t::set_FP(genetic_algo.get_best_fp());
-    output_file << "WHPL " << output_handler_t::WHPL() << std::endl;
+
+    output_file.open("../../custom-output2.txt", std::ios::out | std::ios::trunc);
+    output_file << "WHPL " << output_handler_t::WHPL();
 
     for (output_utility_t& output_utility : output_handler_t::to_real()) {
         output_file << output_utility.to_string();
