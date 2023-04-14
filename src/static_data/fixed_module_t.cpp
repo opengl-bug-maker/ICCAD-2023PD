@@ -43,7 +43,5 @@ bounding_rectangle_t fixed_module_t::make_bd() {
 }
 
 std::pair<bounding_rectangle_t, bool> fixed_module_t::make_bd(rect_t& rect) {
-    if(*this->rect == rect)
-        return {{this, *this->rect}, true};
-    return {{this, *this->rect}, false};
+    return {{(module_t*)this, *this->rect}, *this->rect == rect};
 }

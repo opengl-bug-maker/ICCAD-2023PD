@@ -39,7 +39,9 @@ bounding_rectangle_t soft_module_t::make_bd() {
 }
 
 std::pair<bounding_rectangle_t, bool> soft_module_t::make_bd(rect_t &rect) {
-    if(rect.get_size().get_area() >= this->minArea)
-        return {{this, rect}, true};
-    return {{this, rect}, false};
+    if(rect.get_size().get_area() < this->minArea)
+        return {{(module_t*)this, rect}, false};
+    if(std::min(rect.get_size().get_x(), rect.get_size().get_y()) * 2 < std::max(rect.get_size().get_x(), rect.get_size().get_y()))
+        return {{(module_t*)this, rect}, false};
+    return {{(module_t*)this, rect}, true};
 }
