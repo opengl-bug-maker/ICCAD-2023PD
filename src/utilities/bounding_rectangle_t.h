@@ -24,6 +24,8 @@ public:
 
     const rect_t &getRect() const;
 
+    bool setRect(const rect_t& rect);
+
     const module_t * const getLinkModule() const;
 };
 
