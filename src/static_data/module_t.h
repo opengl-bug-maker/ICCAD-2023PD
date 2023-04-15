@@ -32,7 +32,7 @@ public:
 
     virtual bounding_rectangle_t make_bd() = 0;
 
-    virtual std::pair<bounding_rectangle_t, bool> make_bd(rect_t& rect) = 0;
+    virtual std::pair<bounding_rectangle_t, bool> make_bd(const rect_t& rect) const = 0;
 
     const std::string &getName() const;
 

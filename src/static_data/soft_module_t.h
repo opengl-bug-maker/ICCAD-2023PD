@@ -23,7 +23,7 @@ public:
 
     bounding_rectangle_t make_bd() override;
 
-    std::pair<bounding_rectangle_t, bool> make_bd(rect_t &rect) override;
+    std::pair<bounding_rectangle_t, bool> make_bd(const rect_t &rect) const override;
 
     static soft_module_t* fileInput(std::fstream& file);
 };

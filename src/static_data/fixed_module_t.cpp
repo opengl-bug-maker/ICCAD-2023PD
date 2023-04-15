@@ -42,6 +42,6 @@ bounding_rectangle_t fixed_module_t::make_bd() {
     return {this, *this->rect};
 }
 
-std::pair<bounding_rectangle_t, bool> fixed_module_t::make_bd(rect_t& rect) {
+std::pair<bounding_rectangle_t, bool> fixed_module_t::make_bd(const rect_t& rect) const {
     return {{(module_t*)this, *this->rect}, *this->rect == rect};
 }
