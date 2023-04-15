@@ -18,24 +18,13 @@ class polygon_t {
     rect_t bounding_rect;
     std::vector<bounding_rectangle_t> rects;
 
-    std::vector<int> positionIndexX;
-    std::vector<int> positionIndexY;
-
-    std::vector<std::vector<int>> diffTable;
-    std::vector<std::vector<int>> normalTable;
-    std::vector<std::vector<int>> sumTable;
+public:
 
     explicit polygon_t(bounding_rectangle_t first_rect);
 
-public:
-
     std::vector<bounding_rectangle_t>& get_rects();
 
-    int getSize();
-
-    bool is_bounding_collision(bounding_rectangle_t& rect) const;
-
-    bool has_bounding_rect(const bounding_rectangle_t& rect) const;
+    bool is_bounding_collision(const bounding_rectangle_t& rect) const;
 
     //todo detail collision
     bool is_collision(bounding_rectangle_t& rect);
@@ -43,16 +32,10 @@ public:
     //todo merge, update bounding rect, update rects
     bool merge_polygon(const polygon_t& polygon) const;
 
+    bool has_bounding_rect(const bounding_rectangle_t& rect) const;
+
     //todo cut,
     std::vector<polygon_t> cut_polygon(const bounding_rectangle_t& rect) const;
-
-    void addRect(rect_t& rect);
-
-    void addRects(std::vector<rect_t>& rects);
-
-    void addRects(polygon_t& polygon);
-
-    void refresh();
 };
 
 
