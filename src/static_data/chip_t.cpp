@@ -59,6 +59,7 @@ void chip_t::file_input(std::string fileName) {
                 file >> iTemp;
 
                 chip_t::connectionTable[index0][index1] = iTemp;
+                chip_t::connectionTable[index1][index0] = iTemp;
                 chip_t::modules[index0]->connections.emplace_back(chip_t::modules[index1], iTemp);
                 chip_t::modules[index1]->connections.emplace_back(chip_t::modules[index0], iTemp);
             }
