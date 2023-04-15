@@ -2,6 +2,7 @@
 // Created by 林士傑 on 2023/3/9.
 //
 
+#include <algorithm>
 #include "polygon_t.h"
 
 polygon_t::polygon_t(bounding_rectangle_t rect) : bounding_rect(rect.getRect()) {

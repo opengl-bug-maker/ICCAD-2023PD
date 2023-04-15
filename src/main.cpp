@@ -1,5 +1,4 @@
 #include <iostream>
-#include <bits/ios_base.h>
 
 #include "fstream"
 #include "static_data/chip_t.h"
@@ -17,8 +16,7 @@ int main(/*arg*/){
     floorplanning_t::init();
     genetic_algo_t genetic_algo;
     genetic_algo.run();
-    floorplanning_t fp  =genetic_algo.get_best_fp();
-    //fp.GUI_validation();
+    floorplanning_t fp = genetic_algo.get_best_fp();
     output_handler_t::set_FP(genetic_algo.get_best_fp());
 
     output_file.open("../../custom-output2.txt", std::ios::out | std::ios::trunc);
