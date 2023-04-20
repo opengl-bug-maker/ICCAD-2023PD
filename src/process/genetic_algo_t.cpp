@@ -29,29 +29,18 @@ void genetic_algo_t::run() {
     clock_t start = clock();
     const int epoch = 10;
     for(size_t t = 0; t<epoch; ++t){
-        //cerr<<"t : "<<t<<endl;
-        //clock_t s1 = clock();
         for(auto& fp:floorplannings){
             growing(fp);
         }
-       // clock_t e1 = clock();
 
-        //clock_t s2 = clock();
         selection();
-        //clock_t e2 = clock();
-        //cerr<<"selection : "<<double(e2-s2)/CLOCKS_PER_SEC*1000<<endl;
 
         //clock_t s3 = clock();
         while(floorplannings.size()<floorplanning_n){ //2000
             floorplannings.push_back(floorplanning_t());
         }
-//        clock_t e3 = clock();
-//        cerr<<"pop : "<<double(e3-s3)/CLOCKS_PER_SEC*1000<<endl;
     }
-    clock_t  s4 =clock_t();
     selection();
-    clock_t  e4 =clock_t();
-    //cerr<<"selection : "<<double(e4-s4)/CLOCKS_PER_SEC*1000<<" ms"<<endl;
     clock_t end = clock();
     cerr<<"GA execution time : "<<double(end-start)/CLOCKS_PER_SEC*1000<<" ms"<<endl;
 }
@@ -74,8 +63,14 @@ void genetic_algo_t::growing(floorplanning_t& fp) {
 
 
 
-    std::sample(unplaced_id.begin(), unplaced_id.end(), std::back_inserter(selected_id), growing_rate,
-                std::mt19937{std::random_device{}()}); //choose some id randomly
+//    std::sample(unplaced_id.begin(), unplaced_id.end(), std::back_inserter(selected_id), growing_rate,
+//                std::mt19937{std::random_device{}()}); //choose some id randomly //too slow :(
+
+    for(int t = 0;  t<unplaced_id.size(); ++t){
+        int x = rand()%unplaced_id.size();
+        std::swap(unplaced_id[x], unplaced_id[t]);
+    }
+    selected_id = vector<int>(unplaced_id.begin(), unplaced_id.begin()+std::min(growing_rate, static_cast<int>(unplaced_id.size())));
 
     //sample a shape
     vec2d_t target_shape, target_center;
