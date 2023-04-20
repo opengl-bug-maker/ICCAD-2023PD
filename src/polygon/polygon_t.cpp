@@ -14,12 +14,12 @@ std::vector<bounding_rectangle_t> &polygon_t::get_rects() {
 }
 
 bool polygon_t::is_bounding_collision(const bounding_rectangle_t &rect) const {
-    return !(
-            rect.getRect().get_center().get_x() >= this->bounding_rect.get_center().get_x() + this->bounding_rect.get_size().get_x() ||
-            rect.getRect().get_center().get_y() + rect.getRect().get_size().get_y() <= this->bounding_rect.get_center().get_y() ||
-            rect.getRect().get_center().get_x() + rect.getRect().get_size().get_x() <= this->bounding_rect.get_center().get_x() ||
-            rect.getRect().get_center().get_y() >= this->bounding_rect.get_center().get_y() + this->bounding_rect.get_size().get_y()
-            );
+    return (
+            rect.getRect().get_center().get_x() - rect.getRect().get_size().get_half_x() < this->bounding_rect.get_center().get_x() + this->bounding_rect.get_size().get_half_x() &&
+            rect.getRect().get_center().get_y() + rect.getRect().get_size().get_half_y() > this->bounding_rect.get_center().get_y() - this->bounding_rect.get_size().get_half_y() &&
+            rect.getRect().get_center().get_x() + rect.getRect().get_size().get_half_x() > this->bounding_rect.get_center().get_x() - this->bounding_rect.get_size().get_half_x() &&
+            rect.getRect().get_center().get_y() - rect.getRect().get_size().get_half_y() < this->bounding_rect.get_center().get_y() + this->bounding_rect.get_size().get_half_y()
+    );
 }
 
 bool polygon_t::is_collision(bounding_rectangle_t &rect) {
