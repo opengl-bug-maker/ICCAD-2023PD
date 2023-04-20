@@ -17,9 +17,7 @@ vec2d_t quadratic_t::get_coor(int index) {
 }
 
 vec2d_t quadratic_t::get_coor_random(int index) {
-    std::uniform_int_distribution<> xDis(0, chip_t::get_width());
-    std::uniform_int_distribution<> yDis(0, chip_t::get_height());
-    return vec2d_t(xDis(gen), yDis(gen));
+    return {rand()%(2*chip_t::get_width())/2.0, rand()%(2*chip_t::get_height())/2.0};
 }
 
 void quadratic_t::set_floopplanning(const std::vector<bounding_rectangle_t> &bounding_rectangles,
