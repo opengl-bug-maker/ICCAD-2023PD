@@ -29,13 +29,20 @@ void genetic_algo_t::run() {
     clock_t start = clock();
     const int epoch = 10;
     for(size_t t = 0; t<epoch; ++t){
+
+        //# of fp: 2000
         for(auto& fp:floorplannings){
             growing(fp);
         }
-
+        //# of fp: 2000
         selection();
+        if(get_best_fp().get_unplaced_id().size()==0){
+             return;
+        }
+        //# of fp: 20
+        //crossover_process();
 
-        //clock_t s3 = clock();
+        //# of fp: 2000
         while(floorplannings.size()<floorplanning_n){ //2000
             floorplannings.push_back(floorplanning_t());
         }
@@ -73,20 +80,20 @@ void genetic_algo_t::growing(floorplanning_t& fp) {
     selected_id = vector<int>(unplaced_id.begin(), unplaced_id.begin()+std::min(growing_rate, static_cast<int>(unplaced_id.size())));
 
     //sample a shape
-    vec2d_t target_shape, target_center;
+    vec2d_t target_shape, target_lower_left_pos;
     for(int& id:selected_id){
         pair<vector<bounding_rectangle_t>, vector<bool>> bd_placed = fp.prepare_quad();
         quadratic_calculator.set_floopplanning(bd_placed.first,bd_placed.second);
-        target_center = quadratic_calculator.get_coor_random(id);
+        target_lower_left_pos = quadratic_calculator.get_coor_random(id);
         //target_center = quadratic_calculator.get_coor(id);
 
         //target_center = {rand()%chip_t::get_width(), rand()%chip_t::get_height()};
         vector<vec2d_t> shape_choices = fp.soft_area_to_w_h_m[id];
         size_t shape_id = rand()%(shape_choices.size());
         target_shape = shape_choices[shape_id];
-        if(target_center.get_x()+target_shape.get_half_x()>chip_t::get_width()||target_center.get_x()-target_shape.get_half_x()<0){continue;}
-        if(target_center.get_y()+target_shape.get_half_y()>chip_t::get_height()||target_center.get_y()-target_shape.get_half_y()<0){continue;}
-        bool success = fp.place_soft_module(id,target_center, target_shape);
+        if(target_lower_left_pos.get_x()+target_shape.get_x()>chip_t::get_width()||target_lower_left_pos.get_x()<0){continue;}
+        if(target_lower_left_pos.get_y()+target_shape.get_y()>chip_t::get_height()||target_lower_left_pos.get_y()<0){continue;}
+        bool success = fp.place_soft_module(id,target_lower_left_pos, target_shape);
     }
 
 }
@@ -103,3 +110,38 @@ void genetic_algo_t::selection() {
         floorplannings.pop_back();
     }
 }
+
+floorplanning_t genetic_algo_t::crossover(const floorplanning_t& fp1, const floorplanning_t& fp2) {
+    floorplanning_t ret;
+    for(int i = 0; i<fp1.soft_rects.size(); ++i){
+        vec2d_t distance = fp1.soft_rects[i].getRect().get_center()-fp2.soft_rects[i].getRect().get_center();
+        double hm_distance =  abs(distance.get_x())+abs(distance.get_y());
+        if(hm_distance<0.1*(chip_t::get_width()+chip_t::get_height())){
+            int x = rand()%2;
+            if(x){
+                ret.place_soft_module(i, fp1.soft_rects[i].getRect().get_left_lower(), fp1.soft_rects[i].getRect().get_size());
+            }
+            else{
+                ret.place_soft_module(i, fp2.soft_rects[i].getRect().get_left_lower(), fp2.soft_rects[i].getRect().get_size());
+            }
+
+        }
+    }
+    return ret;
+}
+
+void genetic_algo_t::crossover_process() {
+    for(int i = 0; i<greater_floorplanning_n; ++i){
+        int x = rand()%greater_floorplanning_n;
+        std::swap(floorplannings[i], floorplannings[x]);
+    }
+
+    for(int i = 0; i<greater_floorplanning_n; ++i){
+        for(int j = i+1; j<greater_floorplanning_n; ++j){
+            floorplanning_t fp = crossover(floorplannings[i], floorplannings[j]);
+            floorplannings.push_back(fp);
+        }
+    }
+
+}
+

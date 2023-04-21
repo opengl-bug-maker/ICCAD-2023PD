@@ -40,7 +40,6 @@ class floorplanning_t {
     static size_t soft_rect_n;
     static size_t fixed_rect_n;
     vector<bounding_rectangle_t> fixed_rects;
-    vector<bounding_rectangle_t> soft_rects;
     vector<bool> soft_is_placed;
     //status
     fp_status_t fp_status = in_progress;
@@ -56,6 +55,7 @@ class floorplanning_t {
     vector<uint32_t> soft_deg;
     
 public:
+    vector<bounding_rectangle_t> soft_rects;
     floorplanning_t();
     void cal_soft_deg();
     static void init();

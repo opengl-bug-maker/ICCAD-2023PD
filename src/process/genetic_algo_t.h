@@ -15,7 +15,8 @@
 #include<time.h>
 class genetic_algo_t {
     void growing(floorplanning_t& );
-    void crossover();
+    void crossover_process();
+
     void mutation();
     void selection();
     void evaluate(const floorplanning_t&);
@@ -26,6 +27,7 @@ class genetic_algo_t {
     const static quadratic_t quadratic_calculator;
     const int growing_rate = 3;
 public:
+    floorplanning_t crossover(const floorplanning_t& fp1, const floorplanning_t& fp2);
     genetic_algo_t();
     void run();
     void print_info(bool);

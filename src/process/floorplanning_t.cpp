@@ -168,8 +168,8 @@ float floorplanning_t::get_wirelength()
 
 
 
-bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
-	rect_t target_rect(center,size);
+bool floorplanning_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t size) {
+	rect_t target_rect(lower_left_pos,size);
 	//const soft_module_t* const target_module = dynamic_cast<const soft_module_t*>(soft_rects[i].getLinkModule());
 	soft_module_t* target_module = (soft_module_t*)(soft_rects[i].getLinkModule()); //due to the const->non-const :(
 	auto result = target_module->make_bd(target_rect);
