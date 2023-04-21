@@ -14,7 +14,8 @@ class rect_t {
     vec2d_t Size;
 
 public:
-    rect_t(const vec2d_t &center, const vec2d_t &size);
+
+    rect_t(const vec2d_t &left_lower, const vec2d_t &size);
 
     const vec2d_t &get_left_lower() const;
 

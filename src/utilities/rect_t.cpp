@@ -4,8 +4,8 @@
 
 #include "rect_t.h"
 
-rect_t::rect_t(const vec2d_t &center, const vec2d_t &size) : Center(center), Size(size), LeftLower(center - size / 2),
-                                                             RightUpper(center + size / 2) {
+rect_t::rect_t(const vec2d_t &left_lower, const vec2d_t &size) : Center(left_lower + size / 2), Size(size), LeftLower(left_lower),
+                                                                 RightUpper(left_lower + size) {
 }
 
 const vec2d_t &rect_t::get_left_lower() const {
