@@ -13,7 +13,7 @@ fixed_module_t::fixed_module_t() {
 fixed_module_t *fixed_module_t::fileInput(std::fstream &file) {
     fixed_module_t* fixedModule = new fixed_module_t();
     file >> fixedModule->name >> fixedModule->xCoord >> fixedModule->yCoord >> fixedModule->width >> fixedModule->height;
-    fixedModule->rect = new rect_t(vec2d_t(fixedModule->xCoord + fixedModule->width / 2.0, fixedModule->yCoord + fixedModule->height / 2.0),
+    fixedModule->rect = new rect_t(vec2d_t(fixedModule->xCoord, fixedModule->yCoord),
                                    vec2d_t(fixedModule->width, fixedModule->height));
     return fixedModule;
 }
