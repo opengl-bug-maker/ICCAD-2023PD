@@ -77,19 +77,16 @@ void genetic_algo_t::growing(floorplanning_t& fp) {
     for(int& id:selected_id){
         pair<vector<bounding_rectangle_t>, vector<bool>> bd_placed = fp.prepare_quad();
         quadratic_calculator.set_floopplanning(bd_placed.first,bd_placed.second);
-        //target_center = quadratic_calculator.get_coor_random(id);
+        target_center = quadratic_calculator.get_coor_random(id);
         //target_center = quadratic_calculator.get_coor(id);
-        //clock_t s1 = clock_t();
-        target_center = {rand()%chip_t::get_width(), rand()%chip_t::get_height()};
+
+        //target_center = {rand()%chip_t::get_width(), rand()%chip_t::get_height()};
         vector<vec2d_t> shape_choices = fp.soft_area_to_w_h_m[id];
         size_t shape_id = rand()%(shape_choices.size());
         target_shape = shape_choices[shape_id];
-        if(target_center.get_x()+target_shape.get_half_x()>=chip_t::get_width()||target_center.get_x()-target_shape.get_half_x()<0){continue;}
-        if(target_center.get_y()+target_shape.get_half_y()>=chip_t::get_height()||target_center.get_y()-target_shape.get_half_y()<0){continue;}
-        //clock_t s1 = clock_t();
+        if(target_center.get_x()+target_shape.get_half_x()>chip_t::get_width()||target_center.get_x()-target_shape.get_half_x()<0){continue;}
+        if(target_center.get_y()+target_shape.get_half_y()>chip_t::get_height()||target_center.get_y()-target_shape.get_half_y()<0){continue;}
         bool success = fp.place_soft_module(id,target_center, target_shape);
-        //clock_t e1 = clock_t();
-        //cerr<<"single  : "<<double(e1-s1)/CLOCKS_PER_SEC*1000<<endl;
     }
 
 }

@@ -61,8 +61,10 @@ public:
     static void init();
     //need to move to private
     //static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
-    vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
-    vector<vec2d_t> find_w_h(uint32_t area);
+    //vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    //vector<vec2d_t> find_w_h(uint32_t area);
+    static vector<vec2d_t> find_w_h(uint32_t area);
     //--
 
     //for quadratic

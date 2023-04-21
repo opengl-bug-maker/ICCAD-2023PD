@@ -9,13 +9,13 @@ using std::string;
 #include<iostream>
 
 using std::endl;
-using std::cerr;
+using std::cout;
 
 
 
 unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
 unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
-//vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
+vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
 size_t floorplanning_t::module_n;
 size_t floorplanning_t::soft_rect_n;
 size_t floorplanning_t::fixed_rect_n;
@@ -29,15 +29,17 @@ void floorplanning_t::init() {
 
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
 
+    soft_area_to_w_h_m.resize(soft_rect_n);
+    for (int i = 0; i < soft_rect_n; ++i) {
+        soft_area_to_w_h_m[i] = find_w_h(soft_modules[i]->get_area());
+        floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
+    }
+
 }
 
 floorplanning_t::floorplanning_t() {
     wirelength = 0;
-//    floorplanning_t::soft_rect_n = chip_t::get_soft_modules().size();
-//    floorplanning_t::fixed_rect_n = chip_t::get_fixed_modules().size();
-//    floorplanning_t::module_n = floorplanning_t::soft_rect_n+floorplanning_t::fixed_rect_n;
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
-//
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
 
     //load and make the soft module (undefined shape)
@@ -61,7 +63,7 @@ floorplanning_t::floorplanning_t() {
         bool success = polygons.add_rect(fixed_rects[i]);
         if ( success== false) {  //if the fixed modules can't be placed, must be wrong.
             fp_status = fail_on_placing_fixed_modules;
-            cerr << "fail on placing fixed modules" << endl;
+            cout << "fail on placing fixed modules" << endl;
             return;
         }
     }
@@ -126,31 +128,33 @@ void floorplanning_t::calculate_wirelength(){
 }
 void floorplanning_t::print_info(bool position){
 	if (fp_status == fail_on_placing_fixed_modules) {
-		cerr << "fail on placing fixed modules" << endl;
+		cout << "fail on placing fixed modules" << endl;
 		return;
 	}
     if(position){
-        cerr << "fixed module : " << endl;
+        cout << "fixed module : " << endl;
         for (int i = 0; i < fixed_rect_n; ++i) {
-            cerr << i << " : " << fixed_rects[i].getLinkModule()->getName() << endl;
+            cout << i << " : " << fixed_rects[i].getLinkModule()->getName() << endl;
         }
 
-        cerr << "soft module : " << endl;
+        cout << "soft module : " << endl;
         for (int i = 0; i < soft_rect_n; ++i) {
-            cerr << i << " : " << soft_rects[i].getLinkModule()->getName()<<" "<<soft_rects[i].getRect().get_size()<<" ";
+            cout << i << " : " <<soft_rects[i].getLinkModule()->getName()<<" ";
+
             if(soft_is_placed[i]){
-                cerr<<"placed at "<<soft_rects[i].getRect().get_center()<<endl;
+                cout<<"placed at "<<"{"<<soft_rects[i].getRect().get_center().get_x()<<", "
+                <<soft_rects[i].getRect().get_center().get_y()<<"}"<<endl;
             }
             else{
-                cerr<<"not placed"<<endl;
+                cout<<"not placed"<<endl;
             }
         }
-        cerr << endl;
+        //cout << endl;
     }
 
 	get_wirelength();
-	cerr << "current wirelength : " << wirelength << endl;
-    cerr<<"current score : "<<get_score()<<endl;
+	cout << "current wirelength : " << wirelength << endl;
+    cout<<"current score : "<<get_score()<<endl;
 }
 //
 
@@ -174,7 +178,7 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
 
 	if (result.second == true) {
 		success = polygons.add_rect(target_bd);
-		//cerr << "add :" << success << endl;
+		//cout << "add :" << success << endl;
 	}
 	if (success) {
 		soft_is_placed[i] = true;
@@ -183,7 +187,7 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t center,vec2d_t size) {
     else{
         soft_is_placed[i] = false;
     }
-    //cerr<<success<<endl;
+    //cout<<success<<endl;
     evaluate();
 	return success;
 }
@@ -259,10 +263,10 @@ void floorplanning_t::GUI_validation() {
     vector<bounding_rectangle_t> bd;
     vector<bounding_rectangle_t> placed_soft;
     bd.insert(bd.end(), this->fixed_rects.begin(), this->fixed_rects.end());
-    //cerr<<bd.size()<<endl;
+    //cout<<bd.size()<<endl;
     for(int i = 0; i<soft_rect_n; ++i){
         if(soft_is_placed[i]){
-            //cerr<<soft_rects[i].getRect().get_size()<<" "<<soft_rects[i].getRect().get_center()<<endl;
+            //cout<<soft_rects[i].getRect().get_size()<<" "<<soft_rects[i].getRect().get_center()<<endl;
             placed_soft.push_back(soft_rects[i]);
         }
     }
