@@ -27,6 +27,8 @@ public:
 
     double get_area() const;
 
+    bool is_collision(const rect_t& rect) const;
+
     bool operator==(const rect_t& rect) const;
 
     bool operator!=(const rect_t& rect) const;

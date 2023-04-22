@@ -43,3 +43,12 @@ bool rect_t::operator!=(const rect_t &rect) const {
             this->get_left_lower() != rect.get_left_lower() ||
             this->get_right_upper() != rect.get_right_upper();
 }
+
+bool rect_t::is_collision(const rect_t &rect) const {
+    return (
+            rect.get_left_lower().get_x() < this->get_right_upper().get_x() &&
+            rect.get_right_upper().get_y() > this->get_left_lower().get_y() &&
+            rect.get_right_upper().get_x() > this->get_left_lower().get_x() &&
+            rect.get_left_lower().get_y() < this->get_right_upper().get_y()
+    );
+}
