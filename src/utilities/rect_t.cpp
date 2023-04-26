@@ -52,3 +52,31 @@ bool rect_t::is_collision(const rect_t &rect) const {
             rect.get_left_lower().get_y() < this->get_right_upper().get_y()
     );
 }
+
+rect_t rect_t::intersect(const rect_t &rect) const {
+    double r2l1x = rect.get_right_upper().get_x() - this->get_left_lower().get_x();
+    double r1l2x = this->get_right_upper().get_x() - rect.get_left_lower().get_x();
+    double u2b1y = rect.get_right_upper().get_y() - this->get_left_lower().get_y();
+    double u1b2y = this->get_right_upper().get_y() - rect.get_left_lower().get_y();
+
+    double wid;
+    double hei;
+    double le;
+    double bo;
+    if(r2l1x < r1l2x){
+        wid = r2l1x;
+        le = this->get_left_lower().get_x();
+    }else{
+        wid = r1l2x;
+        le = rect.get_left_lower().get_x();
+    }
+
+    if(u2b1y < u1b2y){
+        hei = u2b1y;
+        bo = this->get_left_lower().get_y();
+    }else{
+        hei = u1b2y;
+        bo = rect.get_left_lower().get_y();
+    }
+    return {{le, bo}, {wid, hei}};
+}

@@ -29,6 +29,8 @@ public:
 
     bool is_collision(const rect_t& rect) const;
 
+    rect_t intersect(const rect_t& rect) const;
+
     bool operator==(const rect_t& rect) const;
 
     bool operator!=(const rect_t& rect) const;
