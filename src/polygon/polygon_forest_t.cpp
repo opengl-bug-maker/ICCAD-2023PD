@@ -23,7 +23,7 @@ std::vector<polygon_t> polygon_forest_t::get_polygons() {
     return {polygons.begin() + 4, polygons.end()};
 }
 
-bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
+bool polygon_forest_t::add_rect(const bounding_rectangle_t &boundingRectangle) {
     if( boundingRectangle.getRect().get_left_lower().get_x() < 0 ||
         boundingRectangle.getRect().get_left_lower().get_y() < 0 ||
         boundingRectangle.getRect().get_right_upper().get_x() > chip_t::get_width() ||
@@ -60,7 +60,7 @@ bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
     return true;
 }
 
-void polygon_forest_t::delete_rect(bounding_rectangle_t& boundingRectangle) {
+void polygon_forest_t::delete_rect(const bounding_rectangle_t& boundingRectangle) {
     int index = 0;
     polygon_t* poly = nullptr;
     for (int i = 0; i < polygons.size(); ++i) {
@@ -94,4 +94,16 @@ void polygon_forest_t::test_without_collision() {
 //    this->delete_rect(bd);
 //    this->delete_rect(bd);
     int a = 0;
+}
+
+bool polygon_forest_t::test_collision(const rect_t &rect) {
+    // check any polygon collision new_rect
+    for (int i = 0; i < polygons.size(); ++i) {
+        if(polygons[i].is_bounding_collision(rect)){
+            if(polygons[i].is_collision(rect)){
+                return true;
+            }
+        }
+    }
+    return false;
 }

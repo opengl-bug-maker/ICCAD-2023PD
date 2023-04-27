@@ -15,8 +15,9 @@ class polygon_forest_t {
 public:
     polygon_forest_t();
     std::vector<polygon_t> get_polygons();
-    bool add_rect(bounding_rectangle_t& boundingRectangle);
-    void delete_rect(bounding_rectangle_t& boundingRectangle);
+    bool test_collision(const rect_t& rect);
+    bool add_rect(const bounding_rectangle_t& boundingRectangle);
+    void delete_rect(const bounding_rectangle_t& boundingRectangle);
 };
 
 

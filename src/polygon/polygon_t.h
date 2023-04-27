@@ -24,10 +24,12 @@ public:
 
     std::vector<bounding_rectangle_t>& get_rects();
 
+    bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
 
     //todo detail collision
-    bool is_collision(bounding_rectangle_t& rect);
+    bool is_collision(const rect_t& rect);
+    bool is_collision(const bounding_rectangle_t& rect);
 
     //todo merge, update bounding rect, update rects
     bool merge_polygon(const polygon_t& polygon) const;
