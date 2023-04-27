@@ -27,6 +27,7 @@ enum fp_status_t {
 class floorplanning_t {
     static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
+
     vector<bounding_rectangle_t> fixed_rects;
     vector<bool> soft_is_placed;
 
@@ -39,13 +40,17 @@ class floorplanning_t {
     // evaluation & output
     float score;
     float wirelength;
+
     void calculate_wirelength();
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
-    void evaluate();
+    //void evaluate();
     vector<uint32_t> soft_deg;
 
+
+
 public:
+    static  uint32_t min_w_h[2];
     vector<bounding_rectangle_t> soft_rects;
     floorplanning_t();
     void cal_soft_deg();
@@ -62,14 +67,16 @@ public:
 
     //get set
     const vector<bool>& get_soft_is_placed() const;
-    const size_t& get_soft_rect_n() const;
+    const size_t get_soft_rect_n() const;
     polygon_forest_t& get_polygon_forest();
     float get_wirelength();
     vector<int> get_unplaced_id();
     const vector<uint32_t>& get_soft_deg();
-    float get_score();
+    const float get_score() const;
 
     //debug
+
+
     void print_info(bool);
     void GUI_validation();
 };

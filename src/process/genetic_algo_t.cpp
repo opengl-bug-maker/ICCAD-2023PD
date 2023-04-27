@@ -5,51 +5,32 @@
 #include "genetic_algo_t.h"
 //for debug
 #include "iostream"
-using std::cerr;
+using std::cout;
 using std::endl;
 floorplanning_t& genetic_algo_t::get_best_fp() {
 	return floorplannings[0];
 }
 
 void genetic_algo_t::run() {
-    //test growing
-//    floorplannings[0].print_info(true);
-//    growing(floorplannings[0]);
-//    floorplannings[0].print_info(true);
 
-
-//
-//    for(int i = 0; i<10; ++i){
-//        growing(floorplannings[0]);
-//    }
-//    for(int i = 0; i<10; ++i){
-//        growing(floorplannings[1]);
-//    }
     //first, let all fp grow
     clock_t start = clock();
-    const int epoch = 10;
+    const int epoch = 100;
     for(size_t t = 0; t<epoch; ++t){
-
-        //# of fp: 2000
         for(auto& fp:floorplannings){
             growing(fp);
         }
-        //# of fp: 2000
         selection();
         if(get_best_fp().get_unplaced_id().size()==0){
              return;
         }
-        //# of fp: 20
-        //crossover_process();
-
-        //# of fp: 2000
         while(floorplannings.size()<floorplanning_n){ //2000
             floorplannings.push_back(floorplanning_t());
         }
     }
     selection();
     clock_t end = clock();
-    cerr<<"GA execution time : "<<double(end-start)/CLOCKS_PER_SEC*1000<<" ms"<<endl;
+    cout<<"GA execution time : "<<double(end-start)/CLOCKS_PER_SEC*1000<<" ms"<<endl;
 }
 
 genetic_algo_t::genetic_algo_t() {
@@ -58,9 +39,9 @@ genetic_algo_t::genetic_algo_t() {
 }
 
 void genetic_algo_t::print_info(bool detail) {
-    cerr<<"there are "<<floorplannings.size()<<" floorplannings"<<endl;
+    cout<<"there are "<<floorplannings.size()<<" floorplannings"<<endl;
     for(size_t i =0; i<floorplannings.size(); ++i){
-        cerr<<"fp : "<<i<<" wirelength : "<<floorplannings[i].get_wirelength()<<" "<<endl;
+        cout<<"fp : "<<i<<" wirelength : "<<floorplannings[i].get_wirelength()<<" "<<endl;
     }
 }
 
