@@ -3,7 +3,13 @@
 //
 
 #include "bounding_rectangle_t.h"
+
+#include <utility>
 #include "static_data/module_t.h"
+
+bounding_rectangle_t::bounding_rectangle_t(rect_t rect) : link_module(nullptr), rect(std::move(rect)) {
+
+}
 
 bounding_rectangle_t::bounding_rectangle_t(module_t *link_module) : link_module(link_module), rect(vec2d_t(0, 0), vec2d_t(0, 0)){
 

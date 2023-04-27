@@ -13,11 +13,19 @@ std::vector<bounding_rectangle_t> &polygon_t::get_rects() {
     return this->rects;
 }
 
+bool polygon_t::is_bounding_collision(const rect_t &rect) const {
+    return this->bounding_rect.is_collision(rect);
+}
+
 bool polygon_t::is_bounding_collision(const bounding_rectangle_t &rect) const {
     return this->bounding_rect.is_collision(rect.getRect());
 }
 
-bool polygon_t::is_collision(bounding_rectangle_t &rect) {
+bool polygon_t::is_collision(const rect_t &rect) {
+    return true;
+}
+
+bool polygon_t::is_collision(const bounding_rectangle_t &rect) {
     return true;
 }
 
