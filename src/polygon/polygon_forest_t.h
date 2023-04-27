@@ -15,6 +15,7 @@ class polygon_forest_t {
 public:
     polygon_forest_t();
     std::vector<polygon_t> get_polygons();
+    std::vector<rect_t> get_death_spaces();
     bool test_collision(const rect_t& rect);
     bool add_rect(const bounding_rectangle_t& boundingRectangle);
     void delete_rect(const bounding_rectangle_t& boundingRectangle);
