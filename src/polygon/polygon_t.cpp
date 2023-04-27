@@ -21,11 +21,11 @@ bool polygon_t::is_bounding_collision(const bounding_rectangle_t &rect) const {
     return this->bounding_rect.is_collision(rect.getRect());
 }
 
-bool polygon_t::is_collision(const rect_t &rect) {
+bool polygon_t::is_collision(const rect_t &rect) const {
     return true;
 }
 
-bool polygon_t::is_collision(const bounding_rectangle_t &rect) {
+bool polygon_t::is_collision(const bounding_rectangle_t &rect) const {
     return true;
 }
 
