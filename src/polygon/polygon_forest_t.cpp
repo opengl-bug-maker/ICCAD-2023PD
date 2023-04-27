@@ -127,13 +127,10 @@ std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
             if(r.get_size().get_y() < 0)
                 r = rect_t(vec2d_t(r.get_left_lower().get_x(), r.get_left_lower().get_y() + r.get_size().get_y()), vec2d_t(r.get_size().get_x(), abs(r.get_size().get_y())));
 
-
-            for (auto & polygon : polygons) {
-                if(polygon.is_bounding_collision(r)){
-                    if(polygon.is_collision(r)){
-                        continue;
-                    }
-                }
+            if(std::any_of(polygons.begin(), polygons.end(), [&r](const polygon_t& poly){
+                return poly.is_bounding_collision(r) && poly.is_collision(r);
+            })){
+                continue;
             }
 
             spaces.push_back(r);
