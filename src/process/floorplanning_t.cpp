@@ -16,16 +16,11 @@ using std::cout;
 unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
 unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
 vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
-size_t floorplanning_t::module_n;
 //size_t floorplanning_t::soft_rect_n;
 //size_t floorplanning_t::fixed_rect_n;
 void floorplanning_t::init() {
-//    floorplanning_t::soft_rect_n = chip_t::get_soft_modules().size();
-//    floorplanning_t::fixed_rect_n = chip_t::get_fixed_modules().size();
     uint16_t  soft_rect_n = chip_t::get_soft_modules().size();
     uint16_t fixed_rect_n = chip_t::get_fixed_modules().size();
-    //floorplanning_t::module_n = floorplanning_t::soft_rect_n+floorplanning_t::fixed_rect_n;
-    floorplanning_t::module_n = soft_rect_n+fixed_rect_n;
 
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
 
