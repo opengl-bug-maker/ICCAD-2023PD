@@ -2,6 +2,7 @@
 // Created by 林士傑 on 2023/3/27.
 //
 
+#include <algorithm>
 #include "polygon_forest_t.h"
 #include "static_data/chip_t.h"
 #include "static_data/module_t.h"
