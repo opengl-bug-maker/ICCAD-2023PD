@@ -108,32 +108,32 @@ bool polygon_forest_t::test_collision(const rect_t &rect) {
     return false;
 }
 
-std::vector<rect_t> polygon_forest_t::get_death_spaces() {
+std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
     std::vector<rect_t> spaces;
-    for (int i = 0; i < polygons.size(); ++i) {
-        for (int j = 0; j < polygons[i].get_rects().size(); ++j) {
+    std::vector<bounding_rectangle_t> bounding;
+    for (auto poly : polygons) {
+        for(auto bd : poly.get_rects()){
+            bounding.push_back(bd);
+        }
+    }
 
-            for (int k = 0; k < polygons.size(); ++k) {
-                for (int l = 0; l < polygons[k].get_rects().size(); ++l) {
-                    if(i == k && j == l) continue;
+    for (int i = 0; i < bounding.size(); ++i) {
+        for (int j = i + 1; j < bounding.size(); ++j) {
+            rect_t r = bounding[i].getRect().intersect(bounding[j].getRect());
+            if(r.get_size().get_x() >= 0 && r.get_size().get_y() >= 0) continue;
 
-                    rect_t r = polygons[i].get_rects()[j].getRect().intersect(polygons[j].get_rects()[k].getRect());
-                    if(r.get_size().get_x() >= 0 && r.get_size().get_y() >= 0) continue;
+            if(r.get_size().get_x() < 0)
+                r = rect_t(vec2d_t(r.get_left_lower().get_x() + r.get_size().get_x(), r.get_left_lower().get_y()), vec2d_t(abs(r.get_size().get_x()), r.get_size().get_y()));
+            if(r.get_size().get_y() < 0)
+                r = rect_t(vec2d_t(r.get_left_lower().get_x(), r.get_left_lower().get_y() + r.get_size().get_y()), vec2d_t(r.get_size().get_x(), abs(r.get_size().get_y())));
 
-                    if(r.get_size().get_x() < 0)
-                        r = rect_t(vec2d_t(r.get_left_lower().get_x() + r.get_size().get_x(), r.get_left_lower().get_y()), vec2d_t(abs(r.get_size().get_x()), r.get_size().get_y()));
-                    if(r.get_size().get_y() < 0)
-                        r = rect_t(vec2d_t(r.get_left_lower().get_x(), r.get_left_lower().get_y() + r.get_size().get_y()), vec2d_t(r.get_size().get_x(), abs(r.get_size().get_y())));
-
-                    if(polygons[i].is_bounding_collision(r)){
-                        if(polygons[i].is_collision(r)){
-                            continue;
-                        }
-                    }
-
-                    spaces.push_back(r);
+            if(polygons[i].is_bounding_collision(r)){
+                if(polygons[i].is_collision(r)){
+                    continue;
                 }
             }
+
+            spaces.push_back(r);
         }
     }
     return spaces;
