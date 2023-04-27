@@ -13,8 +13,13 @@ class bounding_rectangle_t {
     friend class module_t;
     friend class fixed_module_t;
     friend class soft_module_t;
+    //evil
+    friend class polygon_forest_t;
+    //evil
     module_t* link_module;
     rect_t rect;
+
+    bounding_rectangle_t(rect_t rect);
 
     bounding_rectangle_t(module_t* link_module);
 

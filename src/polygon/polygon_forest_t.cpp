@@ -10,8 +10,17 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
-std::vector<polygon_t> &polygon_forest_t::get_polygons() {
-    return this->polygons;
+polygon_forest_t::polygon_forest_t() {
+    this->polygons = {
+        polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height())))),
+        polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0)))),
+        polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), chip_t::get_height())))),
+        polygon_t(bounding_rectangle_t(rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(chip_t::get_width(), chip_t::get_height()))))
+    };
+}
+
+std::vector<polygon_t> polygon_forest_t::get_polygons() {
+    return {polygons.begin() + 4, polygons.end()};
 }
 
 bool polygon_forest_t::add_rect(bounding_rectangle_t &boundingRectangle) {
