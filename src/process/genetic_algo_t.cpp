@@ -24,6 +24,9 @@ void genetic_algo_t::run() {
         if(get_best_fp().get_unplaced_id().size()==0){
              return;
         }
+        for(int i = 0; i<100; ++i){
+            floorplannings.push_back(mutation(floorplannings[i]));
+        }
         while(floorplannings.size()<floorplanning_n){ //2000
             floorplannings.push_back(floorplanning_t());
         }
@@ -124,5 +127,39 @@ void genetic_algo_t::crossover_process() {
         }
     }
 
+}
+
+floorplanning_t genetic_algo_t::mutation(const floorplanning_t& fp) {
+    // discretization x
+    std::set<uint16_t> x_coordinates;
+    std::map<uint16_t, rect_t> m;
+    floorplanning_t new_fp;
+    x_coordinates.insert(chip_t::get_width());
+    for(auto& bd_rect:fp.soft_rects){
+        uint16_t x = bd_rect.getRect().get_left_lower().get_x();
+        x_coordinates.insert(x);
+    }
+    for(auto& bd_rect:fp.fixed_rects){
+        uint16_t x = bd_rect.getRect().get_left_lower().get_x();
+        x_coordinates.insert(x);
+    }
+    for(size_t i = 0; i<fp.get_soft_rect_n(); ++i){
+        if(fp.get_soft_is_placed()[i]==false){ continue;}
+        rect_t origin_rect = fp.soft_rects[i].getRect();
+        auto it = x_coordinates.upper_bound(origin_rect.get_right_upper().get_x());// find a x coordinate at right side
+        bool fnd = 0;
+        if(it!=x_coordinates.end()){
+            rect_t target_rect( {*it-origin_rect.get_size().get_x(),origin_rect.get_left_lower().get_y()}, origin_rect.get_size());
+            bool move_success = new_fp.place_soft_module(i,target_rect.get_left_lower(), target_rect.get_size());
+            if(move_success){
+                fnd = 1;
+            }
+        }
+        if(!fnd){
+            bool add_origin_success = new_fp.place_soft_module(i, origin_rect.get_left_lower(), origin_rect.get_size());
+        }
+
+    }
+    return new_fp;
 }
 

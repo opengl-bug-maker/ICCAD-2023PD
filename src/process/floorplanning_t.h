@@ -28,7 +28,7 @@ class floorplanning_t {
     static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
 
-    vector<bounding_rectangle_t> fixed_rects;
+
     vector<bool> soft_is_placed;
 
     //status
@@ -51,7 +51,9 @@ class floorplanning_t {
 
 public:
     static  uint32_t min_w_h[2];
+
     vector<bounding_rectangle_t> soft_rects;
+    vector<bounding_rectangle_t> fixed_rects;
     floorplanning_t();
     void cal_soft_deg();
     static void init();
@@ -68,6 +70,7 @@ public:
     //get set
     const vector<bool>& get_soft_is_placed() const;
     const size_t get_soft_rect_n() const;
+    const size_t get_fixed_rect_n() const;
     polygon_forest_t& get_polygon_forest();
     float get_wirelength();
     vector<int> get_unplaced_id();

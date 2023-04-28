@@ -12,8 +12,10 @@ uint32_t fp_evaluator_t::get_score(floorplanning_t  fp) {
             deg_c+= (fp.get_soft_deg()[i]*wh)+wh;
         }
     }
-    int v = get_dead_space(fp);
-    return fp.get_wirelength()+deg_c+v*v;
+
+    uint32_t wirelength_cost = fp.get_wirelength()+deg_c;
+    uint32_t dead_space_cost = get_dead_space(fp)*(fp.get_soft_rect_n()+fp.get_fixed_rect_n()-fp.get_unplaced_id().size());
+    return wirelength_cost*0.8+0.2*dead_space_cost;
 }
 
 uint32_t fp_evaluator_t::get_dead_space(floorplanning_t fp) {

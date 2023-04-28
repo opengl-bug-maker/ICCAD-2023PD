@@ -299,3 +299,7 @@ polygon_forest_t &floorplanning_t::get_polygon_forest() {
 const vector<bool> & floorplanning_t::get_soft_is_placed() const{
     return soft_is_placed;
 }
+
+const size_t floorplanning_t::get_fixed_rect_n() const {
+    return fixed_rects.size();
+}
