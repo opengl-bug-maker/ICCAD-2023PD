@@ -13,7 +13,6 @@
 
 template <typename T>
 class quadtree_t {
-public:
     static_assert(std::is_base_of_v<box_t,T>);
 
     class quadtree_node_t {
@@ -28,8 +27,6 @@ public:
         quadtree_node_t(rect_t range);
         void split();
         int get_rect_region(const rect_t& rect);
-
-    public:
         bool is_leaf() const;
         void add_value(const T& value);
         void search_collision(std::vector<T>& vec, const T& value) const;
@@ -40,12 +37,12 @@ public:
     const static int max_depth = 5;
     quadtree_node_t* rt = nullptr;
     std::vector<T> values;
-    quadtree_t<T>();
+    quadtree_t<T>() = default;
 public:
     quadtree_t<T>(const rect_t& range);
     void add_value(const T& value);
-    void print();
     std::vector<T> collision_value(const T& value) const;
+    void print();
 };
 
 //region quadtree_node
@@ -181,9 +178,6 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
 //endregion
 
 //region quadtree
-
-template<typename T>
-quadtree_t<T>::quadtree_t() = default;
 
 template<typename T>
 quadtree_t<T>::quadtree_t(const rect_t &range){
