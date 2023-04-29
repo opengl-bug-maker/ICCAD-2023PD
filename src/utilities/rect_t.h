@@ -29,6 +29,8 @@ public:
 
     bool is_collision(const rect_t& rect) const;
 
+    bool is_contain(const rect_t& rect) const;
+
     rect_t intersect(const rect_t& rect) const;
 
     bool operator==(const rect_t& rect) const;
@@ -36,5 +38,6 @@ public:
     bool operator!=(const rect_t& rect) const;
 };
 
+std::ostream& operator<<(std::ostream& os, const rect_t& vec);
 
 #endif //INC_2023PD_RECT_H

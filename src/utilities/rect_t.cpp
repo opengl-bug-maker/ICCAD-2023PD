@@ -53,6 +53,15 @@ bool rect_t::is_collision(const rect_t &rect) const {
     );
 }
 
+bool rect_t::is_contain(const rect_t &rect) const {
+    return (
+            this->get_right_upper().get_x() >= rect.get_right_upper().get_x() &&
+            this->get_right_upper().get_y() >= rect.get_right_upper().get_y() &&
+            this->get_left_lower().get_x() >= rect.get_left_lower().get_x() &&
+            this->get_left_lower().get_y() >= rect.get_left_lower().get_y()
+            );
+}
+
 rect_t rect_t::intersect(const rect_t &rect) const {
     double r2l1x = rect.get_right_upper().get_x() - this->get_left_lower().get_x();
     double r1l2x = this->get_right_upper().get_x() - rect.get_left_lower().get_x();
@@ -79,4 +88,9 @@ rect_t rect_t::intersect(const rect_t &rect) const {
         bo = rect.get_left_lower().get_y();
     }
     return {{le, bo}, {wid, hei}};
+}
+
+std::ostream &operator<<(std::ostream &os, const rect_t &vec) {
+    os << "rect_t: {" << vec.get_left_lower().get_x() << ", " << vec.get_left_lower().get_y() << " | " << vec.get_size().get_x() << ", " << vec.get_size().get_y() << "}";
+    return os;
 }
