@@ -83,8 +83,10 @@ bool vec2d_t::operator!=(const vec2d_t &vec2D) const {
 
 std::ostream &operator<<(std::ostream &os, const vec2d_t &vec) {
     os << "vec2d_t: {" << vec.x << ", " << vec.y << "}";
+    return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const vec2d_t &&vec) {
     os << "vec2d_t: {" << vec.x << ", " << vec.y << "}";
+    return os;
 }
