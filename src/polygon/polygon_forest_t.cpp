@@ -11,7 +11,7 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
-polygon_forest_t::polygon_forest_t() {
+polygon_forest_t::polygon_forest_t() : quadtree(quadtree_t<polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))) {
     this->polygons = {
         polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height())))),
         polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0)))),
@@ -35,6 +35,7 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t &boundingRectangle) {
     polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
+    std::vector<polygon_t> collision_polygons = quadtree.collision_value(new_poly);
     for (int i = 0; i < polygons.size(); ++i) {
         if(polygons[i].is_bounding_collision(boundingRectangle)){
             if(polygons[i].is_collision(boundingRectangle)){
@@ -43,8 +44,9 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t &boundingRectangle) {
         }
     }
     // add new polygon
-    if(merging_poly.empty()){
+    if(collision_polygons.empty()){
         //no one touch
+        quadtree.add_value(new_poly);
         polygons.push_back(new_poly);
         return true;
     }

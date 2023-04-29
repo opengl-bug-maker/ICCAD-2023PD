@@ -7,18 +7,20 @@
 
 #include <vector>
 #include <map>
+#include "utilities/box_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "utilities/rect_t.h"
 
 class polygon_forest_t;
 
-class polygon_t {
+class polygon_t : public box_t{
     friend class polygon_forest_t;
 
     rect_t bounding_rect;
     std::vector<bounding_rectangle_t> rects;
 
 public:
+    rect_t get_bounding_rect() const override;
 
     explicit polygon_t(bounding_rectangle_t first_rect);
 

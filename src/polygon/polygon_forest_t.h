@@ -6,10 +6,12 @@
 #define INC_2023PD_POLYGON_FOREST_T_H
 
 #include <vector>
+#include "utilities/quadtree_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "polygon/polygon_t.h"
 
 class polygon_forest_t {
+    quadtree_t<polygon_t> quadtree;
     std::vector<polygon_t> polygons;
     void test_without_collision();
 public:
