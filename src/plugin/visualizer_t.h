@@ -11,6 +11,9 @@
 class visualizer_t {
 public:
     static void show_fp(const std::vector<bounding_rectangle_t>&);
+private:
+    static void join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts);
+    static void gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts);
 };
 
 
