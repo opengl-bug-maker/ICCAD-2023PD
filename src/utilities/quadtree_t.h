@@ -146,7 +146,7 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
         for(int j = 0; j < index; j++){
             std::cout << "\t";
         }
-        std::cout << elements[i].get_bounding_rect().get_left_lower().get_x() << " " << elements[i].get_bounding_rect().get_left_lower().get_y() << " " << elements[i].get_bounding_rect().get_size().get_x() <<  " " << elements[i].get_bounding_rect().get_size().get_y() << std::endl;
+        std::cout << elements[i].get_bounding_rect() << std::endl;
     }
     if(is_leaf()) return;
 
