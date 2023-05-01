@@ -6,14 +6,16 @@
 #define INC_2023PD_RECT_H
 
 #include "vec2d_t.h"
+#include "utilities/box_t.h"
 
-class rect_t {
+class rect_t : public box_t {
     vec2d_t LeftLower;
     vec2d_t RightUpper;
     vec2d_t Center;
     vec2d_t Size;
 
 public:
+    const rect_t &get_bounding_rect() const override;
 
     rect_t(const vec2d_t &left_lower, const vec2d_t &size);
 

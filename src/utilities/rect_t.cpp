@@ -90,6 +90,10 @@ rect_t rect_t::intersect(const rect_t &rect) const {
     return {{le, bo}, {wid, hei}};
 }
 
+const rect_t &rect_t::get_bounding_rect() const {
+    return *this;
+}
+
 std::ostream &operator<<(std::ostream &os, const rect_t &vec) {
     os << "rect_t: {" << vec.get_left_lower().get_x() << ", " << vec.get_left_lower().get_y() << " | " << vec.get_size().get_x() << ", " << vec.get_size().get_y() << "}";
     return os;
