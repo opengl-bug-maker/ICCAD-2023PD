@@ -10,7 +10,7 @@
 
 class visualizer_t {
 public:
-    static void show_fp(std::vector<bounding_rectangle_t>&);
+    static void show_fp(const std::vector<bounding_rectangle_t>&);
 };
 
 
