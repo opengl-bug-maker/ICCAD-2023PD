@@ -5,11 +5,11 @@
 #ifndef ICCAD2023PD_BOX_T_H
 #define ICCAD2023PD_BOX_T_H
 
-#include "utilities/rect_t.h"
+class rect_t;
 
 class box_t {
 public:
-    virtual rect_t get_bounding_rect() const = 0;
+    virtual const rect_t& get_bounding_rect() const = 0;
 };
 
 #endif //ICCAD2023PD_BOX_T_H

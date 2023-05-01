@@ -20,7 +20,7 @@ class polygon_t : public box_t{
     std::vector<bounding_rectangle_t> rects;
 
 public:
-    rect_t get_bounding_rect() const override;
+    const rect_t& get_bounding_rect() const override;
 
     explicit polygon_t(bounding_rectangle_t first_rect);
 

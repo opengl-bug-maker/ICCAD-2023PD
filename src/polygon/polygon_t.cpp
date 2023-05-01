@@ -46,6 +46,6 @@ std::vector<polygon_t> polygon_t::cut_polygon(const bounding_rectangle_t &rect) 
     return std::vector<polygon_t>();
 }
 
-rect_t polygon_t::get_bounding_rect() const {
+const rect_t& polygon_t::get_bounding_rect() const {
     return bounding_rect;
 }
