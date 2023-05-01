@@ -29,6 +29,8 @@ class chip_t {
     static std::vector<fixed_module_t*> fixed_modules;
     static std::vector<std::vector<uint_fast32_t>> connectionTable;
 
+    static double module_minimum_length;
+
 public:
     static void file_input(std::string fileName);
 
@@ -47,6 +49,8 @@ public:
     static const std::vector<std::vector<uint_fast32_t>> &get_connection_table();
 
     static const std::unordered_map<std::string, size_t> &get_name_to_index_mapping();
+
+    static const double &get_module_minimum_length();
 };
 
 

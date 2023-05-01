@@ -14,6 +14,7 @@ std::vector<module_t*> chip_t::modules;
 std::vector<soft_module_t*> chip_t::soft_modules;
 std::vector<fixed_module_t*> chip_t::fixed_modules;
 std::vector<std::vector<uint_fast32_t>> chip_t::connectionTable;
+double chip_t::module_minimum_length = 1e100;
 
 void chip_t::file_input(std::string fileName) {
     std::fstream file;
@@ -34,6 +35,7 @@ void chip_t::file_input(std::string fileName) {
                 chip_t::soft_modules[i] = soft_module_t::fileInput(file);
                 chip_t::modules[i] = chip_t::soft_modules[i];
                 chip_t::moduleNameToIndex[chip_t::modules[i]->getName()] = i;
+                chip_t::module_minimum_length = std::min(chip_t::module_minimum_length, ceil(sqrt(chip_t::soft_modules[i]->get_area() / 2)));
             }
         }else if(temp == "FIXEDMODULE"){
             file >> chip_t::fixedCount;
@@ -99,6 +101,10 @@ const std::vector<std::vector<uint_fast32_t>> &chip_t::get_connection_table() {
 
 const std::unordered_map<std::string, size_t> &chip_t::get_name_to_index_mapping() {
     return chip_t::moduleNameToIndex;
+}
+
+const double &chip_t::get_module_minimum_length() {
+    return chip_t::module_minimum_length;
 }
 
 
