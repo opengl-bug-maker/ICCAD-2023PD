@@ -26,4 +26,5 @@ int main(/*arg*/){
         output_file << output_utility.to_string();
     }
     output_file.close();
+    system("PAUSE");
 }
