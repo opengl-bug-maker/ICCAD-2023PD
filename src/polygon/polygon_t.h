@@ -7,24 +7,26 @@
 
 #include <vector>
 #include <map>
-#include "utilities/box_t.h"
+#include "polygon/poly_unit_t.h"
 #include "utilities/bounding_rectangle_t.h"
+#include "utilities/quadtree_t.h"
+#include "utilities/box_t.h"
 #include "utilities/rect_t.h"
 
 class polygon_forest_t;
 
 class polygon_t : public box_t{
-    friend class polygon_forest_t;
-
     rect_t bounding_rect;
-    std::vector<bounding_rectangle_t> rects;
+    quadtree_t<poly_unit_t> quadtree;
+    std::vector<poly_unit_t> poly_units;
+    std::vector<poly_union_unit_t> poly_union_units;
 
 public:
     const rect_t& get_bounding_rect() const override;
 
-    explicit polygon_t(bounding_rectangle_t first_rect);
+    explicit polygon_t(const bounding_rectangle_t& first_rect);
 
-    std::vector<bounding_rectangle_t>& get_rects();
+    std::vector<poly_unit_t>& get_rects();
 
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
@@ -33,13 +35,8 @@ public:
     bool is_collision(const rect_t& rect) const;
     bool is_collision(const bounding_rectangle_t& rect) const;
 
-    //todo merge, update bounding rect, update rects
-    bool merge_polygon(const polygon_t& polygon) const;
-
-    bool has_bounding_rect(const bounding_rectangle_t& rect) const;
-
-    //todo cut,
-    std::vector<polygon_t> cut_polygon(const bounding_rectangle_t& rect) const;
+    //todo: KJ merge poly
+    bool merge_polygon(const polygon_t& polygon);
 };
 
 

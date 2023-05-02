@@ -5,12 +5,15 @@
 #include <algorithm>
 #include "polygon_t.h"
 
-polygon_t::polygon_t(bounding_rectangle_t rect) : bounding_rect(rect.getRect()) {
-    this->rects.push_back(rect);
+polygon_t::polygon_t(const bounding_rectangle_t& rect) : bounding_rect(rect.getRect()), poly_units({poly_unit_t(*this, rect)}), quadtree(rect.getRect()) {
 }
 
-std::vector<bounding_rectangle_t> &polygon_t::get_rects() {
-    return this->rects;
+const rect_t& polygon_t::get_bounding_rect() const {
+    return bounding_rect;
+}
+
+std::vector<poly_unit_t> &polygon_t::get_rects() {
+    return this->poly_units;
 }
 
 bool polygon_t::is_bounding_collision(const rect_t &rect) const {
@@ -18,34 +21,28 @@ bool polygon_t::is_bounding_collision(const rect_t &rect) const {
 }
 
 bool polygon_t::is_bounding_collision(const bounding_rectangle_t &rect) const {
-    return this->bounding_rect.is_collision(rect.getRect());
+    return this->is_bounding_collision(rect.getRect());
 }
 
 bool polygon_t::is_collision(const rect_t &rect) const {
-    return true;
-}
-
-bool polygon_t::is_collision(const bounding_rectangle_t &rect) const {
-    return true;
-}
-
-bool polygon_t::merge_polygon(const polygon_t &polygon) const {
-    return false;
-}
-
-bool polygon_t::has_bounding_rect(const bounding_rectangle_t &rect) const {
-    if(!is_bounding_collision(rect)){
-        return false;
-    }
-    return std::any_of(rects.begin(), rects.end(), [&rect](const bounding_rectangle_t& r){
-        return rect.getLinkModule() == r.getLinkModule();
+    //todo quad tree
+    return std::any_of(poly_units.begin(), poly_units.end(), [&rect](const poly_unit_t& r){
+        return r.get_bounding_rectangle().getRect().is_collision(rect);
     });
 }
 
-std::vector<polygon_t> polygon_t::cut_polygon(const bounding_rectangle_t &rect) const {
-    return std::vector<polygon_t>();
+bool polygon_t::is_collision(const bounding_rectangle_t &rect) const {
+    return this->is_collision(rect.getRect());
 }
 
-const rect_t& polygon_t::get_bounding_rect() const {
-    return bounding_rect;
+bool polygon_t::merge_polygon(const polygon_t &polygon) {
+    auto coli = polygon.quadtree.collision_value(this->poly_units.front());
+    if(/* valid*/false){
+        return false;
+    }
+
+    //todo: KJ need maintain polygon 4 attribute.
+    this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
+    //todo: KJ merge
+    return false;
 }

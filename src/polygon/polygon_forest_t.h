@@ -16,11 +16,14 @@ class polygon_forest_t {
     void test_without_collision();
 public:
     polygon_forest_t();
+
     std::vector<polygon_t> get_polygons();
-    std::vector<rect_t> get_empty_spaces();
+
     bool test_collision(const rect_t& rect);
+
     bool add_rect(const bounding_rectangle_t& boundingRectangle);
-    void delete_rect(const bounding_rectangle_t& boundingRectangle);
+
+    std::vector<rect_t> get_empty_spaces();
 };
 
 

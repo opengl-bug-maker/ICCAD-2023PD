@@ -9,11 +9,11 @@ std::vector<output_utility_t> output_handler_t::utilities;
 
 void output_handler_t::parse_polygon(polygon_t &polygon) {
     for (auto rect : polygon.get_rects()) {
-        utilities.push_back(output_utility_t(rect.getLinkModule()->getName(), {
-            rect.getRect().get_left_lower(),
-            vec2d_t(rect.getRect().get_right_upper().get_x(), rect.getRect().get_left_lower().get_y()),
-            rect.getRect().get_right_upper(),
-            vec2d_t(rect.getRect().get_left_lower().get_x(), rect.getRect().get_right_upper().get_y())
+        utilities.push_back(output_utility_t(rect.get_bounding_rectangle().getLinkModule()->getName(), {
+            rect.get_bounding_rectangle().getRect().get_left_lower(),
+            vec2d_t(rect.get_bounding_rectangle().getRect().get_right_upper().get_x(), rect.get_bounding_rectangle().getRect().get_left_lower().get_y()),
+            rect.get_bounding_rectangle().getRect().get_right_upper(),
+            vec2d_t(rect.get_bounding_rectangle().getRect().get_left_lower().get_x(), rect.get_bounding_rectangle().getRect().get_right_upper().get_y())
         }));
     }
 }
