@@ -33,7 +33,9 @@ public:
 
     bool is_contain(const rect_t& rect) const;
 
-    rect_t intersect(const rect_t& rect) const;
+    std::pair<bool, rect_t> intersect(const rect_t& rect) const;
+
+    const rect_t merge_bounding_rect(const rect_t& rect) const;
 
     bool operator==(const rect_t& rect) const;
 

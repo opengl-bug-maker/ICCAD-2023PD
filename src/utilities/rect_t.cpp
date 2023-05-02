@@ -62,7 +62,7 @@ bool rect_t::is_contain(const rect_t &rect) const {
             );
 }
 
-rect_t rect_t::intersect(const rect_t &rect) const {
+std::pair<bool, rect_t> rect_t::intersect(const rect_t &rect) const {
     double r2l1x = rect.get_right_upper().get_x() - this->get_left_lower().get_x();
     double r1l2x = this->get_right_upper().get_x() - rect.get_left_lower().get_x();
     double u2b1y = rect.get_right_upper().get_y() - this->get_left_lower().get_y();
@@ -87,11 +87,30 @@ rect_t rect_t::intersect(const rect_t &rect) const {
         hei = u1b2y;
         bo = rect.get_left_lower().get_y();
     }
-    return {{le, bo}, {wid, hei}};
+    if(wid >= 0 && hei >= 0){
+        return {true, {{le, bo}, {wid, hei}}};
+    }
+    if(wid < 0){
+        le += wid;
+        wid -= wid + wid;
+    }
+    if(hei < 0){
+        bo += hei;
+        hei -= hei + hei;
+    }
+    return {false, {{le, bo}, {wid, hei}}};
 }
 
 const rect_t &rect_t::get_bounding_rect() const {
     return *this;
+}
+
+const rect_t rect_t::merge_bounding_rect(const rect_t &rect) const {
+    double l = std::min(this->get_left_lower().get_x(), rect.get_left_lower().get_x());
+    double r = std::max(this->get_right_upper().get_x(), rect.get_right_upper().get_x());
+    double u = std::max(this->get_right_upper().get_y(), rect.get_right_upper().get_y());
+    double b = std::min(this->get_left_lower().get_y(), rect.get_left_lower().get_y());
+    return rect_t(vec2d_t(l, b), vec2d_t(r - l, u - b));
 }
 
 std::ostream &operator<<(std::ostream &os, const rect_t &vec) {
