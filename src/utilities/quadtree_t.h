@@ -8,6 +8,7 @@
 #include <iostream>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #include "rect_t.h"
 #include "utilities/box_t.h"
 
