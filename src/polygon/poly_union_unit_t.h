@@ -6,6 +6,7 @@
 #define ICCAD2023PD_POLY_UNION_UNIT_T_H
 
 #include <map>
+#include <vector>
 #include "utilities/rect_t.h"
 
 class polygon_t;
