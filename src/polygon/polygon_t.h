@@ -31,11 +31,9 @@ public:
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
 
-    //todo detail collision
     bool is_collision(const rect_t& rect) const;
     bool is_collision(const bounding_rectangle_t& rect) const;
 
-    //todo: KJ merge poly
     bool merge_polygon(const polygon_t& polygon);
 };
 

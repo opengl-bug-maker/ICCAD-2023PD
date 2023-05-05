@@ -41,8 +41,6 @@ bool polygon_t::merge_polygon(const polygon_t &polygon) {
         return false;
     }
 
-    //todo: KJ need maintain polygon 4 attribute.
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
-    //todo: KJ merge
     return false;
 }
