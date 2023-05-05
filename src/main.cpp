@@ -2,7 +2,7 @@
 
 #include "fstream"
 #include "static_data/chip_t.h"
-#include "process/genetic_algo_t.h"
+#include "process/solver_t.h"
 #include "output_data/output_handler_t.h"
 #include "output_data/output_utility_t.h"
 
@@ -14,10 +14,10 @@ int main(/*arg*/){
     chip_t::file_input("../../testcase/custom-input2.txt");//fstream
 
     floorplanning_t::init();
-    genetic_algo_t genetic_algo;
-    genetic_algo.run();
-    floorplanning_t fp = genetic_algo.get_best_fp();
-    output_handler_t::set_FP(genetic_algo.get_best_fp());
+    solver_t solver;
+    solver.run();
+    floorplanning_t fp = solver.get_best_fp();
+    output_handler_t::set_FP(solver.get_best_fp());
 
     output_file.open("../../custom-output2.txt", std::ios::out | std::ios::trunc);
     output_file << "WHPL " << output_handler_t::WHPL();
