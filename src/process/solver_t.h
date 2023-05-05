@@ -15,23 +15,11 @@
 #include <iterator>
 #include <random>
 #include<time.h>
-class genetic_algo_t {
-    void growing(floorplanning_t& );
-    void crossover_process();
-
-    //floorplanning_t mutation(const floorplanning_t&);
-    void selection();
-    void evaluate(const floorplanning_t&);
-    void update_best_fp();
+class solver_t {
     vector<floorplanning_t> floorplannings;
-    size_t floorplanning_n = 2000;
-    size_t greater_floorplanning_n = 200;
-    const static quadratic_t quadratic_calculator;
-    const int growing_rate = 3;
+    floorplanning_t best_fp;
 public:
-    floorplanning_t mutation(const floorplanning_t&);
-    floorplanning_t crossover(const floorplanning_t& fp1, const floorplanning_t& fp2);
-    genetic_algo_t();
+    solver_t();
     void run();
     void print_info(bool);
     floorplanning_t get_fp(size_t);

@@ -19,8 +19,6 @@ unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
 unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
 vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
 uint32_t floorplanning_t::min_w_h[2];
-//size_t floorplanning_t::soft_rect_n;
-//size_t floorplanning_t::fixed_rect_n;
 void floorplanning_t::init() {
     uint16_t  soft_rect_n = chip_t::get_soft_modules().size();
     uint16_t fixed_rect_n = chip_t::get_fixed_modules().size();
@@ -41,7 +39,6 @@ void floorplanning_t::init() {
             floorplanning_t::min_w_h[1] = std::min(floorplanning_t::min_w_h[1], static_cast<uint32_t>(w_h.get_y()));
         }
     }
-    cout<< floorplanning_t::min_w_h[0]<<" "<<floorplanning_t::min_w_h[1]<<endl;
 }
 
 floorplanning_t::floorplanning_t() {
@@ -77,7 +74,6 @@ floorplanning_t::floorplanning_t() {
 
     cal_soft_deg();
     score = fp_evaluator_t::get_score(*this);
-    //evaluate();
 
 }
 
@@ -108,9 +104,9 @@ float floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<co
 }
 
 void floorplanning_t::calculate_wirelength(){
-//	if (fp_status == fail_on_placing_fixed_modules) {
-//		return;
-//	}
+	if (fp_status == fail_on_placing_fixed_modules) {
+		return;
+	}
 	float sum = 0;
 	for (int i = 0; i < fixed_rects.size(); ++i) {
 		const module_t* fixed_module = fixed_rects[i].getLinkModule();
@@ -131,7 +127,6 @@ void floorplanning_t::calculate_wirelength(){
 	}
 	
 	wirelength = sum / 2;
-	//wirelength = sum;
 }
 void floorplanning_t::print_info(bool position){
 	if (fp_status == fail_on_placing_fixed_modules) {
@@ -160,7 +155,6 @@ void floorplanning_t::print_info(bool position){
 
 	get_wirelength();
 	cout << "current wirelength : " << wirelength << endl;
-    //cout<<"current score : "<<get_score()<<endl;
     cout<<"current score : "<<score<<endl;
 }
 float floorplanning_t::get_wirelength()
@@ -189,7 +183,6 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t
     else{
         soft_is_placed[i] = false;
     }
-    //evaluate();
     score = fp_evaluator_t::get_score(*this);
 	return success;
 }
@@ -246,16 +239,6 @@ pair<vector<bounding_rectangle_t>, vector<bool>> floorplanning_t::prepare_quad()
     return {bd_rects, is_placed};
 }
 
-//void floorplanning_t::evaluate() {
-//    size_t deg_c = 0;
-//    int wh = chip_t::get_width()+chip_t::get_height();
-//    for(size_t i = 0; i<soft_rects.size(); ++i){
-//        if(soft_is_placed[i]==false){
-//            deg_c+= (soft_deg[i]*wh)+wh;
-//        }
-//    }
-//    score = get_wirelength()+deg_c;
-//}
 
 const float floorplanning_t::get_score() const{
     return score;

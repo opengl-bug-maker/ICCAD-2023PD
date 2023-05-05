@@ -29,10 +29,10 @@ class floorplanning_t {
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
 
 
-    vector<bool> soft_is_placed;
-
     //status
     fp_status_t fp_status = in_progress;
+    vector<bool> soft_is_placed;
+    vector<uint32_t> soft_deg;
 
     // to keep fp valid (the area restriction)
     polygon_forest_t polygons;
@@ -45,26 +45,20 @@ class floorplanning_t {
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
     //void evaluate();
-    vector<uint32_t> soft_deg;
-
-
 
 public:
-    static  uint32_t min_w_h[2];
-
-    vector<bounding_rectangle_t> soft_rects;
-    vector<bounding_rectangle_t> fixed_rects;
     floorplanning_t();
-    void cal_soft_deg();
+    static  uint32_t min_w_h[2];
     static void init();
-
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     static vector<vec2d_t> find_w_h(uint32_t area);
 
+    vector<bounding_rectangle_t> soft_rects;
+    vector<bounding_rectangle_t> fixed_rects;
+
+    void cal_soft_deg();
     //for quadratic
     pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
-
-
     bool place_soft_module(size_t i, vec2d_t center, vec2d_t size);
 
     //get set
@@ -78,8 +72,6 @@ public:
     const float get_score() const;
 
     //debug
-
-
     void print_info(bool);
     void GUI_validation();
 };
