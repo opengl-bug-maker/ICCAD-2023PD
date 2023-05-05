@@ -18,6 +18,8 @@ public:
 
     vec2d_t();
 
+    explicit vec2d_t(const double& cons);
+
     vec2d_t(const vec2d_t&);
 
     vec2d_t operator=(const vec2d_t&);
@@ -44,11 +46,27 @@ public:
 
     vec2d_t operator+(const vec2d_t& vec2D) const;
 
+    vec2d_t& operator+=(const vec2d_t& vec2D);
+
+    vec2d_t& operator+=(const double& add);
+
+    vec2d_t add_const(const double& add) const;
+
     vec2d_t operator-(const vec2d_t& vec2D) const;
+
+    vec2d_t& operator-=(const vec2d_t& vec2D);
+
+    vec2d_t& operator-=(const double& sub);
+
+    vec2d_t sub_const(const double& sub) const;
 
     vec2d_t operator*(const double& mul) const;
 
+    vec2d_t normal_multi(const vec2d_t& vec2D) const;
+
     vec2d_t operator/(const double& div) const;
+
+    vec2d_t normal_divide(const vec2d_t& vec2D) const;
 
     bool operator==(const vec2d_t& vec2D) const;
 

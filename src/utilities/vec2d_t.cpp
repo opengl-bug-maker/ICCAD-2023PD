@@ -9,6 +9,8 @@ vec2d_t vec2d_t::default_position = vec2d_t(-1, -1);
 
 vec2d_t::vec2d_t() : x(default_position.get_x()), y(default_position.get_y()) {}
 
+vec2d_t::vec2d_t(const double &cons) : x(cons), y(cons) {}
+
 vec2d_t::vec2d_t(const vec2d_t &vec2d) : x(vec2d.x), y(vec2d.y) {}
 
 vec2d_t vec2d_t::operator=(const vec2d_t &vec2d) {
@@ -61,16 +63,56 @@ vec2d_t vec2d_t::operator+(const vec2d_t &vec2D) const {
     return {this->get_x() + vec2D.get_x(), this->get_y() + vec2D.get_y()};
 }
 
+vec2d_t &vec2d_t::operator+=(const vec2d_t &vec2D) {
+    this->x += vec2D.get_x();
+    this->y += vec2D.get_y();
+    return *this;
+}
+
+vec2d_t &vec2d_t::operator+=(const double &add) {
+    this->x += add;
+    this->y += add;
+    return *this;
+}
+
+vec2d_t vec2d_t::add_const(const double &add) const {
+    return {this->get_x() + add, this->get_y() + add};
+}
+
 vec2d_t vec2d_t::operator-(const vec2d_t &vec2D) const {
     return {this->get_x() - vec2D.get_x(), this->get_y() - vec2D.get_y()};
+}
+
+vec2d_t &vec2d_t::operator-=(const vec2d_t &vec2D) {
+    this->x -= vec2D.get_x();
+    this->y -= vec2D.get_y();
+    return *this;
+}
+
+vec2d_t &vec2d_t::operator-=(const double &sub) {
+    this->x -= sub;
+    this->y -= sub;
+    return *this;
+}
+
+vec2d_t vec2d_t::sub_const(const double &sub) const {
+    return {this->get_x() - sub, this->get_y() - sub};
 }
 
 vec2d_t vec2d_t::operator*(const double& mul) const {
     return {this->get_x() * mul, this->get_y() * mul};
 }
 
+vec2d_t vec2d_t::normal_multi(const vec2d_t &vec2D) const {
+    return {this->get_x() * vec2D.get_x(), this->get_y() * vec2D.get_y()};
+}
+
 vec2d_t vec2d_t::operator/(const double& div) const {
     return {this->get_x() / div, this->get_y() / div};
+}
+
+vec2d_t vec2d_t::normal_divide(const vec2d_t &vec2D) const {
+    return {this->get_x() / vec2D.get_x(), this->get_y() / vec2D.get_y()};
 }
 
 bool vec2d_t::operator==(const vec2d_t &vec2D) const {
