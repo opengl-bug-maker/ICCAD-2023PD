@@ -32,7 +32,7 @@ void floorplanning_t::init() {
         soft_area_to_w_h_m[i] = find_w_h(soft_modules[i]->get_area());
         floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
     }
-    min_w_h[0] = min_w_h[1] = INT_MAX;
+    min_w_h[0] = min_w_h[1] = 1e9+1;
     for(int i = 0; i<soft_rect_n; ++i) {
         for(auto& w_h:soft_area_to_w_h_m[i]){
             floorplanning_t::min_w_h[0] = std::min(floorplanning_t::min_w_h[0], static_cast<uint32_t>(w_h.get_x()));
