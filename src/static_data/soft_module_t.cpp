@@ -18,20 +18,12 @@ const uint32_t soft_module_t::get_area() const {
     return static_cast<const uint32_t>(this->minArea);
 }
 
-const int soft_module_t::getHalfWidth() const {
-    return std::sqrt(this->minArea) / 2;
+const vec2d_t soft_module_t::get_left_lower() const {
+    return vec2d_t::default_position;
 }
 
-const int soft_module_t::getHalfHeight() const {
-    return std::sqrt(this->minArea) / 2;
-}
-
-const int soft_module_t::getCenterPosX() const {
-    return 0;
-}
-
-const int soft_module_t::getCenterPosY() const {
-    return 0;
+const vec2d_t soft_module_t::get_size() const {
+    return vec2d_t(std::sqrt(this->minArea) / 2);
 }
 
 bounding_rectangle_t soft_module_t::make_bd() {
