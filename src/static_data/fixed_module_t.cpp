@@ -22,20 +22,12 @@ const uint32_t fixed_module_t::get_area() const {
     return this->rect == nullptr? 0 : static_cast<const uint32_t>(this->rect->get_area());
 }
 
-const int fixed_module_t::getHalfWidth() const {
-    return this->width / 2;
+const vec2d_t fixed_module_t::get_left_lower() const {
+    return this->rect->get_left_lower();
 }
 
-const int fixed_module_t::getHalfHeight() const {
-    return this->height / 2;
-}
-
-const int fixed_module_t::getCenterPosX() const {
-    return this->xCoord + this->getHalfWidth();
-}
-
-const int fixed_module_t::getCenterPosY() const {
-    return this->yCoord + this->getHalfHeight();
+const vec2d_t fixed_module_t::get_size() const {
+    return this->rect->get_size();
 }
 
 bounding_rectangle_t fixed_module_t::make_bd() {
