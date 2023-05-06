@@ -132,6 +132,6 @@ const rect_t rect_t::merge_bounding_rect(const rect_t &rect) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const rect_t &vec) {
-    os << "rect_t: {" << vec.get_left_lower().get_x() << ", " << vec.get_left_lower().get_y() << " | " << vec.get_size().get_x() << ", " << vec.get_size().get_y() << "}";
+    os << "{" << vec.get_left_lower().get_x() << ", " << vec.get_left_lower().get_y() << " | " << vec.get_size().get_x() << ", " << vec.get_size().get_y() << "}";
     return os;
 }
