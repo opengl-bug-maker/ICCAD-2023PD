@@ -72,21 +72,39 @@ std::pair<bool, rect_t> rect_t::intersect(const rect_t &rect) const {
     double hei;
     double le;
     double bo;
-    if(r2l1x < r1l2x){
-        wid = r2l1x;
+    if(this->get_right_upper().get_x() >= rect.get_right_upper().get_x() && this->get_left_lower().get_x() <= rect.get_left_lower().get_x()){
+        wid = rect.get_size().get_x();
+        le = rect.get_left_lower().get_x();
+    } else if(rect.get_right_upper().get_x() >= this->get_right_upper().get_x() && rect.get_left_lower().get_x() <= this->get_left_lower().get_x()){
+        wid = this->get_size().get_x();
         le = this->get_left_lower().get_x();
     }else{
-        wid = r1l2x;
-        le = rect.get_left_lower().get_x();
+        if(r2l1x < r1l2x){
+            wid = r2l1x;
+            le = this->get_left_lower().get_x();
+        }else{
+            wid = r1l2x;
+            le = rect.get_left_lower().get_x();
+        }
     }
 
-    if(u2b1y < u1b2y){
-        hei = u2b1y;
+
+    if(this->get_right_upper().get_y() >= rect.get_right_upper().get_y() && this->get_left_lower().get_y() <= rect.get_left_lower().get_y()){
+        hei = rect.get_size().get_y();
+        bo = rect.get_left_lower().get_y();
+    } else if(rect.get_right_upper().get_y() >= this->get_right_upper().get_y() && rect.get_left_lower().get_y() <= this->get_left_lower().get_y()){
+        hei = this->get_size().get_y();
         bo = this->get_left_lower().get_y();
     }else{
-        hei = u1b2y;
-        bo = rect.get_left_lower().get_y();
+        if(u2b1y < u1b2y){
+            hei = u2b1y;
+            bo = this->get_left_lower().get_y();
+        }else{
+            hei = u1b2y;
+            bo = rect.get_left_lower().get_y();
+        }
     }
+
     if(wid >= 0 && hei >= 0){
         return {true, {{le, bo}, {wid, hei}}};
     }
