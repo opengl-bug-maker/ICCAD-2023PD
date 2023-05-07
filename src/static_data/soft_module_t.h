@@ -10,7 +10,10 @@
 class soft_module_t : public module_t {
     int minArea;
     soft_module_t();
+    soft_module_t(const int&);
 public:
+    static soft_module_t void_module;
+
     const uint32_t get_area() const override;
 
     const vec2d_t get_left_lower() const override;

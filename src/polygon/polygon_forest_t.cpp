@@ -13,10 +13,10 @@
 
 polygon_forest_t::polygon_forest_t() : quadtree(quadtree_t<polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))),
                                        polygons({
-                                              polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height())))),
-                                              polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0)))),
-                                              polygon_t(bounding_rectangle_t(rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), chip_t::get_height())))),
-                                              polygon_t(bounding_rectangle_t(rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(chip_t::get_width(), chip_t::get_height()))))}){
+                                              polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height())))),
+                                              polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0)))),
+                                              polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), chip_t::get_height())))),
+                                              polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(chip_t::get_width(), chip_t::get_height()))))}){
 }
 
 std::vector<polygon_t> polygon_forest_t::get_polygons() {
