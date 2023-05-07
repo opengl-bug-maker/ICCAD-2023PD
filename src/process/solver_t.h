@@ -9,16 +9,21 @@
 #include "process/floorplanning_t.h"
 #include "static_data/chip_t.h"
 #include "quadratic/quadratic_t.h"
+#include "sequence_pair_t.h"
 #include <map>
 #include <set>
 #include <algorithm>
 #include <iterator>
 #include <random>
-#include<time.h>
+#include <time.h>
+
 class solver_t {
+    sequence_pair_t sequence_pair;
     vector<floorplanning_t> floorplannings;
     floorplanning_t best_fp;
 public:
+    void generate_seq_rand();
+    //essential functions
     solver_t();
     void run();
     void print_info(bool);

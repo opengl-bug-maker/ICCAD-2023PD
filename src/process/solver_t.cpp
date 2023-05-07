@@ -28,3 +28,7 @@ floorplanning_t& solver_t::get_best_fp() {
 solver_t::solver_t() {
 
 }
+
+void solver_t::generate_seq_rand() {
+
+}
