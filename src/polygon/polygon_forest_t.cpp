@@ -112,7 +112,5 @@ void polygon_forest_t::test_without_collision() {
     auto ree =this->add_rect(bd1.first);
     auto bdd = fix[1]->make_bd();
     ree = this->add_rect(bdd);
-//    this->delete_rect(bd);
-//    this->delete_rect(bd);
     int a = 0;
 }

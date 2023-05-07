@@ -44,7 +44,6 @@ class floorplanning_t {
     void calculate_wirelength();
     float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
-    //void evaluate();
 
 public:
     floorplanning_t();

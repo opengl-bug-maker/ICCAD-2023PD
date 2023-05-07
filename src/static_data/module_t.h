@@ -22,13 +22,9 @@ protected:
 public:
     virtual const uint32_t get_area() const = 0;
 
-    virtual const int getHalfWidth() const = 0;
+    virtual const vec2d_t get_left_lower() const = 0;
 
-    virtual const int getHalfHeight() const = 0;
-
-    virtual const int getCenterPosX() const = 0;
-
-    virtual const int getCenterPosY() const = 0;
+    virtual const vec2d_t get_size() const = 0;
 
     virtual bounding_rectangle_t make_bd() = 0;
 
