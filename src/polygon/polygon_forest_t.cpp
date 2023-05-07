@@ -80,7 +80,7 @@ std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
     std::vector<bounding_rectangle_t> bounding;
     for (auto poly : polygons) {
         for(auto bd : poly.get_rects()){
-            bounding.push_back(bd.get_bounding_rectangle());
+            bounding.push_back(bd.get_module_bounding_rectangle());
         }
     }
 
