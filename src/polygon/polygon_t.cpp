@@ -40,6 +40,12 @@ bool polygon_t::is_collision(const bounding_rectangle_t &rect) const {
 bool polygon_t::merge_polygon(const polygon_t &polygon) {
 
     auto coli = polygon.quadtree.collision_value(this->polygon_modules.front());
+
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
+
+    for (const auto& i: polygon.polygon_modules) {
+        this->quadtree.add_value(std::ref(i));
+    }
+
     return false;
 }
