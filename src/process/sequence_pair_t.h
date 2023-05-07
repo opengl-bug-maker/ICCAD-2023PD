@@ -14,27 +14,39 @@
 #include "floorplanning_t.h"
 using std::vector;
 using std::unordered_map;
-class sequence_pair_t{
-    vector<uint16_t> h_sequence, v_sequence;
-    vector<vec2d_t> modules_wh;
+class edge_t{
 public:
+    int from, to, w;
+};
+class sequence_pair_t{
+    vector<int> h_sequence, v_sequence;
+
+    vector<edge_t> constraint_graph_h, constraint_graph_v;
+
+
+public:
+    vector<vec2d_t> modules_wh;
+    pair<bool, vector<vec2d_t>> ILP();
+    void build_constraint_graph();
     sequence_pair_t();
     static vector<bool> seq_is_fix;
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     static vector<vec2d_t> find_w_h(uint32_t area);
     static vector<soft_module_t*> seq_soft_map;
     static vector<fixed_module_t*> seq_fixed_map;
-
     static void init();
+    static const int inf = 1e9+10;
+    static int sequence_n;
 
     //essential
     floorplanning_t to_fp();
+    void seq_randomize();
 
     //get & set
-    void set_v(std::vector<uint16_t>);
-    void set_h(std::vector<uint16_t>);
-    std::vector<uint16_t> get_v();
-    std::vector<uint16_t> get_h();
+    void set_v(std::vector<int>);
+    void set_h(std::vector<int>);
+    std::vector<int> get_v();
+    std::vector<int> get_h();
 
     //debug
     void print();
