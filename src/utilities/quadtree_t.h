@@ -43,7 +43,8 @@ class quadtree_t {
 public:
     quadtree_t<T>(const rect_t& range);
     void add_value(const T& value);
-    std::vector<T>& get_values();
+    const std::vector<T> get_values() const;
+    std::vector<T>& get_values_ref();
     std::vector<std::reference_wrapper<T>> collision_value(const T& value) const;
     void print();
 };
@@ -194,7 +195,12 @@ void quadtree_t<T>::add_value(const T &value) {
 }
 
 template<typename T>
-std::vector<T> &quadtree_t<T>::get_values() {
+const std::vector<T> quadtree_t<T>::get_values() const{
+    return this->values;
+}
+
+template<typename T>
+std::vector<T> &quadtree_t<T>::get_values_ref(){
     return this->values;
 }
 
