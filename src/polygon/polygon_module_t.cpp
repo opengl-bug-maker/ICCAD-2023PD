@@ -8,7 +8,7 @@
 
 #include <utility>
 
-polygon_module_t::polygon_module_t(polygon_t& belong_polygon, bounding_rectangle_t bounding_rect) :
+polygon_module_t::polygon_module_t(polygon_t& belong_polygon, const bounding_rectangle_t& bounding_rect) :
     belong_polygon(belong_polygon),
     module_rect(std::move(bounding_rect)),
     demand_area(bounding_rect.getLinkModule()->get_area()),
@@ -28,17 +28,6 @@ polygon_module_t polygon_module_t::operator=(const polygon_module_t &r) {
     return polygon_module_t(r);
 }
 
-const rect_t &polygon_module_t::get_bounding_rect() const {
-    return module_rect.getRect();
-}
-
-const bounding_rectangle_t &polygon_module_t::get_module_bounding_rectangle() const {
-    return module_rect;
-}
-
-void polygon_module_t::connect(polygon_module_t &module) {
-}
-
 std::pair<bool, uint32_t> polygon_module_t::request_area(const uint32_t& required_area) {
     if(required_area <= this->free_to_share_area){
         this->shared_area += required_area;
@@ -55,3 +44,13 @@ std::vector<std::reference_wrapper<polygon_module_t>> polygon_module_t::get_neig
     return std::vector<std::reference_wrapper<polygon_module_t>>({});
 }
 
+const rect_t &polygon_module_t::get_bounding_rect() const {
+    return module_rect.getRect();
+}
+
+const bounding_rectangle_t &polygon_module_t::get_module_bounding_rectangle() const {
+    return module_rect;
+}
+
+bool polygon_module_t::connect(polygon_module_t &module) {
+}

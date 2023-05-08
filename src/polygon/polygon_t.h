@@ -33,7 +33,7 @@ public:
     bool is_collision(const rect_t& rect) const;
     bool is_collision(const bounding_rectangle_t& rect) const;
 
-    bool merge_polygon(const polygon_t& polygon);
+    bool merge_polygon(polygon_t& polygon);
 };
 
 

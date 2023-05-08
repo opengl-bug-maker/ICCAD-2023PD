@@ -37,7 +37,7 @@ bool polygon_t::is_collision(const bounding_rectangle_t &rect) const {
     return this->is_collision(rect.getRect());
 }
 
-bool polygon_t::merge_polygon(const polygon_t &polygon) {
+bool polygon_t::merge_polygon(polygon_t& polygon) {
 
     auto coli = polygon.quadtree.collision_value(this->polygon_modules.front());
 
