@@ -10,6 +10,9 @@
 #include <sstream>
 #include <iomanip>
 
+int visualizer_t::max_x = 0;
+int visualizer_t::max_y = 0;
+
 void my_out(const std::string& str){
 #ifdef USING_VIS
     std::cout << str << std::endl;
@@ -18,8 +21,8 @@ void my_out(const std::string& str){
 
 void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts){
     srand(time(NULL));
-    int width = chip_t::get_width();
-    int height = chip_t::get_height();
+    int width = visualizer_t::max_x;
+    int height = visualizer_t::max_y;
     FILE* pipe = popen(true ? "gnuplot -persist" : "gnuplot", "w");
 //    fputs("set title \"A!!\"\n", pipe);
     fputs("set grid\n", pipe);
@@ -73,6 +76,8 @@ void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::st
 }
 
 void visualizer_t::show_fp(const std::vector<bounding_rectangle_t>& bd_rect) {
+    visualizer_t::max_x = chip_t::get_width();
+    visualizer_t::max_y = chip_t::get_height();
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bd_rect_pt;
     for(auto & i : bd_rect){
         const double rx = i.getRect().get_right_upper().get_x();
@@ -84,4 +89,21 @@ void visualizer_t::show_fp(const std::vector<bounding_rectangle_t>& bd_rect) {
     }
     join(bd_rect_pt);
     return ;
+}
+
+void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd_rect){
+    visualizer_t::max_x = chip_t::get_width();
+    visualizer_t::max_y = chip_t::get_height();
+    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bd_rect_pt;
+    for(auto & i : bd_rect){
+        const double rx = i.getRect().get_right_upper().get_x();
+        const double lx = i.getRect().get_left_lower().get_x();
+        const double uy = i.getRect().get_right_upper().get_y();
+        const double ly = i.getRect().get_left_lower().get_y();
+        if(rx > visualizer_t::max_x) { visualizer_t::max_x = rx; }
+        if(uy > visualizer_t::max_y) { visualizer_t::max_y = uy; }
+        bd_rect_pt.push_back({std::vector<vec2d_t>{{lx, ly}, {rx, ly}, {rx, uy}, {lx,uy}},
+                              i.getLinkModule()->getName()});
+    }
+    join(bd_rect_pt);
 }
