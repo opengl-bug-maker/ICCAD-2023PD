@@ -46,7 +46,7 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t &boundingRectangle) {
     polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
-    std::vector<polygon_t> collision_polygons = quadtree.collision_value(new_poly);
+    auto collision_polygons = quadtree.collision_value(new_poly);
     for (int i = 0; i < polygons.size(); ++i) {
         if(polygons[i].is_bounding_collision(boundingRectangle)){
             if(polygons[i].is_collision(boundingRectangle)){
