@@ -1,5 +1,5 @@
 //
-// Created by 林士傑 on 2023/4/22.
+// Modify by lkj on 2023/5/7.
 //
 
 #ifndef ICCAD2023PD_POLYGON_MODULE_T_H
@@ -36,7 +36,6 @@ public:
     const bounding_rectangle_t& get_module_bounding_rectangle() const;
 
     std::pair<bool, uint32_t> request_area(const uint32_t& required_area);
-    std::pair<bool, uint32_t> request_area(const uint32_t&& required_area);
 
     void connect(polygon_module_t& module);
 

@@ -1,5 +1,5 @@
 //
-// Created by 林士傑 on 2023/4/22.
+// Modify by lkj on 2023/5/7.
 //
 
 #include "polygon_module_t.h"
@@ -49,10 +49,6 @@ std::pair<bool, uint32_t> polygon_module_t::request_area(const uint32_t& require
         this->free_to_share_area = 0;
         return {false, this->free_to_share_area};
     }
-}
-
-std::pair<bool, uint32_t> polygon_module_t::request_area(const uint32_t&& required_area) {
-    return this->request_area(required_area);
 }
 
 std::vector<std::reference_wrapper<polygon_module_t>> polygon_module_t::get_neighbor(const polygon_overlap_area_t&) const {

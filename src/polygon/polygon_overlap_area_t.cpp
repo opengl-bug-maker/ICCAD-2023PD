@@ -1,5 +1,5 @@
 //
-// Created by 林士傑 on 2023/4/22.
+// Modify by lkj on 2023/5/7.
 //
 
 #include "polygon_overlap_area_t.h"
@@ -7,37 +7,25 @@
 
 #include <utility>
 
-polygon_overlap_area_t::module_info::module_info(polygon_module_t &other_module) : other_module(other_module),
-                                                                                   belong_area(0.0) {}
+polygon_overlap_area_t::module_info::module_info(polygon_module_t &polygon_module) :
+                                                 polygon_module(polygon_module),
+                                                 belong_area(0.0) {}
 
-//polygon_module_t &polygon_overlap_area_t::module_info::get_other_module() const {
-//    return other_module;
-//}
-//
-//double polygon_overlap_area_t::module_info::get_belong_area() const {
-//    return belong_area;
-//}
-//
-//void polygon_overlap_area_t::module_info::set_belong_area(double value) {
-//    module_info::belong_area = value;
-//}
-
-polygon_overlap_area_t::polygon_overlap_area_t(polygon_t& belong_polygon,
-                                               rect_t intersectRect): //,
-                                           //const std::vector<polygon_module_t>& connectPolyUnit) :
-                                           belong_polygon(belong_polygon),
-                                           area(std::move(intersectRect)) { //,
-//                                           connect_poly_unit({}) {
-//
-//    for(auto poly : connectPolyUnit) this->connect_poly_unit.emplace_back(poly);
+polygon_overlap_area_t::polygon_overlap_area_t(polygon_t& belong_polygon, rect_t area,
+                                               const std::vector<std::reference_wrapper<polygon_module_t>>& connect_module) :
+                                               belong_polygon(belong_polygon),
+                                               area(std::move(area)) {
+    for(auto module : connect_module){
+        this->connect_module.emplace_back(module);
+    }
 }
 
 const rect_t &polygon_overlap_area_t::get_area() const {
     return area;
 }
 
-bool polygon_overlap_area_t::change_value(polygon_module_t *other_module, double value) {
-    return false;
+std::pair<bool, uint32_t> request_area(const uint32_t& value) {
+    return {false,0};
 }
 
 std::vector<polygon_module_t> polygon_overlap_area_t::get_neighbor(const polygon_module_t &poly_unit) {
