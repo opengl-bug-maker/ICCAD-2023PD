@@ -12,6 +12,7 @@ class visualizer_t {
 public:
     static void show_fp(const std::vector<bounding_rectangle_t>&);
     static void show_fp_no_border(const std::vector<bounding_rectangle_t>&);
+    static void show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> &);
 private:
     static int max_x;
     static int max_y;

@@ -107,3 +107,20 @@ void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd
     }
     join(bd_rect_pt);
 }
+
+void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> & rect_pair) {
+    visualizer_t::max_x = chip_t::get_width();
+    visualizer_t::max_y = chip_t::get_height();
+    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bd_rect_pt;
+    for(auto & i : rect_pair){
+        const double rx = i.first.get_right_upper().get_x();
+        const double lx = i.first.get_left_lower().get_x();
+        const double uy = i.first.get_right_upper().get_y();
+        const double ly = i.first.get_left_lower().get_y();
+        if(rx > visualizer_t::max_x) { visualizer_t::max_x = rx; }
+        if(uy > visualizer_t::max_y) { visualizer_t::max_y = uy; }
+        bd_rect_pt.push_back({std::vector<vec2d_t>{{lx, ly}, {rx, ly}, {rx, uy}, {lx,uy}},
+                              i.second});
+    }
+    join(bd_rect_pt);
+}
