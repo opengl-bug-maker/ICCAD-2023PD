@@ -12,6 +12,7 @@
 #include"static_data/soft_module_t.h"
 #include"static_data/fixed_module_t.h"
 #include "floorplanning_t.h"
+
 using std::vector;
 using std::unordered_map;
 class edge_t{
@@ -22,9 +23,10 @@ class sequence_pair_t{
     vector<int> h_sequence, v_sequence;
 
     vector<edge_t> constraint_graph_h, constraint_graph_v;
-
-
+    static vector<edge_t> connections;
+    static vector<vector<int>> connectivities;
 public:
+    floorplanning_t fp;
     vector<vec2d_t> modules_wh;
     pair<bool, vector<vec2d_t>> ILP();
     void build_constraint_graph();
@@ -37,10 +39,14 @@ public:
     static void init();
     static const int inf = 1e9+10;
     static int sequence_n;
+    static unordered_map<const module_t*, int> soft_module_to_id_m;
+    static unordered_map<const module_t*, int> fix_module_to_id_m;
+
 
     //essential
-    floorplanning_t to_fp();
+    bool to_fp();
     void seq_randomize();
+    void set_fix_sequence();
 
     //get & set
     void set_v(std::vector<int>);
@@ -50,6 +56,7 @@ public:
 
     //debug
     void print();
+    void sequence_pair_validation(vector<std::pair<rect_t, std::string>>);
 
 };
 

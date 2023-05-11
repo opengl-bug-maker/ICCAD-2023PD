@@ -204,8 +204,10 @@ vector<int> floorplanning_t::get_unplaced_id() {
 
 
 vector<vec2d_t> floorplanning_t::find_w_h(uint32_t area){
+    if(area==1){return {{1,1}};}
     uint32_t  from = sqrt(area/2);
     vector<vec2d_t> ret;
+
     for(uint32_t i = from; i<= sqrt(area); ++i){ //i will be the short edge
         if(area%i==0){
             int x = i, y = area/i;
@@ -261,6 +263,8 @@ void floorplanning_t::GUI_validation() {
     }
     bd.insert(bd.end(), placed_soft.begin(), placed_soft.end());
     visualizer_t::show_fp(bd);
+    std::cout<<"Press any key to continue"<<std::endl;
+    fgetc(stdin);
 }
 
 void floorplanning_t::cal_soft_deg() {
