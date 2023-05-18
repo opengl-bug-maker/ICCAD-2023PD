@@ -8,6 +8,11 @@ rect_t::rect_t(const vec2d_t &left_lower, const vec2d_t &size) : Center(left_low
                                                                  RightUpper(left_lower + size) {
 }
 
+rect_t::rect_t(const rect_t & rect) : Center(rect.Center), Size(rect.Size),
+                                      LeftLower(rect.LeftLower), RightUpper(rect.RightUpper) {
+
+}
+
 const vec2d_t &rect_t::get_left_lower() const {
     return LeftLower;
 }
