@@ -185,17 +185,20 @@ void sequence_pair_t::print() {
 bool sequence_pair_t::to_fp() {
     auto t1 = std::chrono::high_resolution_clock::now();
     bool success = false;
-    this->build_constraint_graph();
+    auto t11 = std::chrono::high_resolution_clock::now();
     pair<bool, vector<vec2d_t>> res = this->ILP();
+    auto t12 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed1 = t12 - t11;
+        std::cout <<"ILP takes"<<elapsed1.count() << " ms\n";
     vector<std::pair<rect_t, std::string>> rects;
     if(res.first==true){
         success = true;
         for(int i = 0; i<res.second.size(); ++i){
             if(this->seq_is_fix[i]){
-                rects.push_back({{res.second[i], this->modules_wh[i]}, "f"});
+                rects.push_back({{res.second[i], this->modules_wh[i]}, "f"+ std::to_string(i)});
             }
             else{
-                rects.push_back({{res.second[i], this->modules_wh[i]}, "s"});
+                rects.push_back({{res.second[i], this->modules_wh[i]}, "s"+std::to_string(i)});
             //this->fp.place_soft_module(i, {res.second[i]}, {this->modules_wh[i]});
             }
         }
@@ -243,173 +246,85 @@ void sequence_pair_t::build_constraint_graph() {
         cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
     }
 }
-
 pair<bool, vector<vec2d_t>> sequence_pair_t::ILP() {
-    glp_prob *ILP = glp_create_prob();
-    glp_set_prob_name(ILP, "sample");
-    glp_set_obj_dir(ILP, GLP_MIN);
 
+    build_constraint_graph();
     int constraint_n = this->constraint_graph_h.size()+this->constraint_graph_v.size()+chip_t::get_fixed_modules().size()*2;
-    int constraint_i = 1;
-    glp_add_rows(ILP, constraint_n);
 
+    ILP_solver_t ILP_solver;
+    ILP_solver.init("ILP_solver", constraint_n, 2*sequence_pair_t::sequence_n);
+    ILP_solver.set_min();
+    int constraint_i = 1;
     int set_n = 2*(this->constraint_graph_h.size()+this->constraint_graph_v.size())+2*chip_t::get_fixed_modules().size();
 
     vector<int> set_i(set_n+1),set_j(set_n+1),set_val(set_n+1); //due to 1-index
+    vector<int> coef_h(sequence_n,0), coef_v(sequence_n,0),coef(2*sequence_n+1);
 
-    vector<int> coef_h(sequence_n,0), coef_v(sequence_n,0);
-
-    int set_cnt = 1;
-    int overlap_v = 1;
+    int overlap_v = 2;
     //set constraints to avoid overlap
     for(int i = 0; i<this->constraint_graph_h.size(); ++i){
-
         int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
+        coef_h[from]++; coef_h[to]--;
         string constraint_name = "h_c"+ std::to_string(i);
-
-        set_i[set_cnt] = constraint_i;
-        set_j[set_cnt] = (from+1); //due to sequence# to coefficient#
-
-        set_val[set_cnt] = 1;
-        set_cnt++;
-
-        set_i[set_cnt] = constraint_i;
-        set_j[set_cnt] = (to+1);
-        set_val[set_cnt] = -1;
-        set_cnt++;
-
-        glp_set_row_name(ILP, constraint_i, constraint_name.c_str());
-        glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, -w+overlap_v); //x_i-x_j<=- w
-        //glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, -w); //x_i-x_j<=- w
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_v);
         constraint_i++;
     }
     for(int i = 0; i<this->constraint_graph_v.size(); ++i){
         int from = constraint_graph_v[i].from, to = constraint_graph_v[i].to, w = constraint_graph_v[i].w;
+        coef_v[from]++; coef_v[to]--;
         string constraint_name = "v_c"+ std::to_string(i);
-        set_i[set_cnt] = constraint_i;
-        set_j[set_cnt] = from+1+sequence_n; //due to sequence# to coefficient#
-        set_val[set_cnt] = 1;
-        set_cnt++;
-
-        set_i[set_cnt] = constraint_i;
-        set_j[set_cnt] = (to+1)+sequence_n;
-        set_val[set_cnt] = -1;
-        set_cnt++;
-
-        glp_set_row_name(ILP, constraint_i, constraint_name.c_str());
-        glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, -w+overlap_v); //y_i-y_j<=- w
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w+overlap_v);
         constraint_i++;
     }
-
     //set constraints to fix module
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(sequence_pair_t::seq_is_fix[i]){
-            set_i[set_cnt] = constraint_i;
-            set_j[set_cnt] = i+1; //due to sequence# to coefficient#
-            set_val[set_cnt] = 1;
-            set_cnt++;
-
-            vec2d_t ll_pos = sequence_pair_t::seq_fixed_map[i]->get_left_lower();
             string x_constraint_name = "fix_x_c"+ std::to_string(i);
-            glp_set_row_name(ILP, constraint_i, x_constraint_name.c_str());
-            glp_set_row_bnds(ILP, constraint_i, GLP_FX, static_cast<int>(ll_pos.get_x()), static_cast<int>(ll_pos.get_x())); //x_i = k
-            constraint_i++;
-
-            set_i[set_cnt] = constraint_i;
-            set_j[set_cnt] = i+1+sequence_n; //due to sequence# to coefficient#
-            set_val[set_cnt] = 1;
-            set_cnt++;
-
             string y_constraint_name = "fix_y_c"+ std::to_string(i);
-            glp_set_row_name(ILP, constraint_i, y_constraint_name.c_str());
-            glp_set_row_bnds(ILP, constraint_i, GLP_FX, static_cast<int>(ll_pos.get_y()), static_cast<int>(ll_pos.get_y())); //y_i = k
+            vec2d_t ll_pos = sequence_pair_t::seq_fixed_map[i]->get_left_lower();
+            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1}, {1}, x_constraint_name, static_cast<int>(ll_pos.get_x()));
+            constraint_i++;
+            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1}, {1}, y_constraint_name, static_cast<int>(ll_pos.get_y()));
             constraint_i++;
         }
     }
     //set variables
-
-    glp_add_cols(ILP, 2*sequence_pair_t::sequence_n);
     for(int i = 1;i<=sequence_pair_t::sequence_n; ++i){
         string var_name = "x"+ std::to_string(i);
-        glp_set_col_name(ILP, i, var_name.c_str());
-        //glp_set_col_bnds(ILP, i, GLP_LO, 0.0, inf);
-        glp_set_col_bnds(ILP, i, GLP_DB, 0.0, chip_t::get_width()-this->modules_wh[i-1].get_x());
-        glp_set_col_kind(ILP, i, GLP_IV);
+        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
     }
     for(int i = sequence_pair_t::sequence_n+1;i<=2*sequence_pair_t::sequence_n; ++i){
         string var_name = "x"+ std::to_string(i);
-        glp_set_col_name(ILP, i, var_name.c_str());
-        //glp_set_col_bnds(ILP, i, GLP_LO, 0.0, inf);
-        glp_set_col_bnds(ILP, i, GLP_DB, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
-        glp_set_col_kind(ILP, i, GLP_IV);
+        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
     }
-
-
+    //set coefficients
     for(int i = 0; i<sequence_n; ++i){
-        coef_h[i] = coef_v[i] = 1;
+        coef_h[i] = coef_v[i] = 0;
     }
-    for(int i = 1; i<=sequence_n; ++i){
-        glp_set_obj_coef(ILP, i, coef_h[i-1]);
-        glp_set_obj_coef(ILP, i+sequence_n, coef_v[i-1]);
+    //prepare coefficients
+    for(int i = 1; i<2*sequence_n; ++i){
+        if(i<sequence_n){
+            coef[i] = coef_h[i-1];
+        }
+        else{
+            coef[i] = coef_v[i-sequence_n-1];
+        }
     }
-
-
-    int* set_i_a = new int[set_n+1];
-    int* set_j_a = new int[set_n+1];
-    double* set_val_a = new double[set_n+1];
-    for(int i = 1; i<=set_n; ++i){
-        set_i_a[i] = set_i[i];
-        set_j_a[i] = set_j[i];
-        set_val_a[i] = set_val[i];
-    }
-
-    glp_load_matrix(ILP, set_n, set_i_a, set_j_a, set_val_a);
-    //glp_load_matrix(ILP, 1, set_i_a, set_j_a, set_val_a);
-    //cout<< glp_get_num_rows(ILP)<<endl;
-    //    for(int j = 1; j<=6; ++j){
-    //        int a[8];
-    //        double kk[8];
-    //        int x = glp_get_mat_row(ILP, j, a,kk);
-    //        int y = glp_get_obj_coef(ILP, j);
-    //        cout<< glp_get_row_name(ILP, j)<<":"<<endl;
-    //        for(int i = 1; i<=x; ++i){
-    //            cout<<a[i]<<":"<<(int) kk[i]<<", ";
-    //        }
-    //        cout<< glp_get_row_lb(ILP, j)<<" "<<glp_get_row_ub(ILP, j);
-    //        cout<<endl;
-    //    }
-    glp_iocp parm;
-
-
-    glp_init_iocp(&parm);
-    parm.presolve = GLP_ON;
-
-
-    int err = glp_intopt(ILP, &parm);
+    //solve
+    ILP_solver.set_obj_coef(coef);
+    ILP_solver.load();
+    ILP_result_t ILP_result = ILP_solver.solve();
     vector<vec2d_t> result;
-
-
-    //cout<< "wirelengh : "<< glp_mip_obj_val(ILP)<<endl;
+    cout<< "z : "<< ILP_result.z<<endl;
     for(int i = 1; i<=sequence_n; ++i){
-        result.emplace_back(glp_mip_col_val(ILP, i), glp_mip_col_val(ILP, i+sequence_n));
+        result.emplace_back(ILP_result.var_values[i], ILP_result.var_values[i+sequence_n]);
     }
-
-
-    delete[] set_i_a;
-    delete[] set_j_a;
-    delete[] set_val_a;
-    glp_delete_prob(ILP);
-    cout<< "Error "<<err<<", got wire length: "<<glp_mip_obj_val(ILP)<<endl;
-    if(err==0){
-        //here
-//        for(int i = 1; i<=sequence_n; ++i){
-//            cout<< "seq# "<<i-1<<":";
-//            cout<<"{"<<glp_mip_col_val(ILP, i)<<" "<<glp_mip_col_val(ILP, i+sequence_n)<<"} "<<endl;
-//        }
+    if(ILP_result.legal){
         return {true, result};
     }
     else{return {false, {}};}
-
 }
 void sequence_pair_t::seq_randomize() {
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
@@ -420,7 +335,7 @@ void sequence_pair_t::seq_randomize() {
         int x = rand()%sequence_pair_t::sequence_n;
         std::swap(this->h_sequence[i], this->h_sequence[x]);
     }
-    this->set_fix_sequence();
+    //this->set_fix_sequence();
 }
 
 void sequence_pair_t::set_fix_sequence() {

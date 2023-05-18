@@ -12,13 +12,11 @@
 #include"static_data/soft_module_t.h"
 #include"static_data/fixed_module_t.h"
 #include "floorplanning_t.h"
-
+#include "edge_t.h"
+#include "ILP_solver_t.h"
 using std::vector;
 using std::unordered_map;
-class edge_t{
-public:
-    int from, to, w;
-};
+
 class sequence_pair_t{
     vector<int> h_sequence, v_sequence;
 
@@ -28,7 +26,9 @@ class sequence_pair_t{
 public:
     floorplanning_t fp;
     vector<vec2d_t> modules_wh;
+    vector<vec2d_t> modules_pos;
     pair<bool, vector<vec2d_t>> ILP();
+    pair<bool, vector<vec2d_t>> ILPop();
     void build_constraint_graph();
     sequence_pair_t();
     static vector<bool> seq_is_fix;
