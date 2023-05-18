@@ -14,6 +14,7 @@
 class polygon_t;
 
 class polygon_module_t : public box_t {
+    friend class polygon_overlap_area_t;
 
 
     const bounding_rectangle_t& module_rect;

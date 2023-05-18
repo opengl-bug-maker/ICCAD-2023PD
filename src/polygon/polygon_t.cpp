@@ -49,8 +49,6 @@ bool polygon_t::merge_polygon(polygon_t& polygon) {
         }
     }
 
-    return false;
-
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
 
     for (auto& i: polygon.quadtree.get_values_ref()) {

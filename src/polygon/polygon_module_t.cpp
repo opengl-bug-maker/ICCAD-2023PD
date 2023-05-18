@@ -53,4 +53,5 @@ const bounding_rectangle_t& polygon_module_t::get_module_bounding_rectangle() co
 }
 
 bool polygon_module_t::connect(polygon_module_t &module) {
+    return true;
 }
