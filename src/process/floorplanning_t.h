@@ -58,7 +58,7 @@ public:
     void cal_soft_deg();
     //for quadratic
     pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
-    bool place_soft_module(size_t i, vec2d_t center, vec2d_t size);
+    bool place_soft_module(size_t i, vec2d_t lower_left_pos, vec2d_t size);
 
     //get set
     const vector<bool>& get_soft_is_placed() const;
