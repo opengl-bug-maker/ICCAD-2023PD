@@ -23,9 +23,13 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
     srand(time(NULL));
     int width = visualizer_t::max_x;
     int height = visualizer_t::max_y;
+    double canvas_size = 600.0f * double(max_x) / double(max_y);
     FILE* pipe = popen(true ? "gnuplot -persist" : "gnuplot", "w");
 //    fputs("set title \"A!!\"\n", pipe);
+    fputs(("set term qt size " + std::to_string(canvas_size) + ",600\n").c_str(), pipe);
     fputs("set grid\n", pipe);
+    fputs("set mxtics 5\n", pipe);
+    fputs("set mytics 5\n", pipe);
     fputs(("set xrange [0:" + std::to_string(width) + "]\n").c_str(), pipe);
     fputs(("set yrange [0:" + std::to_string(height) + "]\n").c_str(), pipe);
 
