@@ -43,10 +43,10 @@ class quadtree_t {
 public:
     quadtree_t<T>(const rect_t& range);
     void add_value(const T& value);
-    const std::vector<T> get_values() const;
+    const std::vector<T>& get_values() const;
     std::vector<T>& get_values_ref();
     std::vector<std::reference_wrapper<T>> collision_value(const T& value) const;
-    void print();
+    void print() const;
 };
 
 //region quadtree_node
@@ -150,7 +150,7 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
         for(int j = 0; j < index; j++){
             std::cout << "\t";
         }
-        std::cout << elements[i].get_bounding_rect() << std::endl;
+        std::cout << elements[i].get().get_bounding_rect() << std::endl;
     }
     if(is_leaf()) return;
 
@@ -186,16 +186,17 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
 template<typename T>
 quadtree_t<T>::quadtree_t(const rect_t &range){
     this->rt = new quadtree_node_t(range);
+    this->values.reserve(200);
 }
 
 template<typename T>
-void quadtree_t<T>::add_value(const T &value) {
+void quadtree_t<T>::add_value(const T& value) {
     this->values.push_back(value);
     this->rt->add_value(this->values.back());
 }
 
 template<typename T>
-const std::vector<T> quadtree_t<T>::get_values() const{
+const std::vector<T>& quadtree_t<T>::get_values() const{
     return this->values;
 }
 
@@ -212,7 +213,7 @@ std::vector<std::reference_wrapper<T>> quadtree_t<T>::collision_value(const T &v
 }
 
 template<typename T>
-void quadtree_t<T>::print() {
+void quadtree_t<T>::print() const {
     this->rt->print(0);
 }
 
