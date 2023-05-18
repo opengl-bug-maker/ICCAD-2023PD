@@ -74,7 +74,7 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         }
     }
     for (int i = (int)merging_poly.size() - 1; i >= 0; --i) {
-        polygons.erase(polygons.begin() + i);
+        polygons.erase(polygons.begin() + merging_poly[i]);
     }
     polygons.push_back(std::move(new_poly));
     return true;
