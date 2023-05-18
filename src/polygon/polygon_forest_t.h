@@ -9,10 +9,11 @@
 #include "utilities/quadtree_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "polygon/polygon_t.h"
+#include <memory>
 
 class polygon_forest_t {
     quadtree_t<polygon_t> quadtree;
-    std::vector<polygon_t> polygons;
+    std::vector<std::shared_ptr<polygon_t>> polygons;
     void test_without_collision();
 public:
     polygon_forest_t();
