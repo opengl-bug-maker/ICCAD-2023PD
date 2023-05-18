@@ -8,14 +8,14 @@
 polygon_t::polygon_t(const bounding_rectangle_t& rect) :
                      bounding_rect(rect.getRect()),
                      quadtree(rect.getRect()) {
-    quadtree.add_value({polygon_module_t(*this, rect)});
+    quadtree.add_value(polygon_module_t(rect));
 }
 
 const rect_t& polygon_t::get_bounding_rect() const {
     return bounding_rect;
 }
 
-const std::vector<polygon_module_t>& polygon_t::get_rects(){
+const std::vector<polygon_module_t>& polygon_t::get_rects() const{
     return this->quadtree.get_values();
 }
 
@@ -53,8 +53,8 @@ bool polygon_t::merge_polygon(polygon_t& polygon) {
 
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
 
-    for (const auto& i: polygon.quadtree.get_values()) {
-        this->quadtree.add_value(std::ref(i));
+    for (auto& i: polygon.quadtree.get_values_ref()) {
+        this->quadtree.add_value(i);
     }
 
     return true;

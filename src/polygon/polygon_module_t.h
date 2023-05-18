@@ -5,9 +5,9 @@
 #ifndef ICCAD2023PD_POLYGON_MODULE_T_H
 #define ICCAD2023PD_POLYGON_MODULE_T_H
 
-#include <functional>
-#include <vector>
 #include <map>
+#include <vector>
+#include <functional>
 #include "polygon/polygon_overlap_area_t.h"
 #include "utilities/bounding_rectangle_t.h"
 
@@ -15,7 +15,6 @@ class polygon_t;
 
 class polygon_module_t : public box_t {
 
-    polygon_t& belong_polygon;
 
     const bounding_rectangle_t& module_rect;
 
@@ -31,7 +30,7 @@ class polygon_module_t : public box_t {
     std::pair<bool, uint32_t> request_area(const uint32_t& required_area);
 
 public:
-    explicit polygon_module_t(polygon_t& belong_polygon, const bounding_rectangle_t& bounding_rect);
+    explicit polygon_module_t(const bounding_rectangle_t& bounding_rect);
 
     polygon_module_t(const polygon_module_t& polygon_module);
     polygon_module_t operator=(const polygon_module_t& r);

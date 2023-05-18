@@ -20,11 +20,11 @@ class polygon_t : public box_t{
     quadtree_t<polygon_module_t> quadtree;
 
 public:
-    const rect_t& get_bounding_rect() const override;
-
     explicit polygon_t(const bounding_rectangle_t& first_rect);
 
-    const std::vector<polygon_module_t>& get_rects();
+    const rect_t& get_bounding_rect() const override;
+
+    const std::vector<polygon_module_t>& get_rects() const;
 
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;

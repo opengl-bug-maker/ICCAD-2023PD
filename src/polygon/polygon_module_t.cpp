@@ -8,21 +8,21 @@
 
 #include <utility>
 
-polygon_module_t::polygon_module_t(polygon_t& belong_polygon, const bounding_rectangle_t& bounding_rect) :
-    belong_polygon(belong_polygon),
-    module_rect(std::move(bounding_rect)),
+polygon_module_t::polygon_module_t(const bounding_rectangle_t& bounding_rect) :
+    module_rect(bounding_rect),
     demand_area(bounding_rect.getLinkModule()->get_area()),
     free_to_share_area(bounding_rect.getRect().get_area() - demand_area),
     shared_area(0),
-    overlap_areas(std::vector<std::reference_wrapper<polygon_overlap_area_t>>({})) {}
+    overlap_areas(std::vector<std::reference_wrapper<polygon_overlap_area_t>>({}))
+    {}
 
 polygon_module_t::polygon_module_t(const polygon_module_t &r):
-    belong_polygon(r.belong_polygon),
-    module_rect(std::move(r.module_rect)),
+    module_rect(r.module_rect),
     demand_area(r.demand_area),
     free_to_share_area(r.free_to_share_area),
     shared_area(r.shared_area),
-    overlap_areas(r.overlap_areas) {}
+    overlap_areas(r.overlap_areas)
+    {}
 
 polygon_module_t polygon_module_t::operator=(const polygon_module_t &r) {
     return polygon_module_t(r);
@@ -45,10 +45,10 @@ std::vector<std::reference_wrapper<polygon_module_t>> polygon_module_t::get_neig
 }
 
 const rect_t &polygon_module_t::get_bounding_rect() const {
-    return module_rect.getRect();
+    return this->module_rect.getRect();
 }
 
-const bounding_rectangle_t &polygon_module_t::get_module_bounding_rectangle() const {
+const bounding_rectangle_t& polygon_module_t::get_module_bounding_rectangle() const {
     return module_rect;
 }
 
