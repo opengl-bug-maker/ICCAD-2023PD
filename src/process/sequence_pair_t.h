@@ -27,7 +27,7 @@ public:
     floorplanning_t fp;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_pos;
-    pair<bool, vector<vec2d_t>> find_position(int);
+    pair<bool, vector<vec2d_t>> find_position(int,int);
     void build_constraint_graph();
     sequence_pair_t();
     static vector<bool> seq_is_fix;

@@ -184,15 +184,22 @@ void sequence_pair_t::print() {
 
 bool sequence_pair_t::to_fp() {
     build_constraint_graph();
-    //pair<bool, vector<vec2d_t>> res = this->ILP_process();
+
     bool success = false;
     pair<bool, vector<vec2d_t>> res;
-    int overlap = 0;
-    while(success==false&&overlap<3){
-        pair<bool, vector<vec2d_t>> presolve_res = this->find_position(overlap++);
+    int overlap_v = 0, overlap_h = 0;
+    for(int i = 0; i<4; ++i){
+        pair<bool, vector<vec2d_t>> presolve_res = this->find_position(overlap_h, overlap_v);
         if(presolve_res.first){
             res = presolve_res;
             success=true;
+            break;
+        }
+        if(i&1){
+            overlap_v++;
+        }
+        else{
+            overlap_h++;
         }
     }
     if(success){
@@ -236,7 +243,7 @@ void sequence_pair_t::build_constraint_graph() {
         cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
     }
 }
-pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_v) {
+pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int overlap_v) {
     int constraint_n = this->constraint_graph_h.size()+this->constraint_graph_v.size()+chip_t::get_fixed_modules().size()*2;
 
     ILP_solver_t ILP_solver;
@@ -254,7 +261,7 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_v) {
         int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
         coef_h[from]++; coef_h[to]--;
         string constraint_name = "h_c"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_v);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_h);
         constraint_i++;
     }
     for(int i = 0; i<this->constraint_graph_v.size(); ++i){
@@ -289,7 +296,7 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_v) {
     }
     //set coefficients
 //    for(int i = 0; i<sequence_n; ++i){
-//        coef_h[i] = coef_v[i] = 0;
+//        coef_h[i] = coef_v[i] = 1;
 //    }
     //prepare coefficients
     for(int i = 1; i<2*sequence_n; ++i){
