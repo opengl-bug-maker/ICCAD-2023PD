@@ -57,7 +57,13 @@ void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> vari
 
 void ILP_solver_t::set_variable_double_range(int var_i, int lb, int ub) {
     //glp_set_col_bnds(ILP, i, GLP_LO, 0.0, inf);
-    glp_set_col_bnds(ILP, var_i, GLP_DB, lb, ub);
+    if(lb==ub){
+        glp_set_col_bnds(ILP, var_i, GLP_FX, lb, ub);
+    }
+    else{
+        glp_set_col_bnds(ILP, var_i, GLP_DB, lb, ub);
+    }
+
     glp_set_col_kind(ILP, var_i, GLP_IV);
 }
 

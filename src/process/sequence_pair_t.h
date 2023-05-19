@@ -23,14 +23,11 @@ class sequence_pair_t{
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     static vector<edge_t> connections;
     static vector<vector<int>> connectivities;
-    int overlap_v = 2;
 public:
     floorplanning_t fp;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_pos;
-    pair<bool, vector<vec2d_t>> ILP_process();
-    pair<bool, vector<vec2d_t>> ILP();
-    pair<bool, vector<vec2d_t>> ILP_relaxation(vector<vec2d_t> ILP_presolve_result);
+    pair<bool, vector<vec2d_t>> find_position(int);
     void build_constraint_graph();
     sequence_pair_t();
     static vector<bool> seq_is_fix;
