@@ -1,0 +1,118 @@
+//
+// Created by 林士傑 on 2023/6/9.
+//
+
+#include "lenf_unit.h"
+#include "polygon/polygon_overlap_area_t.h"
+#include "static_data/module_t.h"
+#include <iostream>
+
+#include <utility>
+
+lenf_unit::lenf_unit(const bounding_rectangle_t& bounding_rect) :
+        module_rect(bounding_rect),
+        max_area(bounding_rect.getRect().get_area())
+//        demand_area(bounding_rect.getLinkModule()->get_area()),
+//        free_to_share_area(bounding_rect.getRect().get_area() - demand_area),
+//        shared_area(0)
+//        overlap_areas(std::vector<std::reference_wrapper<polygon_overlap_area_t>>({}))
+{
+}
+
+lenf_unit::lenf_unit(const lenf_unit &r):
+        module_rect(r.module_rect),
+        max_area(r.max_area),
+        area_from_where(r.area_from_where),
+        connections(r.connections)
+//        demand_area(r.demand_area),
+//        free_to_share_area(r.free_to_share_area),
+//        shared_area(r.shared_area)
+//        overlap_areas(r.overlap_areas)
+{}
+
+lenf_unit lenf_unit::operator=(const lenf_unit &r) {
+    return lenf_unit(r);
+}
+
+//std::pair<bool, uint32_t> lenf_unit::request_area(const uint32_t& required_area) {
+//    if(required_area <= this->free_to_share_area){
+//        this->shared_area += required_area;
+//        this->free_to_share_area -= required_area;
+//        return {true, required_area};
+//    } else{
+//        this->shared_area += free_to_share_area;
+//        this->free_to_share_area = 0;
+//        return {false, this->free_to_share_area};
+//    }
+//}
+
+//std::vector<std::reference_wrapper<polygon_module_t>> lenf_unit::get_neighbor(const polygon_overlap_area_t&) const {
+//    return std::vector<std::reference_wrapper<polygon_module_t>>({});
+//}
+
+const rect_t &lenf_unit::get_bounding_rect() const {
+    return this->module_rect.getRect();
+}
+
+const bounding_rectangle_t& lenf_unit::get_module_bounding_rectangle() const {
+    return module_rect;
+}
+
+void lenf_unit::fix_max_area(int area) {
+    this->max_area += area;
+    std::cout << this << " : " << this->max_area << " : " << area << "\n";
+}
+
+void lenf_unit::add_connection(const std::shared_ptr<lenf_unit> &connection) {
+    this->connections.push_back(connection);
+}
+
+void lenf_unit::set_area(std::set<std::shared_ptr<lenf_unit>> area_keys) {
+    if (area_keys.size() == 1){
+        this->area_from_where[*area_keys.begin()] = this->module_rect.getLinkModule()->get_area();
+    }else{
+        for(auto key : area_keys){
+            this->area_from_where[key] = 0;
+        }
+    }
+}
+
+std::map<std::shared_ptr<lenf_unit>, uint32_t> lenf_unit::set_overlap_take(const std::shared_ptr<lenf_unit>& requester, uint32_t area) {
+    std::map<std::shared_ptr<lenf_unit>, uint32_t> copy;
+    copy[requester] = 0;
+    for (auto item : this->area_from_where) {
+        copy[item.first] = 0;
+    }
+    for (auto item : this->area_from_where) {
+        auto value = std::min(area, item.second);
+        this->area_from_where[item.first] -= value;
+        copy[item.first] = value;
+        area -= value;
+    }
+    return copy;
+}
+
+void lenf_unit::set_area_from_where(const std::map<std::shared_ptr<lenf_unit>, uint32_t> &areaFromWhere) {
+    area_from_where = areaFromWhere;
+}
+
+int lenf_unit::fix_area(std::shared_ptr<lenf_unit> robber, int value) {
+    int other_area = 0;
+    for (auto item : this->area_from_where){
+        if (item.first != robber) other_area += item.second;
+    }
+    int now_area = 0;
+    for (auto item : this->area_from_where){
+        now_area += item.second;
+    }
+    int need_area = this->max_area - now_area;
+    if (need_area <= 0) return 0;
+
+
+    return 0;
+}
+
+//bool lenf_unit::connect(lenf_unit &module) {
+//    return true;
+//}
+
