@@ -60,6 +60,7 @@ floorplanning_t::floorplanning_t() {
 
 
     //load and place the fixed modules
+    fixed_rects.reserve(fixed_modules.size());
     for (int i = 0; i < fixed_modules.size(); ++i) {
         bounding_rectangle_t bd = fixed_modules[i]->make_bd();
         floorplanning_t::module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;

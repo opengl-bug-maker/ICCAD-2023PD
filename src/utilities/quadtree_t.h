@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <functional>
 #include "rect_t.h"
 #include "utilities/box_t.h"
 
@@ -19,7 +20,7 @@ class quadtree_t {
     class quadtree_node_t {
         friend class quadtree_t<T>;
         rect_t range;
-        std::vector<T> elements;
+        std::vector<std::reference_wrapper<T>> elements;
         // 0 : upper_left, 1 : upper_right, 2 : lower_left, 3 : lower_right
         // 0 1
         // 2 3
@@ -29,8 +30,8 @@ class quadtree_t {
         void split();
         int get_rect_region(const rect_t& rect);
         bool is_leaf() const;
-        void add_value(const T& value);
-        void search_collision(std::vector<T>& vec, const T& value) const;
+        void add_value(T& value);
+        void search_collision(std::vector<std::reference_wrapper<T>>& vec, const T& value) const;
         void print(int index);
     };
 
@@ -42,8 +43,10 @@ class quadtree_t {
 public:
     quadtree_t<T>(const rect_t& range);
     void add_value(const T& value);
-    std::vector<T> collision_value(const T& value) const;
-    void print();
+    const std::vector<T>& get_values() const;
+    std::vector<T>& get_values_ref();
+    std::vector<std::reference_wrapper<T>> collision_value(const T& value) const;
+    void print() const;
 };
 
 //region quadtree_node
@@ -64,7 +67,7 @@ void quadtree_t<T>::quadtree_node_t::split() {
     children[3] = new quadtree_t<T>::quadtree_node_t(rect_t(vec2d_t(range.get_center().get_x(), range.get_left_lower().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y())));
 
     for(int i = elements.size() - 1; i >= 0; --i){
-        int region = this->get_rect_region(elements[i].get_bounding_rect());
+        int region = this->get_rect_region(elements[i].get().get_bounding_rect());
         if(region != -1){
             children[region]->add_value(elements[i]);
             elements.erase(elements.begin() + i);
@@ -96,7 +99,7 @@ bool quadtree_t<T>::quadtree_node_t::is_leaf() const {
 }
 
 template<typename T>
-void quadtree_t<T>::quadtree_node_t::add_value(const T& value) {
+void quadtree_t<T>::quadtree_node_t::add_value(T& value) {
     if(this->is_leaf()){
         this->elements.push_back(value);
         if(this->elements.size() >= quadtree_t::max_element_count){
@@ -112,9 +115,9 @@ void quadtree_t<T>::quadtree_node_t::add_value(const T& value) {
 }
 
 template<typename T>
-void quadtree_t<T>::quadtree_node_t::search_collision(std::vector<T> &vec, const T &value) const {
+void quadtree_t<T>::quadtree_node_t::search_collision(std::vector<std::reference_wrapper<T>> &vec, const T &value) const {
     for (auto rects : this->elements) {
-        if(value.get_bounding_rect().is_collision(rects.get_bounding_rect())){
+        if(value.get_bounding_rect().is_collision(rects.get().get_bounding_rect())){
             vec.push_back(rects);
         }
     }
@@ -147,7 +150,7 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
         for(int j = 0; j < index; j++){
             std::cout << "\t";
         }
-        std::cout << elements[i].get_bounding_rect() << std::endl;
+        std::cout << elements[i].get().get_bounding_rect() << std::endl;
     }
     if(is_leaf()) return;
 
@@ -183,22 +186,34 @@ void quadtree_t<T>::quadtree_node_t::print(int index) {
 template<typename T>
 quadtree_t<T>::quadtree_t(const rect_t &range){
     this->rt = new quadtree_node_t(range);
+    this->values.reserve(200);
 }
 
 template<typename T>
-void quadtree_t<T>::add_value(const T &value) {
-    this->rt->add_value(value);
+void quadtree_t<T>::add_value(const T& value) {
+    this->values.push_back(value);
+    this->rt->add_value(this->values.back());
 }
 
 template<typename T>
-std::vector<T> quadtree_t<T>::collision_value(const T &value) const {
-    std::vector<T> vec;
+const std::vector<T>& quadtree_t<T>::get_values() const{
+    return this->values;
+}
+
+template<typename T>
+std::vector<T> &quadtree_t<T>::get_values_ref(){
+    return this->values;
+}
+
+template<typename T>
+std::vector<std::reference_wrapper<T>> quadtree_t<T>::collision_value(const T &value) const {
+    std::vector<std::reference_wrapper<T>> vec;
     this->rt->search_collision(vec, value);
     return vec;
 }
 
 template<typename T>
-void quadtree_t<T>::print() {
+void quadtree_t<T>::print() const {
     this->rt->print(0);
 }
 

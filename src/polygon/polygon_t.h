@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <map>
-#include "polygon/poly_unit_t.h"
+#include "polygon/polygon_module_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "utilities/quadtree_t.h"
 #include "utilities/box_t.h"
@@ -17,16 +17,14 @@ class polygon_forest_t;
 
 class polygon_t : public box_t{
     rect_t bounding_rect;
-    quadtree_t<poly_unit_t> quadtree;
-    std::vector<poly_unit_t> poly_units;
-    std::vector<poly_union_unit_t> poly_union_units;
+    quadtree_t<polygon_module_t> quadtree;
 
 public:
-    const rect_t& get_bounding_rect() const override;
-
     explicit polygon_t(const bounding_rectangle_t& first_rect);
 
-    std::vector<poly_unit_t>& get_rects();
+    const rect_t& get_bounding_rect() const override;
+
+    const std::vector<polygon_module_t>& get_rects() const;
 
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
@@ -34,7 +32,7 @@ public:
     bool is_collision(const rect_t& rect) const;
     bool is_collision(const bounding_rectangle_t& rect) const;
 
-    bool merge_polygon(const polygon_t& polygon);
+    bool merge_polygon(polygon_t& polygon);
 };
 
 

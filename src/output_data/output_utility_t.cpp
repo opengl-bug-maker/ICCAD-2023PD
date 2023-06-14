@@ -13,5 +13,5 @@ std::string output_utility_t::to_string() {
     return str;
 }
 
-output_utility_t::output_utility_t(const std::string &moduleName, const std::vector<vec2d_t> &points) : module_name(
-        moduleName), points(points) {}
+output_utility_t::output_utility_t(const std::string &moduleName, const std::vector<vec2d_t> &points) :
+module_name(moduleName), points(points) {}

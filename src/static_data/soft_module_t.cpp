@@ -6,9 +6,13 @@
 
 soft_module_t soft_module_t::void_module = soft_module_t(0);
 
-soft_module_t::soft_module_t() {}
+soft_module_t::soft_module_t() : minArea(0) {
+    this->name = "";
+}
 
-soft_module_t::soft_module_t(const int& area) : minArea(area) {}
+soft_module_t::soft_module_t(const int& area) : minArea(area) {
+    this->name = "";
+}
 
 soft_module_t *soft_module_t::fileInput(std::fstream &file) {
     soft_module_t* soft_module = new soft_module_t();
