@@ -5,6 +5,7 @@
 #include "lenf_polygon_t.h"
 
 #include <algorithm>
+#include <iomanip>
 #include "static_data/soft_module_t.h"
 
 const std::vector<std::vector<std::vector<std::vector<int>>>> lenf_polygon_t::combination_list{{{},{},{},{},{},{}},
