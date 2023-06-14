@@ -21,9 +21,11 @@ using std::cout;
 using std::endl;
 using std::string;
 void sequence_pair_t::init() {
+    srand(time(NULL));
+
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
-    sequence_pair_t::sequence_n = chip_t::get_total_module_n();
+    sequence_pair_t::sequence_n = static_cast<int>(chip_t::get_total_module_n());
 
     soft_area_to_w_h_m.resize(soft_modules.size());
     sequence_pair_t::seq_soft_map.resize(chip_t::get_total_module_n());
@@ -53,45 +55,10 @@ void sequence_pair_t::init() {
         sequence_pair_t::fix_module_to_id_m[fixed_modules[i]] = j;
         j++;
     }
-    srand(time(NULL));
 
-    for(int i = 0; i<sequence_n; ++i) {
-        if(seq_is_fix[i]){
-            const vector<std::pair<const module_t* const, const int>> neighbors
-                    = (seq_fixed_map[i])->getConnections();
-            for(const auto neighbor:neighbors){
-                int neighbor_i = -1;
-                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-                    neighbor_i = fix_module_to_id_m[neighbor.first];
-                }
-                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-                    neighbor_i = soft_module_to_id_m[neighbor.first];
-                }
-                connections.push_back({i, neighbor_i, neighbor.second});
-                connectivities[neighbor_i][i] = connectivities[i][neighbor_i] = neighbor.second;
-            }
-        }
-        else{
-            const vector<std::pair<const module_t* const, const int>> neighbors
-                    = (seq_soft_map[i])->getConnections();
-            for(const auto neighbor:neighbors){
-                int neighbor_i = -1;
-                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-                    neighbor_i = fix_module_to_id_m[neighbor.first];
-                }
-                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-                    neighbor_i = soft_module_to_id_m[neighbor.first];
-                }
-                connections.push_back({i, neighbor_i, neighbor.second});
-                connectivities[neighbor_i][i] = connectivities[i][neighbor_i] = neighbor.second;
-            }
-        }
-    }
 
-    //check connections
-//    for(auto& e:connections){
-//        cout<<"from "<<e.from<<" to"<<e.to<<", w : "<<e.w<<endl;
-//    }
+    //build adj list and adj matrix
+    build_graph();
 }
 
 sequence_pair_t::sequence_pair_t() {
@@ -140,14 +107,12 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
     uint32_t  from = sqrt(area/2);
     vector<vec2d_t> ret;
     for(uint32_t i = from; i<= sqrt(area); ++i){ //i will be the short edge
-        if(area%i==0){
-            int x = i, y = area/i;
-            if(x*2>=y){
-                ret.push_back({x, y});
-                if(x!=y){
-                    ret.push_back({y, x});
-                }
-
+        //cout<< area<<" "<<i<<" "<<ceil(static_cast<float>(area)/static_cast<float>(i))<<endl;
+        int x = i, y = ceil(static_cast<float>(area)/static_cast<float>(i));
+        if(x*2>=y){
+            ret.push_back({x, y});
+            if(x!=y){
+                ret.push_back({y, x});
             }
         }
     }
@@ -184,7 +149,6 @@ void sequence_pair_t::print() {
 
 bool sequence_pair_t::to_fp() {
     build_constraint_graph();
-
     bool success = false;
     pair<bool, vector<vec2d_t>> res;
     int overlap_v = 0, overlap_h = 0;
@@ -204,14 +168,11 @@ bool sequence_pair_t::to_fp() {
     }
     if(success){
         this->sequence_pair_validation(res);
-        fgetc(stdin);
         return true;
     }
     else{
-        //std::cout <<"fail in "<<elapsed.count() << " ms\n";
         return false;
     }
-
 }
 
 
@@ -245,18 +206,19 @@ void sequence_pair_t::build_constraint_graph() {
 }
 pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int overlap_v) {
     int constraint_n = this->constraint_graph_h.size()+this->constraint_graph_v.size()+chip_t::get_fixed_modules().size()*2;
-
+    int constraint_i = 1; //constraint_counter
+    int set_n = 2*(this->constraint_graph_h.size()+this->constraint_graph_v.size())+2*chip_t::get_fixed_modules().size();
+    //apart from constraint graph, every fix module need 2 additional condition
     ILP_solver_t ILP_solver;
     ILP_solver.init("ILP_solver", constraint_n, 2*sequence_pair_t::sequence_n);
     ILP_solver.set_min();
-    int constraint_i = 1;
-    int set_n = 2*(this->constraint_graph_h.size()+this->constraint_graph_v.size())+2*chip_t::get_fixed_modules().size();
+
 
     vector<int> set_i(set_n+1),set_j(set_n+1),set_val(set_n+1); //due to 1-index
     vector<int> coef_h(sequence_n,0), coef_v(sequence_n,0),coef(2*sequence_n+1);
 
 
-    //set constraints to avoid overlap
+    //set constraints to place modules
     for(int i = 0; i<this->constraint_graph_h.size(); ++i){
         int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
         coef_h[from]++; coef_h[to]--;
@@ -294,10 +256,6 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
         glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
         ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
     }
-    //set coefficients
-//    for(int i = 0; i<sequence_n; ++i){
-//        coef_h[i] = coef_v[i] = 1;
-//    }
     //prepare coefficients
     for(int i = 1; i<2*sequence_n; ++i){
         if(i<sequence_n){
@@ -368,5 +326,41 @@ void sequence_pair_t::sequence_pair_validation(pair<bool, vector<vec2d_t>> res) 
         }
     }
     visualizer_t::show_fp_rect_no_border(rects);
+    fgetc(stdin);
+}
+
+void sequence_pair_t::build_graph() {
+    for(int i = 0; i<sequence_n; ++i) {
+        if(seq_is_fix[i]){
+            const vector<std::pair<const module_t* const, const int>> neighbors
+                    = (seq_fixed_map[i])->getConnections();
+            for(const auto neighbor:neighbors){
+                int neighbor_i = -1;
+                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
+                    neighbor_i = fix_module_to_id_m[neighbor.first];
+                }
+                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
+                    neighbor_i = soft_module_to_id_m[neighbor.first];
+                }
+                connections.push_back({i, neighbor_i, neighbor.second});
+                connectivities[neighbor_i][i] = connectivities[i][neighbor_i] = neighbor.second;
+            }
+        }
+        else{
+            const vector<std::pair<const module_t* const, const int>> neighbors
+                    = (seq_soft_map[i])->getConnections();
+            for(const auto neighbor:neighbors){
+                int neighbor_i = -1;
+                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
+                    neighbor_i = fix_module_to_id_m[neighbor.first];
+                }
+                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
+                    neighbor_i = soft_module_to_id_m[neighbor.first];
+                }
+                connections.push_back({i, neighbor_i, neighbor.second});
+                connectivities[neighbor_i][i] = connectivities[i][neighbor_i] = neighbor.second;
+            }
+        }
+    }
 }
 

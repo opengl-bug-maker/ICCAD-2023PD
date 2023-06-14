@@ -18,29 +18,28 @@ using std::vector;
 using std::unordered_map;
 
 class sequence_pair_t{
-    vector<int> h_sequence, v_sequence;
-
-    vector<edge_t> constraint_graph_h, constraint_graph_v;
     static vector<edge_t> connections;
     static vector<vector<int>> connectivities;
+    static void build_graph();
+    vector<int> h_sequence, v_sequence;
+    vector<edge_t> constraint_graph_h, constraint_graph_v;
+
 public:
+    static void init();
+    static vector<bool> seq_is_fix; //if the module is a fixed module
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    static vector<vec2d_t> find_w_h(uint32_t area);
+    static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
+    static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
+    static int sequence_n;
+    static unordered_map<const module_t*, int> soft_module_to_id_m;
+    static unordered_map<const module_t*, int> fix_module_to_id_m;
     floorplanning_t fp;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_pos;
     pair<bool, vector<vec2d_t>> find_position(int,int);
     void build_constraint_graph();
     sequence_pair_t();
-    static vector<bool> seq_is_fix;
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
-    static vector<vec2d_t> find_w_h(uint32_t area);
-    static vector<soft_module_t*> seq_soft_map;
-    static vector<fixed_module_t*> seq_fixed_map;
-    static void init();
-    static const int inf = 1e9+10;
-    static int sequence_n;
-    static unordered_map<const module_t*, int> soft_module_to_id_m;
-    static unordered_map<const module_t*, int> fix_module_to_id_m;
-
 
     //essential
     bool to_fp();
