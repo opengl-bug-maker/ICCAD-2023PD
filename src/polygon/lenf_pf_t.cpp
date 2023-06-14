@@ -11,8 +11,8 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
-lenf_pf_t::lenf_pf_t() : quadtree(lenf_quadtree_t<lenf_polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))){
-    this->polygons.reserve(200);
+lenf_pf_t::lenf_pf_t() {
+    this->polygons.reserve(204);
     this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
     this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
     this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
@@ -51,7 +51,6 @@ bool lenf_pf_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
 //    lenf_polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
-    auto collision_polygons = quadtree.collision_value(new_poly);
     for (int i = 0; i < polygons.size(); ++i) {
         if(polygons[i]->is_bounding_collision(boundingRectangle)){
             if(polygons[i]->is_collision(boundingRectangle)){
@@ -60,9 +59,8 @@ bool lenf_pf_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         }
     }
     // add new polygon
-    if(collision_polygons.empty()){
+    if(merging_poly.empty()){
         //no one touch
-        quadtree.add_value(*new_poly.get());
         polygons.push_back(std::move(new_poly));
         return true;
     }

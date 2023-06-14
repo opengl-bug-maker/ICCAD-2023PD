@@ -13,7 +13,6 @@
 
 
 class lenf_pf_t {
-    lenf_quadtree_t<lenf_polygon_t> quadtree;
     std::vector<std::shared_ptr<lenf_polygon_t>> polygons;
     void test_without_collision();
 public:
