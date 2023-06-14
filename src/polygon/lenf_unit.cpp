@@ -60,7 +60,7 @@ const bounding_rectangle_t& lenf_unit::get_module_bounding_rectangle() const {
 
 void lenf_unit::fix_max_area(int area) {
     this->max_area += area;
-    std::cout << this << " : " << this->max_area << " : " << area << "\n";
+//    std::cout << this << " : " << this->max_area << " : " << area << "\n";
 }
 
 void lenf_unit::add_connection(const std::shared_ptr<lenf_unit> &connection) {
@@ -69,12 +69,16 @@ void lenf_unit::add_connection(const std::shared_ptr<lenf_unit> &connection) {
 
 void lenf_unit::set_area(std::set<std::shared_ptr<lenf_unit>> area_keys) {
     if (area_keys.size() == 1){
+        //todo maybe not put this
         this->area_from_where[*area_keys.begin()] = this->module_rect.getLinkModule()->get_area();
     }else{
         for(auto key : area_keys){
             this->area_from_where[key] = 0;
         }
     }
+//    for(auto key : area_keys){
+//        this->area_from_where[key] = 0;
+//    }
 }
 
 std::map<std::shared_ptr<lenf_unit>, uint32_t> lenf_unit::set_overlap_take(const std::shared_ptr<lenf_unit>& requester, uint32_t area) {
@@ -96,20 +100,49 @@ void lenf_unit::set_area_from_where(const std::map<std::shared_ptr<lenf_unit>, u
     area_from_where = areaFromWhere;
 }
 
+const std::map<std::shared_ptr<lenf_unit>, uint32_t>& lenf_unit::get_area_from_where() {
+    return this->area_from_where;
+}
+
+void lenf_unit::fix_area_reset() {
+    this->area_from_where.begin()->second = 0;
+}
+
 int lenf_unit::fix_area(std::shared_ptr<lenf_unit> robber, int value) {
-    int other_area = 0;
-    for (auto item : this->area_from_where){
-        if (item.first != robber) other_area += item.second;
+    this->if_found = true;
+    if (this->area_from_where.find(robber) == this->area_from_where.end()){
+        this->if_found = false;
+        return value;
     }
+    this->area_from_where[robber] += value;
     int now_area = 0;
     for (auto item : this->area_from_where){
         now_area += item.second;
     }
-    int need_area = this->max_area - now_area;
-    if (need_area <= 0) return 0;
+    int need_area = now_area - this->max_area;
+    if (need_area <= 0){
+        this->if_found = false;
+        return 0;
+    }
 
-
-    return 0;
+    for (auto other : this->area_from_where) {
+        for (auto other_conn : this->connections) {
+            if (other_conn->if_found) continue;
+            if (need_area <= 0) {
+                this->if_found = false;
+                return 0;
+            }
+            uint32_t need = std::min((uint32_t)need_area, other.second);
+            if (need == 0) continue;
+            int left = other_conn->fix_area(other.first, need);
+            int move = need_area - left;
+            this->area_from_where[other.first] -= move;
+            need_area = left;
+        }
+    }
+    this->area_from_where[robber] -= need_area;
+    this->if_found = false;
+    return need_area;
 }
 
 //bool lenf_unit::connect(lenf_unit &module) {

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "static_data/soft_module_t.h"
 
-const std::vector<std::vector<std::vector<std::vector<int>>>> lenf_polygon_t::combination_list{{},
+const std::vector<std::vector<std::vector<std::vector<int>>>> lenf_polygon_t::combination_list{{{},{},{},{},{},{}},
                                                                                          {{}, {{0}},                                         {},                                                                                                                                                                                                                                                                                               {}, {}, {}},
                                                                                          {{}, {{0}, {1}},                                    {{0, 1}},                                                                                                                                                                                                                                                                                         {}, {}, {}},
                                                                                          {{}, {{0}, {1}, {2}},                               {{0, 1}, {0, 2}, {1, 2}},                                                                                                                                                                                                                                                                         {{0, 1, 2}}, {}, {}},
@@ -81,6 +81,8 @@ bool lenf_polygon_t::merge_polygon(lenf_polygon_t &polygon) {
             for (auto set: sets) {
                 key_set.insert(coli[set]);
             }
+            if (this->unit_lib.find(key_set) == this->unit_lib.end()) continue;
+
             auto find = this->unit_lib[key_set];
 
             auto new_rect = find->get_bounding_rect().intersect(
@@ -93,7 +95,7 @@ bool lenf_polygon_t::merge_polygon(lenf_polygon_t &polygon) {
             this->overlap_unit.push_back(std::make_shared<lenf_unit>(new_unit));
             key_set.insert(this->get_origin_unit());
             this->unit_lib[key_set] = this->overlap_unit.back();
-            this->overlap_unit.back()->set_area_from_where(find->set_overlap_take(this->get_origin_unit(), new_unit.get_bounding_rect().get_area()));
+//            this->overlap_unit.back()->set_area_from_where(find->set_overlap_take(this->get_origin_unit(), new_unit.get_bounding_rect().get_area()));
 
             std::vector<std::shared_ptr<lenf_unit>> key_set_vec(key_set.begin(), key_set.end());
             int sign = 1;
@@ -119,26 +121,60 @@ bool lenf_polygon_t::merge_polygon(lenf_polygon_t &polygon) {
                 conn_find->add_connection(this->unit_lib[key_set]);
                 this->unit_lib[key_set]->add_connection(conn_find);
             }
-            int z = 0;
         }
     }
 
 
+    for (int i = 1; i < 6; ++i) {
+        auto c = lenf_polygon_t::combination_list[coli.size() - 1][i];
+        for (auto sets: c) {
+            std::set<std::shared_ptr<lenf_unit>> key_set;
+            for (auto set: sets) {
+                key_set.insert(coli[set]);
+            }
 
+            if (this->unit_lib.find(key_set) == this->unit_lib.end()) continue;
 
+            auto find = this->unit_lib[key_set];
 
+            key_set.insert(this->get_origin_unit());
+            auto new_unit = this->unit_lib[key_set];
+            new_unit->set_area_from_where(find->set_overlap_take(this->get_origin_unit(), new_unit->max_area));
+        }
+    }
 
-//    for(auto& module : coli){
-//        if(this->quadtree.get_values_ref().front().connect(module) == false) {
-//            return false;
-//        }
-//    }
+    this->get_origin_unit()->fix_area_reset();
+    int left = this->get_origin_unit()->fix_area(this->get_origin_unit(), this->get_origin_unit()->get_module_bounding_rectangle().getLinkModule()->get_area());
 
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
-//
-//    for (auto &i: polygon.quadtree.get_values_ref()) {
-//        this->quadtree.add_value(i);
-//    }
 
-    return true;
+//    return true;
+    return left == 0;
+}
+
+void lenf_polygon_t::print() {
+    std::map<std::shared_ptr<lenf_unit>, std::string> unit_to_name;
+    for (int i = 0; i < this->origin_unit_tree.get_values().size(); ++i) {
+        unit_to_name[this->origin_unit_tree.get_values()[i]] = std::string(1, 'A' + i);
+    }
+    for (auto unit_pair : this->unit_lib){
+        std::string name_set = "";
+        for (auto units : unit_pair.first){
+            name_set += unit_to_name[units] + " ";
+        }
+        std::cout << std::setw(8) << name_set;
+        std::cout << " | ";
+
+        std::cout << std::setw(2) << unit_pair.second->max_area << " | ";
+
+        std::cout << unit_pair.second->get_bounding_rect();
+
+        std::cout << " { ";
+        for (auto area : unit_pair.second->get_area_from_where()) {
+            std::cout << unit_to_name[area.first] << " : " << area.second << ", ";
+        }
+        std::cout << " }";
+
+        std::cout << "\n";
+    }
 }

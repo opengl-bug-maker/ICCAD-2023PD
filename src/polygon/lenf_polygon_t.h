@@ -45,6 +45,8 @@ public:
     bool is_collision(const bounding_rectangle_t& rect) const;
 
     bool merge_polygon(lenf_polygon_t& polygon);
+
+    void print();
 };
 
 

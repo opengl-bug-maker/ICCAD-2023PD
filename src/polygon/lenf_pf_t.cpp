@@ -11,16 +11,16 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
-lenf_pf_t::lenf_pf_t() : quadtree(quadtree_t<polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))){
+lenf_pf_t::lenf_pf_t() : quadtree(lenf_quadtree_t<lenf_polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))){
     this->polygons.reserve(200);
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
+    this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
+    this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<lenf_polygon_t>(lenf_polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
 }
 
-std::vector<polygon_t> lenf_pf_t::get_polygons() {
-    std::vector<polygon_t> vecs;
+std::vector<lenf_polygon_t> lenf_pf_t::get_polygons() {
+    std::vector<lenf_polygon_t> vecs;
     for(int i = 4; i < this->polygons.size(); i++){
         vecs.push_back(*polygons[i].get());
     }
@@ -47,11 +47,11 @@ bool lenf_pf_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         //haha got you!
         throw std::exception();
     }
-    std::shared_ptr<polygon_t> new_poly = std::make_shared<polygon_t>(boundingRectangle);
-//    polygon_t new_poly(boundingRectangle);
+    std::shared_ptr<lenf_polygon_t> new_poly = std::make_shared<lenf_polygon_t>(boundingRectangle);
+//    lenf_polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
-    auto collision_polygons = quadtree.collision_value(*new_poly.get());
+    auto collision_polygons = quadtree.collision_value(new_poly);
     for (int i = 0; i < polygons.size(); ++i) {
         if(polygons[i]->is_bounding_collision(boundingRectangle)){
             if(polygons[i]->is_collision(boundingRectangle)){
@@ -85,7 +85,7 @@ std::vector<rect_t> lenf_pf_t::get_empty_spaces() {
     std::vector<bounding_rectangle_t> bounding;
     for (auto poly : polygons) {
         for(auto bd : poly->get_rects()){
-            bounding.push_back(bd.get_module_bounding_rectangle());
+            bounding.push_back(bd->get_module_bounding_rectangle());
         }
     }
 
@@ -94,7 +94,7 @@ std::vector<rect_t> lenf_pf_t::get_empty_spaces() {
             auto inter = bounding[i].getRect().intersect(bounding[j].getRect());
             if(inter.first) continue;
 
-            if(std::any_of(polygons.begin(), polygons.end(), [&inter](std::shared_ptr<polygon_t> poly){
+            if(std::any_of(polygons.begin(), polygons.end(), [&inter](std::shared_ptr<lenf_polygon_t> poly){
                 return poly->is_bounding_collision(inter.second) && poly->is_collision(inter.second);
             })){
                 continue;

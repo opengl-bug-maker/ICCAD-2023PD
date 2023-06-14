@@ -11,13 +11,7 @@
 #include "utilities/lenf_quadtree_t.h"
 #include "static_data/soft_module_t.h"
 #include "polygon/lenf_polygon_t.h"
-
-class tes{
-    int a;
-    int b;
-public:
-    tes(int a, int b) : a(a), b(b) {}
-};
+#include "polygon/lenf_pf_t.h"
 
 int main(/*arg*/){
 
@@ -34,8 +28,6 @@ int main(/*arg*/){
 
 //    return 0;
 
-
-
     std::fstream input_file;
     std::fstream output_file;
 
@@ -46,10 +38,25 @@ int main(/*arg*/){
     lenf_polygon_t polygon2(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(4, 0), vec2d_t(5, 5))).first);
     lenf_polygon_t polygon3(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 4), vec2d_t(5, 5))).first);
 
-    polygon1.merge_polygon(polygon);
-    polygon2.merge_polygon(polygon1);
-    polygon3.merge_polygon(polygon2);
+//    polygon1.merge_polygon(polygon);
+//    polygon2.merge_polygon(polygon1);
+//    polygon3.merge_polygon(polygon2);
+//    polygon3.print();
 
+
+    lenf_pf_t lenf_pt0;
+    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(7, 2), vec2d_t(4, 5))).first);
+    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 2), vec2d_t(4, 5))).first);
+    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 0), vec2d_t(5, 4))).first);
+    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 5), vec2d_t(5, 4))).first);
+    lenf_pt0.get_polygons()[0].print();
+
+    lenf_pf_t lenf_pt1;
+    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 2), vec2d_t(4, 5))).first);
+    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(7, 2), vec2d_t(4, 5))).first);
+    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 0), vec2d_t(5, 4))).first);
+    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 5), vec2d_t(5, 4))).first);
+    lenf_pt1.get_polygons()[0].print();
 
     return 0;
 

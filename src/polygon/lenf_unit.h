@@ -14,6 +14,7 @@
 #include "utilities/bounding_rectangle_t.h"
 
 class lenf_unit : public box_t{
+public:
     bounding_rectangle_t module_rect;
 
     uint32_t max_area;
@@ -48,6 +49,10 @@ public:
     std::map<std::shared_ptr<lenf_unit>, uint32_t> set_overlap_take(const std::shared_ptr<lenf_unit>& requester, uint32_t area);
 
     void set_area_from_where(const std::map<std::shared_ptr<lenf_unit>, uint32_t> &areaFromWhere);
+
+    const std::map<std::shared_ptr<lenf_unit>, uint32_t>& get_area_from_where();
+
+    void fix_area_reset();
 
     int fix_area(std::shared_ptr<lenf_unit> robber, int value);
 
