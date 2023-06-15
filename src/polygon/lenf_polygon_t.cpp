@@ -63,14 +63,41 @@ const std::shared_ptr<lenf_unit> &lenf_polygon_t::get_origin_unit() {
 
 bool lenf_polygon_t::merge_polygon(lenf_polygon_t &polygon) {
     auto coli = polygon.origin_unit_tree.collision_value(this->get_origin_unit());
+    std::map<std::shared_ptr<lenf_unit>, std::shared_ptr<lenf_unit>> old_2_new;
     for (const auto& ori : polygon.origin_unit_tree.get_values()){
-        this->origin_unit_tree.add_value(ori);
+        this->origin_unit_tree.add_value(*ori.get());
+        old_2_new[ori] = this->origin_unit_tree.get_values().back();
     }
     for (const auto& over : polygon.overlap_unit){
-        this->overlap_unit.push_back(over);
+        this->overlap_unit.push_back(std::make_shared<lenf_unit>(*over.get()));
+        old_2_new[over] = this->overlap_unit.back();
     }
     for (const auto& lib : polygon.unit_lib){
-        this->unit_lib.insert(lib);
+        std::set<std::shared_ptr<lenf_unit>> new_set;
+        for (auto set : lib.first){
+            new_set.insert(old_2_new[set]);
+        }
+        this->unit_lib[new_set] = old_2_new[lib.second];
+    }
+
+    for (auto ori : this->origin_unit_tree.get_values()){
+        for (auto area : ori->area_from_where){
+            if (old_2_new.find(area.first) != old_2_new.end()){
+                ori->area_from_where.erase(area.first);
+                ori->area_from_where[old_2_new[area.first]] = area.second;
+            }
+        }
+        for (auto& conn : ori->connections){
+            if (old_2_new.find(conn) != old_2_new.end()){
+                conn = old_2_new[conn];
+            }
+        }
+    }
+
+    for (auto& co : coli){
+        if (old_2_new.find(co) != old_2_new.end()){
+            co = old_2_new[co];
+        }
     }
 
     coli.push_back(this->get_origin_unit());
