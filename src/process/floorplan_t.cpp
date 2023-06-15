@@ -2,7 +2,7 @@
 // Created by 林士傑 on 2023/3/27.
 //
 
-#include "floorplanning_t.h"
+#include "floorplan_t.h"
 #include "fp_evaluator_t.h"
 #include<string>
 
@@ -15,11 +15,11 @@ using std::cout;
 
 
 
-unordered_map<const module_t*, int> floorplanning_t::module_to_bd_soft_rect_i_m;
-unordered_map<const module_t*, int> floorplanning_t::module_to_bd_fixed_rect_i_m;
-vector<vector<vec2d_t>> floorplanning_t::soft_area_to_w_h_m;
-uint32_t floorplanning_t::min_w_h[2];
-void floorplanning_t::init() {
+unordered_map<const module_t*, int> floorplan_t::module_to_bd_soft_rect_i_m;
+unordered_map<const module_t*, int> floorplan_t::module_to_bd_fixed_rect_i_m;
+vector<vector<vec2d_t>> floorplan_t::soft_area_to_w_h_m;
+uint32_t floorplan_t::min_w_h[2];
+void floorplan_t::init() {
     uint16_t  soft_rect_n = chip_t::get_soft_modules().size();
     uint16_t fixed_rect_n = chip_t::get_fixed_modules().size();
 
@@ -30,18 +30,18 @@ void floorplanning_t::init() {
     soft_area_to_w_h_m.resize(soft_rect_n);
     for (int i = 0; i < soft_rect_n; ++i) {
         soft_area_to_w_h_m[i] = find_w_h(soft_modules[i]->get_area());
-        floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
+        floorplan_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
     }
-    min_w_h[0] = min_w_h[1] = 1e9+1;
-    for(int i = 0; i<soft_rect_n; ++i) {
-        for(auto& w_h:soft_area_to_w_h_m[i]){
-            floorplanning_t::min_w_h[0] = std::min(floorplanning_t::min_w_h[0], static_cast<uint32_t>(w_h.get_x()));
-            floorplanning_t::min_w_h[1] = std::min(floorplanning_t::min_w_h[1], static_cast<uint32_t>(w_h.get_y()));
-        }
-    }
+//    min_w_h[0] = min_w_h[1] = 1e9+1;
+//    for(int i = 0; i<soft_rect_n; ++i) {
+//        for(auto& w_h:soft_area_to_w_h_m[i]){
+//            floorplan_t::min_w_h[0] = std::min(floorplan_t::min_w_h[0], static_cast<uint32_t>(w_h.get_x()));
+//            floorplan_t::min_w_h[1] = std::min(floorplan_t::min_w_h[1], static_cast<uint32_t>(w_h.get_y()));
+//        }
+//    }
 }
 
-floorplanning_t::floorplanning_t() {
+floorplan_t::floorplan_t() {
     wirelength = 0;
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
@@ -54,7 +54,7 @@ floorplanning_t::floorplanning_t() {
         bounding_rectangle_t bd = soft_modules[i]->make_bd();
         soft_area_to_w_h_m[i] = find_w_h(soft_modules[i]->get_area());
 
-        floorplanning_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
+        floorplan_t::module_to_bd_soft_rect_i_m[soft_modules[i]] = i;
         soft_rects.push_back(bd);
     }
 
@@ -63,7 +63,7 @@ floorplanning_t::floorplanning_t() {
     fixed_rects.reserve(fixed_modules.size());
     for (int i = 0; i < fixed_modules.size(); ++i) {
         bounding_rectangle_t bd = fixed_modules[i]->make_bd();
-        floorplanning_t::module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;
+        floorplan_t::module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;
         fixed_rects.push_back(bd);
         bool success = polygons.add_rect(fixed_rects[i]);
         if ( success== false) {  //if the fixed modules can't be placed, must be wrong.
@@ -79,13 +79,13 @@ floorplanning_t::floorplanning_t() {
 }
 
 
-float floorplanning_t::bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b){
+float floorplan_t::bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b){
 	rect_t rect_a = a.getRect();
 	rect_t rect_b = b.getRect();
 	vec2d_t dis = rect_a.get_center() - rect_b.get_center();
 	return fabs(dis.get_x()) + fabs(dis.get_y()); //must be fabs
 }
-float floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor){
+float floorplan_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor){
 	const module_t* neighbor_module = neighbor.first;
 	const bounding_rectangle_t* neighbor_rect;
 	int neighbor_rect_i = -1;
@@ -104,7 +104,7 @@ float floorplanning_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<co
 	return sum*static_cast<float>(neighbor.second);
 }
 
-void floorplanning_t::calculate_wirelength(){
+void floorplan_t::calculate_wirelength(){
 	if (fp_status == fail_on_placing_fixed_modules) {
 		return;
 	}
@@ -129,7 +129,7 @@ void floorplanning_t::calculate_wirelength(){
 	
 	wirelength = sum / 2;
 }
-void floorplanning_t::print_info(bool position){
+void floorplan_t::print_info(bool position){
 	if (fp_status == fail_on_placing_fixed_modules) {
 		cout << "fail on placing fixed modules" << endl;
 		return;
@@ -158,7 +158,7 @@ void floorplanning_t::print_info(bool position){
 	cout << "current wirelength : " << wirelength << endl;
     cout<<"current score : "<<score<<endl;
 }
-float floorplanning_t::get_wirelength()
+float floorplan_t::get_wirelength()
 {
 	calculate_wirelength();
 	return wirelength;
@@ -166,7 +166,7 @@ float floorplanning_t::get_wirelength()
 
 
 
-bool floorplanning_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t size) {
+bool floorplan_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t size) {
 	rect_t target_rect(lower_left_pos,size);
 	//const soft_module_t* const target_module = dynamic_cast<const soft_module_t*>(soft_rects[i].getLinkModule());
 	soft_module_t* target_module = (soft_module_t*)(soft_rects[i].getLinkModule()); //due to the const->non-const :(
@@ -188,12 +188,12 @@ bool floorplanning_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t
 	return success;
 }
 
-const size_t floorplanning_t::get_soft_rect_n() const
+const size_t floorplan_t::get_soft_rect_n() const
 {
 	return soft_rects.size();
 }
 
-vector<int> floorplanning_t::get_unplaced_id() {
+vector<int> floorplan_t::get_unplaced_id() {
     vector<int> ret;
     for(int i = 0; i<soft_rects.size(); ++i){
         if(soft_is_placed[i]==0){
@@ -204,7 +204,7 @@ vector<int> floorplanning_t::get_unplaced_id() {
 }
 
 
-vector<vec2d_t> floorplanning_t::find_w_h(uint32_t area){
+vector<vec2d_t> floorplan_t::find_w_h(uint32_t area){
     if(area==1){return {{1,1}};}
     uint32_t  from = sqrt(area/2);
     vector<vec2d_t> ret;
@@ -228,30 +228,30 @@ vector<vec2d_t> floorplanning_t::find_w_h(uint32_t area){
     return ret;
 }
 
-pair<vector<bounding_rectangle_t>, vector<bool>> floorplanning_t::prepare_quad()  {
-    vector<bounding_rectangle_t> bd_rects;
-    vector<bool> is_placed;
-    for(int i = 0; i<fixed_rects.size(); ++i){
-        bd_rects.push_back(fixed_rects[i]);
-        is_placed.push_back(true);
-    }
-    for(int i = 0; i<soft_rects.size(); ++i){
-        bd_rects.push_back(soft_rects[i]);
-        is_placed.push_back(soft_is_placed[i]);
-    }
-    return {bd_rects, is_placed};
-}
+//pair<vector<bounding_rectangle_t>, vector<bool>> floorplan_t::prepare_quad()  {
+//    vector<bounding_rectangle_t> bd_rects;
+//    vector<bool> is_placed;
+//    for(int i = 0; i<fixed_rects.size(); ++i){
+//        bd_rects.push_back(fixed_rects[i]);
+//        is_placed.push_back(true);
+//    }
+//    for(int i = 0; i<soft_rects.size(); ++i){
+//        bd_rects.push_back(soft_rects[i]);
+//        is_placed.push_back(soft_is_placed[i]);
+//    }
+//    return {bd_rects, is_placed};
+//}
 
 
-const float floorplanning_t::get_score() const{
+const float floorplan_t::get_score() const{
     return score;
 }
 
-const vector<uint32_t>& floorplanning_t::get_soft_deg() {
+const vector<uint32_t>& floorplan_t::get_soft_deg() {
     return soft_deg;
 }
 
-void floorplanning_t::GUI_validation() {
+void floorplan_t::GUI_validation() {
     vector<bounding_rectangle_t> bd;
     vector<bounding_rectangle_t> placed_soft;
     bd.insert(bd.end(), this->fixed_rects.begin(), this->fixed_rects.end());
@@ -268,7 +268,7 @@ void floorplanning_t::GUI_validation() {
     fgetc(stdin);
 }
 
-void floorplanning_t::cal_soft_deg() {
+void floorplan_t::cal_soft_deg() {
     soft_deg.resize(soft_rects.size());
     for(int i = 0; i<soft_rects.size(); ++i){
         uint32_t deg = 0;
@@ -280,14 +280,14 @@ void floorplanning_t::cal_soft_deg() {
     }
 }
 
-polygon_forest_t &floorplanning_t::get_polygon_forest() {
+polygon_forest_t &floorplan_t::get_polygon_forest() {
     return this->polygons;
 }
 
-const vector<bool> & floorplanning_t::get_soft_is_placed() const{
+const vector<bool> & floorplan_t::get_soft_is_placed() const{
     return soft_is_placed;
 }
 
-const size_t floorplanning_t::get_fixed_rect_n() const {
+const size_t floorplan_t::get_fixed_rect_n() const {
     return fixed_rects.size();
 }

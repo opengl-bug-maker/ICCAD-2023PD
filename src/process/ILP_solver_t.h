@@ -39,6 +39,7 @@ public:
     void set_constraint_fx(int row_i, int variable_n, vector<int>variable_i,vector<int> values, string,int);
     void set_variable_double_range(int var_i, int lb, int ub);
     void set_obj_coef(vector<int>);
+    void set_msg_lev();
     ILP_result_t solve();
     void load();
 

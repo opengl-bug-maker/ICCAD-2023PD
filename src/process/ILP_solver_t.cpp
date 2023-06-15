@@ -76,6 +76,7 @@ void ILP_solver_t::set_obj_coef(vector<int> coef) {
 
 ILP_result_t ILP_solver_t::solve() {
     glp_iocp parm;
+    parm.msg_lev = GLP_MSG_OFF;
     glp_init_iocp(&parm);
     parm.presolve = GLP_ON;
     int err = glp_intopt(this->ILP, &parm);
@@ -116,6 +117,7 @@ void ILP_solver_t::load() {
     }
     glp_load_matrix(this->ILP, set_n, set_i_a, set_j_a, set_val_a);
 }
+
 
 
 

@@ -62,10 +62,10 @@ void sequence_pair_t::init() {
 }
 
 sequence_pair_t::sequence_pair_t() {
+    max_overlap = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width())));
+
     v_sequence.resize(chip_t::get_total_module_n());
     h_sequence.resize(chip_t::get_total_module_n());
-
-
     modules_wh.resize(chip_t::get_total_module_n());
 
     //determine the shape of the modules
@@ -123,36 +123,12 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
     return ret;
 }
 
-void sequence_pair_t::print() {
-    for(int i = 0; i<chip_t::get_total_module_n(); ++i){
-        cout<< "seq# "<<i<<":";
-        if(sequence_pair_t::seq_is_fix[i]){
-            cout<<"fixed, ";
-        }
-        else{
-            cout<< "soft, ";
-        }
-        cout<< "shape : ";
-        cout<< this->modules_wh[i]<<endl;
-    }
-    cout<<"H: {";
-    for(int i = 0; i<this->h_sequence.size(); ++i){
-        cout<< h_sequence[i]<<" ";
-    }
-    cout<<"}"<<endl;
-    cout<<"V: {";
-    for(int i = 0; i<this->v_sequence.size(); ++i){
-        cout<< v_sequence[i]<<" ";
-    }
-    cout<<"}"<<endl;
-}
-
-bool sequence_pair_t::to_fp() {
+pair<bool, floorplan_t> sequence_pair_t::get_fp() {
     build_constraint_graph();
     bool success = false;
     pair<bool, vector<vec2d_t>> res;
     int overlap_v = 0, overlap_h = 0;
-    for(int i = 0; i<4; ++i){
+    for(int i = 0; i<=max_overlap; ++i){
         pair<bool, vector<vec2d_t>> presolve_res = this->find_position(overlap_h, overlap_v);
         if(presolve_res.first){
             res = presolve_res;
@@ -166,12 +142,15 @@ bool sequence_pair_t::to_fp() {
             overlap_h++;
         }
     }
+    floorplan_t fp;
     if(success){
-        this->sequence_pair_validation(res);
-        return true;
+        cout<< "SUCCESS"<<endl;
+        this->sequence_pair_validation(res.second);
+        floorplan_t fp = this->place(res.second);
+        return {true, fp};
     }
     else{
-        return false;
+        return {false, fp};
     }
 }
 
@@ -314,19 +293,18 @@ void sequence_pair_t::set_fix_sequence() {
     }
 }
 
-void sequence_pair_t::sequence_pair_validation(pair<bool, vector<vec2d_t>> res) {
+void sequence_pair_t::sequence_pair_validation(vector<vec2d_t> res) {
     vector<std::pair<rect_t, std::string>> rects;
-    for(int i = 0; i<res.second.size(); ++i){
+    for(int i = 0; i<res.size(); ++i){
         if(this->seq_is_fix[i]){
-            rects.push_back({{res.second[i], this->modules_wh[i]}, "f"+ std::to_string(i)});
+            rects.push_back({{res[i], this->modules_wh[i]}, "f"+ std::to_string(i)});
         }
         else{
-            rects.push_back({{res.second[i], this->modules_wh[i]}, "s"+std::to_string(i)});
-            //this->fp.place_soft_module(i, {res.second[i]}, {this->modules_wh[i]});
+            rects.push_back({{res[i], this->modules_wh[i]}, "s"+std::to_string(i)});
         }
     }
     visualizer_t::show_fp_rect_no_border(rects);
-    fgetc(stdin);
+
 }
 
 void sequence_pair_t::build_graph() {
@@ -364,3 +342,37 @@ void sequence_pair_t::build_graph() {
     }
 }
 
+floorplan_t sequence_pair_t::place(vector<vec2d_t> res) {
+
+    floorplan_t fp;
+    cout<< res.size()<<endl;
+    for(int i = 0; i<res.size(); ++i){
+        if(seq_is_fix[i]){ continue;}
+        bool success = fp.place_soft_module(i, {res[i]}, {modules_wh[i]});
+    }
+    return fp;
+}
+
+void sequence_pair_t::print() {
+    for(int i = 0; i<chip_t::get_total_module_n(); ++i){
+        cout<< "seq# "<<i<<":";
+        if(sequence_pair_t::seq_is_fix[i]){
+            cout<<"fixed, ";
+        }
+        else{
+            cout<< "soft, ";
+        }
+        cout<< "shape : ";
+        cout<< this->modules_wh[i]<<endl;
+    }
+    cout<<"H: {";
+    for(int i = 0; i<this->h_sequence.size(); ++i){
+        cout<< h_sequence[i]<<" ";
+    }
+    cout<<"}"<<endl;
+    cout<<"V: {";
+    for(int i = 0; i<this->v_sequence.size(); ++i){
+        cout<< v_sequence[i]<<" ";
+    }
+    cout<<"}"<<endl;
+}

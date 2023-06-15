@@ -6,7 +6,7 @@
 #define INC_2023PD_GENETIC_ALGO_T_H
 
 #include "polygon/polygon_forest_t.h"
-#include "process/floorplanning_t.h"
+#include "process/floorplan_t.h"
 #include "static_data/chip_t.h"
 #include "quadratic/quadratic_t.h"
 #include "sequence_pair_t.h"
@@ -19,16 +19,16 @@
 
 class solver_t {
     sequence_pair_t sequence_pair;
-    vector<floorplanning_t> floorplannings;
-    floorplanning_t best_fp;
+    vector<floorplan_t> floorplannings;
+    floorplan_t best_fp;
 public:
     void generate_seq_rand();
     //essential functions
     solver_t();
     void run();
     void print_info(bool);
-    floorplanning_t get_fp(size_t);
-    floorplanning_t& get_best_fp();
+    floorplan_t get_fp(size_t);
+    floorplan_t& get_best_fp();
 };
 
 

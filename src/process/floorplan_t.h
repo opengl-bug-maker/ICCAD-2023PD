@@ -2,8 +2,8 @@
 // Created by 林士傑 on 2023/3/27.
 //
 
-#ifndef INC_2023PD_FLOORPLANNING_T_H
-#define INC_2023PD_FLOORPLANNING_T_H
+#ifndef INC_2023PD_floorplan_t_H
+#define INC_2023PD_floorplan_t_H
 #include <vector>
 #include <unordered_map>
 #include "polygon/polygon_forest_t.h"
@@ -24,7 +24,7 @@ enum fp_status_t {
     fail_on_placing_soft_modules = 2,
     success_to_place_all_modules = 3
 };
-class floorplanning_t {
+class floorplan_t {
     static unordered_map<const module_t*, int> module_to_bd_soft_rect_i_m; // for evaluation
     static unordered_map<const module_t*, int> module_to_bd_fixed_rect_i_m; // for evaluation
 
@@ -46,7 +46,7 @@ class floorplanning_t {
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
 
 public:
-    floorplanning_t();
+    floorplan_t();
     static  uint32_t min_w_h[2];
     static void init();
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
@@ -57,7 +57,7 @@ public:
 
     void cal_soft_deg();
     //for quadratic
-    pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
+    //pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
     bool place_soft_module(size_t i, vec2d_t lower_left_pos, vec2d_t size);
 
     //get set
@@ -76,4 +76,4 @@ public:
 };
 
 
-#endif //INC_2023PD_FLOORPLANNING_T_H
+#endif //INC_2023PD_floorplan_t_H

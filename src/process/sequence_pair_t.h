@@ -11,7 +11,7 @@
 #include "utilities/vec2d_t.h"
 #include"static_data/soft_module_t.h"
 #include"static_data/fixed_module_t.h"
-#include "floorplanning_t.h"
+#include "floorplan_t.h"
 #include "edge_t.h"
 #include "ILP_solver_t.h"
 using std::vector;
@@ -34,7 +34,8 @@ public:
     static int sequence_n;
     static unordered_map<const module_t*, int> soft_module_to_id_m;
     static unordered_map<const module_t*, int> fix_module_to_id_m;
-    floorplanning_t fp;
+    int max_overlap;
+    //floorplan_t fp;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_pos;
     pair<bool, vector<vec2d_t>> find_position(int,int);
@@ -42,9 +43,10 @@ public:
     sequence_pair_t();
 
     //essential
-    bool to_fp();
+    pair<bool, floorplan_t> get_fp();
     void seq_randomize();
     void set_fix_sequence();
+    floorplan_t place(vector<vec2d_t>);
 
     //get & set
     void set_v(std::vector<int>);
@@ -54,7 +56,7 @@ public:
 
     //debug
     void print();
-    void sequence_pair_validation(pair<bool, vector<vec2d_t>>);
+    void sequence_pair_validation(vector<vec2d_t>);
 
 };
 

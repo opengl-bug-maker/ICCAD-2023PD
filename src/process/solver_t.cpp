@@ -17,11 +17,11 @@ void solver_t::print_info(bool) {
     return;
 }
 
-floorplanning_t solver_t::get_fp(size_t) {
-    return floorplanning_t();
+floorplan_t solver_t::get_fp(size_t) {
+    return floorplan_t();
 }
 
-floorplanning_t& solver_t::get_best_fp() {
+floorplan_t& solver_t::get_best_fp() {
     return best_fp;
 }
 
