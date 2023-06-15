@@ -19,8 +19,8 @@ private:
     static int max_x;
     static int max_y;
     static std::string name;
-    static void join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts);
-    static void gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts);
+    static void join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts, std::string window_name);
+    static void gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts, std::string window_name);
 };
 
 

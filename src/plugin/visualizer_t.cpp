@@ -20,14 +20,14 @@ void my_out(const std::string& str){
 #endif
 }
 
-void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts){
+void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts, std::string window_name){
     srand(time(NULL));
     int width = visualizer_t::max_x;
     int height = visualizer_t::max_y;
     double canvas_size = 600.0f * double(max_x) / double(max_y);
     FILE* pipe = popen(true ? "gnuplot -persist" : "gnuplot", "w");
     fputs(("set term qt size " + std::to_string(canvas_size) + ",600\n").c_str(), pipe);
-    fputs(("set term qt title \"" + visualizer_t::name + "\"\n").c_str(), pipe);
+    fputs(("set term qt title \"" + window_name + "\"\n").c_str(), pipe);
     fputs("set grid\n", pipe);
     fputs("set mxtics 5\n", pipe);
     fputs("set mytics 5\n", pipe);
@@ -51,9 +51,9 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
         str += " \n";
         fputs(str.c_str(), pipe);
 
-        const uint32_t r = (rand() % 0xFF);
-        const uint32_t g = (rand() % 0xFF);
-        const uint32_t b = (rand() % 0xFF);
+        const uint32_t r = (rand() % 0xBF);
+        const uint32_t g = (rand() % 0xBF);
+        const uint32_t b = (rand() % 0xBF);
         const uint32_t rgb = r << 16 | g << 8 | b;
         stream.str("");
         stream << "0x"
@@ -74,11 +74,10 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
     if(pipe != nullptr) { pclose(pipe); }
 
     //reset window name
-    visualizer_t::set_window_name("plotting by gnuplot");
 }
 
-void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts){
-    std::thread th(visualizer_t::gnup_th, polys_pts);
+void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts, std::string window_name){
+    std::thread th(visualizer_t::gnup_th, polys_pts, window_name);
     th.detach();
     return;
 }
@@ -95,7 +94,8 @@ void visualizer_t::show_fp(const std::vector<bounding_rectangle_t>& bd_rect) {
         bd_rect_pt.push_back({std::vector<vec2d_t>{{lx, ly}, {rx, ly}, {rx, uy}, {lx,uy}},
                               i.getLinkModule()->getName()});
     }
-    join(bd_rect_pt);
+    join(bd_rect_pt, visualizer_t::name);
+    visualizer_t::set_window_name("Gnuplot window");
     return ;
 }
 
@@ -114,7 +114,8 @@ void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd
                               i.getLinkModule()->getName()});
     }
     visualizer_t::set_window_name(window_name);
-    join(bd_rect_pt);
+    join(bd_rect_pt, visualizer_t::name);
+    visualizer_t::set_window_name("Gnuplot window");
 }
 
 void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> & rect_pair, const std::string& window_name) {
@@ -132,7 +133,8 @@ void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, st
                               i.second});
     }
     visualizer_t::set_window_name(window_name);
-    join(bd_rect_pt);
+    join(bd_rect_pt, visualizer_t::name);
+    visualizer_t::set_window_name("Gnuplot window");
 }
 
 void visualizer_t::set_window_name(const std::string& name) {
