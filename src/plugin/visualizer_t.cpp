@@ -12,7 +12,7 @@
 
 int visualizer_t::max_x = 0;
 int visualizer_t::max_y = 0;
-std::string visualizer_t::name = "plotting by gnuplot";
+std::string visualizer_t::name = "Gnuplot window";
 
 void my_out(const std::string& str){
 #ifdef USING_VIS
@@ -27,7 +27,7 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
     double canvas_size = 600.0f * double(max_x) / double(max_y);
     FILE* pipe = popen(true ? "gnuplot -persist" : "gnuplot", "w");
     fputs(("set term qt size " + std::to_string(canvas_size) + ",600\n").c_str(), pipe);
-    fputs(("set term qt title " + visualizer_t::name + "\n").c_str(), pipe);
+    fputs(("set term qt title \"" + visualizer_t::name + "\"\n").c_str(), pipe);
     fputs("set grid\n", pipe);
     fputs("set mxtics 5\n", pipe);
     fputs("set mytics 5\n", pipe);
