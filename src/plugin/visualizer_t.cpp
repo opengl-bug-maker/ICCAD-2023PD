@@ -12,6 +12,7 @@
 
 int visualizer_t::max_x = 0;
 int visualizer_t::max_y = 0;
+std::string visualizer_t::name = "plotting by gnuplot";
 
 void my_out(const std::string& str){
 #ifdef USING_VIS
@@ -25,8 +26,8 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
     int height = visualizer_t::max_y;
     double canvas_size = 600.0f * double(max_x) / double(max_y);
     FILE* pipe = popen(true ? "gnuplot -persist" : "gnuplot", "w");
-//    fputs("set title \"A!!\"\n", pipe);
     fputs(("set term qt size " + std::to_string(canvas_size) + ",600\n").c_str(), pipe);
+    fputs(("set term qt title " + visualizer_t::name + "\n").c_str(), pipe);
     fputs("set grid\n", pipe);
     fputs("set mxtics 5\n", pipe);
     fputs("set mytics 5\n", pipe);
@@ -71,6 +72,9 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
 
     fputs("plot 0\n", pipe);
     if(pipe != nullptr) { pclose(pipe); }
+
+    //reset window name
+    visualizer_t::set_window_name("plotting by gnuplot");
 }
 
 void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts){
@@ -95,7 +99,7 @@ void visualizer_t::show_fp(const std::vector<bounding_rectangle_t>& bd_rect) {
     return ;
 }
 
-void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd_rect){
+void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd_rect, const std::string& window_name){
     visualizer_t::max_x = chip_t::get_width();
     visualizer_t::max_y = chip_t::get_height();
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bd_rect_pt;
@@ -109,10 +113,11 @@ void visualizer_t::show_fp_no_border(const std::vector<bounding_rectangle_t>& bd
         bd_rect_pt.push_back({std::vector<vec2d_t>{{lx, ly}, {rx, ly}, {rx, uy}, {lx,uy}},
                               i.getLinkModule()->getName()});
     }
+    visualizer_t::set_window_name(window_name);
     join(bd_rect_pt);
 }
 
-void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> & rect_pair) {
+void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> & rect_pair, const std::string& window_name) {
     visualizer_t::max_x = chip_t::get_width();
     visualizer_t::max_y = chip_t::get_height();
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bd_rect_pt;
@@ -126,5 +131,10 @@ void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, st
         bd_rect_pt.push_back({std::vector<vec2d_t>{{lx, ly}, {rx, ly}, {rx, uy}, {lx,uy}},
                               i.second});
     }
+    visualizer_t::set_window_name(window_name);
     join(bd_rect_pt);
+}
+
+void visualizer_t::set_window_name(const std::string& name) {
+    visualizer_t::name = name;
 }
