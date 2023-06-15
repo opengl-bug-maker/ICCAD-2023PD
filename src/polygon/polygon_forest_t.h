@@ -1,18 +1,18 @@
 //
-// Created by 林士傑 on 2023/3/27.
+// Created by 林士傑 on 2023/6/9.
 //
 
-#ifndef INC_2023PD_POLYGON_FOREST_T_H
-#define INC_2023PD_POLYGON_FOREST_T_H
+#ifndef ICCAD2023PD_POLYGON_FOREST_T_H
+#define ICCAD2023PD_POLYGON_FOREST_T_H
 
 #include <vector>
-#include "utilities/quadtree_t.h"
+#include <memory>
+#include "utilities/lenf_quadtree_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "polygon/polygon_t.h"
-#include <memory>
+
 
 class polygon_forest_t {
-    quadtree_t<polygon_t> quadtree;
     std::vector<std::shared_ptr<polygon_t>> polygons;
     void test_without_collision();
 public:
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //INC_2023PD_POLYGON_FOREST_T_H
+#endif //ICCAD2023PD_POLYGON_FOREST_T_H
