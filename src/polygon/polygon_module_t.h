@@ -1,5 +1,5 @@
 //
-// Modify by lkj on 2023/5/7.
+// Created by 林士傑 on 2023/6/9.
 //
 
 #ifndef ICCAD2023PD_POLYGON_MODULE_T_H
@@ -8,29 +8,22 @@
 #include <map>
 #include <vector>
 #include <functional>
-#include "polygon/polygon_overlap_area_t.h"
+#include <memory>
+#include <set>
 #include "utilities/bounding_rectangle_t.h"
 
-class polygon_t;
+class polygon_module_t : public box_t{
+public:
+    bounding_rectangle_t module_rect;
 
-class polygon_module_t : public box_t {
-    friend class polygon_overlap_area_t;
+    uint32_t max_area;
+    std::map<std::shared_ptr<polygon_module_t>, uint32_t> area_from_where;
+    std::vector<std::shared_ptr<polygon_module_t>> connections;
 
-
-    const bounding_rectangle_t& module_rect;
-
-    //store overlapping areas for this polygon
-    std::vector<std::reference_wrapper<polygon_overlap_area_t>> overlap_areas;
-
-    const uint32_t demand_area;
-    uint32_t free_to_share_area, shared_area;
-
-    //return self neighbor of specific overlapping area
-    std::vector<std::reference_wrapper<polygon_module_t>> get_neighbor(const polygon_overlap_area_t&) const;
-
-    std::pair<bool, uint32_t> request_area(const uint32_t& required_area);
+    bool if_found = false;
 
 public:
+
     explicit polygon_module_t(const bounding_rectangle_t& bounding_rect);
 
     polygon_module_t(const polygon_module_t& polygon_module);
@@ -40,7 +33,22 @@ public:
 
     const bounding_rectangle_t& get_module_bounding_rectangle() const;
 
-    bool connect(polygon_module_t& module);
+    void add_connection(const std::shared_ptr<polygon_module_t>& connection);
+
+    void set_area(std::set<std::shared_ptr<polygon_module_t>> area_keys);
+
+    void fix_max_area(int area);
+
+    std::map<std::shared_ptr<polygon_module_t>, uint32_t> set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, uint32_t area);
+
+    void set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, uint32_t> &areaFromWhere);
+
+    const std::map<std::shared_ptr<polygon_module_t>, uint32_t>& get_area_from_where();
+
+    void fix_area_reset();
+
+    int fix_area(std::shared_ptr<polygon_module_t> robber, int value);
+
 };
 
 
