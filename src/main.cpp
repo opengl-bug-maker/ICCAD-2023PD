@@ -7,58 +7,11 @@
 #include "output_data/output_utility_t.h"
 
 
-#include "polygon/lenf_unit.h"
-#include "utilities/lenf_quadtree_t.h"
-#include "static_data/soft_module_t.h"
-#include "polygon/lenf_polygon_t.h"
-#include "polygon/lenf_pf_t.h"
-
 int main(/*arg*/){
-
-//    lenf_quadtree_t<lenf_unit> tree(rect_t(vec2d_t(0,0), vec2d_t(20, 20)));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(0,0), vec2d_t(5, 5))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(6,6), vec2d_t(2, 2))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(8,0), vec2d_t(5, 5))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(0,7), vec2d_t(4, 4))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(0,0), vec2d_t(2, 2))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(1,1), vec2d_t(2, 2))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(0,1), vec2d_t(2, 2))).first));
-//    tree.add_value(lenf_unit(soft_module_t::void_module.make_bd(rect_t(vec2d_t(1,0), vec2d_t(2, 2))).first));
-//    tree.print();
-
-//    return 0;
-
     std::fstream input_file;
     std::fstream output_file;
 
-    chip_t::file_input("../../testcase/custom-input2.txt");//fstream
-
-    lenf_polygon_t polygon(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 0), vec2d_t(5, 5))).first);
-    lenf_polygon_t polygon1(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(4, 4), vec2d_t(5, 5))).first);
-    lenf_polygon_t polygon2(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(4, 0), vec2d_t(5, 5))).first);
-    lenf_polygon_t polygon3(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 4), vec2d_t(5, 5))).first);
-
-//    polygon1.merge_polygon(polygon);
-//    polygon2.merge_polygon(polygon1);
-//    polygon3.merge_polygon(polygon2);
-//    polygon3.print();
-
-
-    lenf_pf_t lenf_pt0;
-    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(7, 2), vec2d_t(4, 5))).first);
-    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 2), vec2d_t(4, 5))).first);
-    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 0), vec2d_t(5, 4))).first);
-    lenf_pt0.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 5), vec2d_t(5, 4))).first);
-    lenf_pt0.get_polygons()[0].print();
-
-    lenf_pf_t lenf_pt1;
-    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(0, 2), vec2d_t(4, 5))).first);
-    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(7, 2), vec2d_t(4, 5))).first);
-    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 0), vec2d_t(5, 4))).first);
-    lenf_pt1.add_rect(chip_t::get_soft_modules()[3]->make_bd(rect_t(vec2d_t(3, 5), vec2d_t(5, 4))).first);
-    lenf_pt1.get_polygons()[0].print();
-
-    return 0;
+    chip_t::file_input("");//fstream
 
     floorplanning_t::init();
     solver_t solver;
