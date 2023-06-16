@@ -62,8 +62,8 @@ void sequence_pair_t::init() {
 }
 
 sequence_pair_t::sequence_pair_t() {
-    max_overlap = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width())));
-
+    max_overlap = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width()))*0.5);
+    max_distance = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width()))*0,2);
     v_sequence.resize(chip_t::get_total_module_n());
     h_sequence.resize(chip_t::get_total_module_n());
     modules_wh.resize(chip_t::get_total_module_n());
@@ -142,15 +142,14 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
             overlap_h++;
         }
     }
-    floorplan_t fp;
     if(success){
         cout<< "SUCCESS"<<endl;
-        this->sequence_pair_validation(res.second);
-        floorplan_t fp = this->place(res.second);
-        return {true, fp};
+        //this->sequence_pair_validation(res.second);
+        pair<bool, floorplan_t> valid_fp = this->place_all_modules(res.second);
+        return valid_fp;
     }
     else{
-        return {false, fp};
+        return {false, floorplan_t()};
     }
 }
 
@@ -174,14 +173,14 @@ void sequence_pair_t::build_constraint_graph() {
             }
         }
     }
-    cout<<"horizontal constraint graph : "<<endl;
-    for(auto& e:constraint_graph_h){
-        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
-    }
-    cout<<"vertical constraint graph : "<<endl;
-    for(auto& e:constraint_graph_v){
-        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
-    }
+//    cout<<"horizontal constraint graph : "<<endl;
+//    for(auto& e:constraint_graph_h){
+//        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
+//    }
+//    cout<<"vertical constraint graph : "<<endl;
+//    for(auto& e:constraint_graph_v){
+//        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
+//    }
 }
 pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int overlap_v) {
     int constraint_n = this->constraint_graph_h.size()+this->constraint_graph_v.size()+chip_t::get_fixed_modules().size()*2;
@@ -303,7 +302,7 @@ void sequence_pair_t::sequence_pair_validation(vector<vec2d_t> res) {
             rects.push_back({{res[i], this->modules_wh[i]}, "s"+std::to_string(i)});
         }
     }
-    visualizer_t::show_fp_rect_no_border(rects);
+    visualizer_t::show_fp_rect_no_border(rects, "SQP");
 
 }
 
@@ -342,15 +341,20 @@ void sequence_pair_t::build_graph() {
     }
 }
 
-floorplan_t sequence_pair_t::place(vector<vec2d_t> res) {
+pair<bool, floorplan_t> sequence_pair_t::place_all_modules(vector<vec2d_t> res) {
 
     floorplan_t fp;
-    cout<< res.size()<<endl;
+    bool all_module_placed = true;
     for(int i = 0; i<res.size(); ++i){
         if(seq_is_fix[i]){ continue;}
-        bool success = fp.place_soft_module(i, {res[i]}, {modules_wh[i]});
+        //bool success = fp.place_soft_module(i, res[i], modules_wh[i]);
+        bool success = place_8d(fp,i, res[i], modules_wh[i]);
+        if(success==false){
+            all_module_placed = false;
+            break;
+        }
     }
-    return fp;
+    return {all_module_placed, fp};
 }
 
 void sequence_pair_t::print() {
@@ -376,3 +380,122 @@ void sequence_pair_t::print() {
     }
     cout<<"}"<<endl;
 }
+
+bool sequence_pair_t::place_8d(floorplan_t& fp,int id,vec2d_t res, vec2d_t wh) {
+
+    const int dir_x[8] = {0,0,1,-1,1,1,-1,-1};
+    const int dir_y[8] = {1,-1,0,0,1,-1,1,-1};
+    bool finish = false;
+    for(int i = 0; i<=max_distance&&!finish; ++i){
+        for(int j = 0; j<8 && !finish; ++j){
+            for(int k = 0; k<8 && !finish; ++k){
+                int nx = res.get_x()+dir_x[j]*i, ny = res.get_y()+dir_y[k]*i;
+                if(nx<0||nx>=chip_t::get_width()||ny<0||ny>=chip_t::get_height()){break;}
+                bool success = fp.place_soft_module(id, {nx, ny}, wh);
+                if(success){finish = true;}
+            }
+        }
+    }
+    return finish;
+}
+
+void sequence_pair_t::swap_v(int a,  int b) {
+    std::swap(this->v_sequence[a], this->v_sequence[b]);
+}
+
+void sequence_pair_t::swap_h(int a, int b) {
+    std::swap(this->h_sequence[a], this->h_sequence[b]);
+}
+
+void sequence_pair_t::print_inline() {
+    cout<<"[";
+    for(int i = 0; i<this->v_sequence.size(); ++i){
+        cout<< v_sequence[i];
+        if(i!=this->v_sequence.size()-1){cout<<", ";}
+    }
+    cout<<"] ";
+    cout<<"[";
+    for(int i = 0; i<this->h_sequence.size(); ++i){
+        cout<< h_sequence[i];
+        if(i!=this->h_sequence.size()-1){cout<<", ";}
+    }
+
+    cout<<"]"<<endl;
+}
+
+
+void sequence_pair_enumerator_t::set_seed_need_n(int n) {
+    this->seed_need_n = n;
+}
+
+void sequence_pair_enumerator_t::fill_seeds(int x) {
+    if(seeds.size()>=seed_need_n){return;}
+    if(x==seed.size()){
+        this->seeds.push_back(this->seed);
+        return;
+    }
+    for (int i = x; i < seed.size(); ++i) {
+        std::swap(seed[x], seed[i]);
+        fill_seeds(x + 1);
+        std::swap(seed[x], seed[i]);
+    }
+}
+
+sequence_pair_enumerator_t::sequence_pair_enumerator_t() {
+    this->seed.resize(sequence_pair_t::sequence_n);
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        seed[i] = i;
+    }
+    seed_need_n = 0;
+    cout<< "seq got shape: "<<endl;
+    for(int i = 0; i<seq.modules_wh.size(); ++i){
+        cout<< i<<": "<<seq.modules_wh[i].get_x()<<" "<<seq.modules_wh[i].get_y()<<endl;
+    }
+}
+
+void sequence_pair_enumerator_t::generate_valid_seq(int x) {
+    int continuous_v_fail = 0;
+    int continuous_h_fail = 0;
+    const int tolerance_v = 5;
+    const int jump_distance = 50;
+
+    this->valid_seq.clear();
+    for(int i = 0; i<seeds.size(); ++i){
+        bool continuous_fail = false;
+        for(int j = 0; j<seeds.size(); ++j){
+            seq.set_h(seeds[i]);seq.set_v(seeds[j]);
+            pair<bool,floorplan_t> success_fp = seq.get_fp(); //try if the sequence pair could be a legal fp
+            if(success_fp.first==false){continue;}
+
+            this->valid_seq.push_back(seq);
+            if(valid_seq.size()>=x){return;}
+
+            if(success_fp.first==false){continuous_v_fail++;}
+
+//            if(continuous_v_fail==tolerance_v){
+//                continuous_fail = true;
+//                break;
+//            }
+        }
+        continuous_v_fail = 0;
+//        if(continuous_fail){
+//            continuous_h_fail++;
+//        }
+//        if(continuous_h_fail){
+//            continuous_h_fail++;
+//            i+=jump_distance;
+//        }
+    }
+}
+
+void sequence_pair_enumerator_t::print_all_valid_seq() {
+    for(auto& valid_sequence:this->valid_seq){
+        valid_sequence.print();
+    }
+}
+
+vector<sequence_pair_t> sequence_pair_enumerator_t::get_all_valid_seq() {
+    return this->valid_seq;
+}
+
+

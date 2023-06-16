@@ -32,3 +32,7 @@ solver_t::solver_t() {
 void solver_t::generate_seq_rand() {
 
 }
+
+
+int solver_t::find_valid_seq_pair(int n) {
+}

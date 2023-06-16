@@ -65,13 +65,14 @@ floorplan_t::floorplan_t() {
         bounding_rectangle_t bd = fixed_modules[i]->make_bd();
         floorplan_t::module_to_bd_fixed_rect_i_m[fixed_modules[i]] = i;
         fixed_rects.push_back(bd);
-        bool success = polygons.add_rect(fixed_rects[i]);
+        bool success = polygon_forest.add_rect(fixed_rects[i]);
         if ( success== false) {  //if the fixed modules can't be placed, must be wrong.
             fp_status = fail_on_placing_fixed_modules;
             cout << "fail on placing fixed modules" << endl;
             return;
         }
     }
+
 
     cal_soft_deg();
     score = fp_evaluator_t::get_score(*this);
@@ -175,7 +176,11 @@ bool floorplan_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t siz
 	bool success = false;
 
 	if (result.second == true) {
-		success = polygons.add_rect(target_bd);
+        //cout<< target_rect.get_left_lower().get_x()<<" "<<target_rect.get_left_lower().get_y()<<" "<<target_rect.get_size().get_x()<<" "<<target_rect.get_size().get_y()<<endl;
+		success = polygon_forest.add_rect(target_bd);
+        //cout<<success<<endl;
+        int a = 5;
+        //cout<< success<<endl;
 	}
 	if (success) {
 		soft_is_placed[i] = true;
@@ -228,20 +233,6 @@ vector<vec2d_t> floorplan_t::find_w_h(uint32_t area){
     return ret;
 }
 
-//pair<vector<bounding_rectangle_t>, vector<bool>> floorplan_t::prepare_quad()  {
-//    vector<bounding_rectangle_t> bd_rects;
-//    vector<bool> is_placed;
-//    for(int i = 0; i<fixed_rects.size(); ++i){
-//        bd_rects.push_back(fixed_rects[i]);
-//        is_placed.push_back(true);
-//    }
-//    for(int i = 0; i<soft_rects.size(); ++i){
-//        bd_rects.push_back(soft_rects[i]);
-//        is_placed.push_back(soft_is_placed[i]);
-//    }
-//    return {bd_rects, is_placed};
-//}
-
 
 const float floorplan_t::get_score() const{
     return score;
@@ -263,9 +254,10 @@ void floorplan_t::GUI_validation() {
         }
     }
     bd.insert(bd.end(), placed_soft.begin(), placed_soft.end());
+    visualizer_t::set_window_name("fp");
     visualizer_t::show_fp(bd);
-    std::cout<<"Press any key to continue"<<std::endl;
-    fgetc(stdin);
+    //std::cout<<"Press any key to continue"<<std::endl;
+    //fgetc(stdin);
 }
 
 void floorplan_t::cal_soft_deg() {
@@ -280,8 +272,8 @@ void floorplan_t::cal_soft_deg() {
     }
 }
 
-polygon_forest_t &floorplan_t::get_polygon_forest() {
-    return this->polygons;
+polygon_forest_t floorplan_t::get_polygon_forest() {
+    return this->polygon_forest;
 }
 
 const vector<bool> & floorplan_t::get_soft_is_placed() const{

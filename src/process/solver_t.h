@@ -27,6 +27,8 @@ public:
     solver_t();
     void run();
     void print_info(bool);
+    vector<sequence_pair_t> valid_sequence_pairs;
+    int find_valid_seq_pair(int); //number of valid seq
     floorplan_t get_fp(size_t);
     floorplan_t& get_best_fp();
 };

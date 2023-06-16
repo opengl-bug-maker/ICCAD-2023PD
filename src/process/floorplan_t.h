@@ -13,6 +13,7 @@
 #include"static_data/soft_module_t.h"
 #include "plugin/visualizer_t.h"
 
+
 //for debug
 #include<iostream>
 using std::vector;
@@ -34,8 +35,8 @@ class floorplan_t {
     vector<bool> soft_is_placed;
     vector<uint32_t> soft_deg;
 
-    // to keep fp valid (the area restriction)
-    polygon_forest_t polygons;
+
+
 
     // evaluation & output
     float score;
@@ -46,25 +47,23 @@ class floorplan_t {
     float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
 
 public:
-    floorplan_t();
     static  uint32_t min_w_h[2];
     static void init();
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     static vector<vec2d_t> find_w_h(uint32_t area);
+    floorplan_t();
 
     vector<bounding_rectangle_t> soft_rects;
     vector<bounding_rectangle_t> fixed_rects;
-
+    polygon_forest_t polygon_forest; // to keep fp valid (the area restriction)
     void cal_soft_deg();
-    //for quadratic
-    //pair<vector<bounding_rectangle_t>, vector<bool>> prepare_quad();
     bool place_soft_module(size_t i, vec2d_t lower_left_pos, vec2d_t size);
 
     //get set
     const vector<bool>& get_soft_is_placed() const;
     const size_t get_soft_rect_n() const;
     const size_t get_fixed_rect_n() const;
-    polygon_forest_t& get_polygon_forest();
+    polygon_forest_t get_polygon_forest();
     float get_wirelength();
     vector<int> get_unplaced_id();
     const vector<uint32_t>& get_soft_deg();

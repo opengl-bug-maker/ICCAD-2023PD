@@ -17,6 +17,7 @@
 using std::vector;
 using std::unordered_map;
 
+class sequence_pair_enumerator_t;
 class sequence_pair_t{
     static vector<edge_t> connections;
     static vector<vector<int>> connectivities;
@@ -35,6 +36,7 @@ public:
     static unordered_map<const module_t*, int> soft_module_to_id_m;
     static unordered_map<const module_t*, int> fix_module_to_id_m;
     int max_overlap;
+    int max_distance;
     //floorplan_t fp;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_pos;
@@ -46,21 +48,42 @@ public:
     pair<bool, floorplan_t> get_fp();
     void seq_randomize();
     void set_fix_sequence();
-    floorplan_t place(vector<vec2d_t>);
+    bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t);
+    pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
 
     //get & set
     void set_v(std::vector<int>);
     void set_h(std::vector<int>);
+    void swap_v(int,int);
+    void swap_h(int,int);
     std::vector<int> get_v();
     std::vector<int> get_h();
 
     //debug
     void print();
+    void print_inline();
     void sequence_pair_validation(vector<vec2d_t>);
 
 };
 
 
+class sequence_pair_enumerator_t{
+    int seed_need_n = 0; //how many seed do we need
 
+public:
+    vector<int> seed; //for permutation
+    sequence_pair_enumerator_t();
+    vector<sequence_pair_t> valid_seq; // (# of seeds)^2
+    vector<vector<int>> seeds; //all seeds
+    sequence_pair_t seq; //pop one sequence
+    void fill_seeds(int n);
+    void set_seed_need_n(int n);
+    void generate_valid_seq(int x);
+    void print_all_valid_seq();
+    void change_size();
+
+    //set get
+    vector<sequence_pair_t> get_all_valid_seq();
+};
 
 #endif //ICCAD2023PD_SEQUENCE_PAIR_T_H
