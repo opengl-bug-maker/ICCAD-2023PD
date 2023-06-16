@@ -62,11 +62,11 @@ void polygon_module_t::fix_max_area(int area) {
 //    std::cout << this << " : " << this->max_area << " : " << area << "\n";
 }
 
-void polygon_module_t::add_connection(const std::shared_ptr<polygon_module_t> &connection) {
+void polygon_module_t::add_connection(polygon_module_t* connection) {
     this->connections.push_back(connection);
 }
 
-void polygon_module_t::set_area(std::set<std::shared_ptr<polygon_module_t>> area_keys) {
+void polygon_module_t::set_area(std::set<polygon_module_t*> area_keys) {
     if (area_keys.size() == 1){
         //todo maybe not put this
         this->area_from_where[*area_keys.begin()] = this->module_rect.getLinkModule()->get_area();
@@ -80,8 +80,8 @@ void polygon_module_t::set_area(std::set<std::shared_ptr<polygon_module_t>> area
 //    }
 }
 
-std::map<std::shared_ptr<polygon_module_t>, int32_t> polygon_module_t::set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, int32_t area) {
-    std::map<std::shared_ptr<polygon_module_t>, int32_t> copy;
+std::map<polygon_module_t*, int32_t> polygon_module_t::set_overlap_take(polygon_module_t* requester, int32_t area) {
+    std::map<polygon_module_t*, int32_t> copy;
     copy[requester] = 0;
     for (auto item : this->area_from_where) {
         copy[item.first] = 0;
@@ -95,11 +95,11 @@ std::map<std::shared_ptr<polygon_module_t>, int32_t> polygon_module_t::set_overl
     return copy;
 }
 
-void polygon_module_t::set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, int32_t> &areaFromWhere) {
+void polygon_module_t::set_area_from_where(const std::map<polygon_module_t*, int32_t> &areaFromWhere) {
     area_from_where = areaFromWhere;
 }
 
-const std::map<std::shared_ptr<polygon_module_t>, int32_t>& polygon_module_t::get_area_from_where() {
+const std::map<polygon_module_t*, int32_t>& polygon_module_t::get_area_from_where() {
     return this->area_from_where;
 }
 
@@ -107,7 +107,7 @@ void polygon_module_t::fix_area_reset() {
     this->area_from_where.begin()->second = 0;
 }
 
-int polygon_module_t::fix_area(std::shared_ptr<polygon_module_t> robber, int value) {
+int polygon_module_t::fix_area(polygon_module_t* robber, int value) {
     this->if_found = true;
     if (this->area_from_where.find(robber) == this->area_from_where.end()){
         this->if_found = false;
@@ -142,6 +142,15 @@ int polygon_module_t::fix_area(std::shared_ptr<polygon_module_t> robber, int val
     this->area_from_where[robber] -= need_area;
     this->if_found = false;
     return need_area;
+}
+
+polygon_module_t::~polygon_module_t() {
+//    for (auto& area : this->area_from_where){
+//        auto& f = area.first;
+//    }
+//    for (auto& connection : this->connections){
+//        connection.reset();
+//    }
 }
 
 //bool polygon_module_t::connect(polygon_module_t &module) {
