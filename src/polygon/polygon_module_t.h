@@ -16,8 +16,8 @@ class polygon_module_t : public box_t{
 public:
     bounding_rectangle_t module_rect;
 
-    uint32_t max_area;
-    std::map<std::shared_ptr<polygon_module_t>, uint32_t> area_from_where;
+    int32_t max_area;
+    std::map<std::shared_ptr<polygon_module_t>, int32_t> area_from_where;
     std::vector<std::shared_ptr<polygon_module_t>> connections;
 
     bool if_found = false;
@@ -39,11 +39,11 @@ public:
 
     void fix_max_area(int area);
 
-    std::map<std::shared_ptr<polygon_module_t>, uint32_t> set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, uint32_t area);
+    std::map<std::shared_ptr<polygon_module_t>, int32_t> set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, int32_t area);
 
-    void set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, uint32_t> &areaFromWhere);
+    void set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, int32_t> &areaFromWhere);
 
-    const std::map<std::shared_ptr<polygon_module_t>, uint32_t>& get_area_from_where();
+    const std::map<std::shared_ptr<polygon_module_t>, int32_t>& get_area_from_where();
 
     void fix_area_reset();
 

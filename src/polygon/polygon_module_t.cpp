@@ -80,8 +80,8 @@ void polygon_module_t::set_area(std::set<std::shared_ptr<polygon_module_t>> area
 //    }
 }
 
-std::map<std::shared_ptr<polygon_module_t>, uint32_t> polygon_module_t::set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, uint32_t area) {
-    std::map<std::shared_ptr<polygon_module_t>, uint32_t> copy;
+std::map<std::shared_ptr<polygon_module_t>, int32_t> polygon_module_t::set_overlap_take(const std::shared_ptr<polygon_module_t>& requester, int32_t area) {
+    std::map<std::shared_ptr<polygon_module_t>, int32_t> copy;
     copy[requester] = 0;
     for (auto item : this->area_from_where) {
         copy[item.first] = 0;
@@ -95,11 +95,11 @@ std::map<std::shared_ptr<polygon_module_t>, uint32_t> polygon_module_t::set_over
     return copy;
 }
 
-void polygon_module_t::set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, uint32_t> &areaFromWhere) {
+void polygon_module_t::set_area_from_where(const std::map<std::shared_ptr<polygon_module_t>, int32_t> &areaFromWhere) {
     area_from_where = areaFromWhere;
 }
 
-const std::map<std::shared_ptr<polygon_module_t>, uint32_t>& polygon_module_t::get_area_from_where() {
+const std::map<std::shared_ptr<polygon_module_t>, int32_t>& polygon_module_t::get_area_from_where() {
     return this->area_from_where;
 }
 
@@ -131,7 +131,7 @@ int polygon_module_t::fix_area(std::shared_ptr<polygon_module_t> robber, int val
                 this->if_found = false;
                 return 0;
             }
-            uint32_t need = std::min((uint32_t)need_area, other.second);
+            int32_t need = std::min((int32_t)need_area, other.second);
             if (need == 0) continue;
             int left = other_conn->fix_area(other.first, need);
             int move = need_area - left;
