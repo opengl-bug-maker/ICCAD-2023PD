@@ -142,6 +142,7 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
             overlap_h++;
         }
     }
+    floorplan_t fp;
     if(success){
         cout<< "SUCCESS"<<endl;
         //this->sequence_pair_validation(res.second);
@@ -149,7 +150,7 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
         return valid_fp;
     }
     else{
-        return {false, floorplan_t()};
+        return {false, fp};
     }
 }
 
@@ -257,17 +258,7 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
     }
     else{return {false, {}};}
 }
-void sequence_pair_t::seq_randomize() {
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        int x = rand()%sequence_pair_t::sequence_n;
-        std::swap(this->v_sequence[i], this->v_sequence[x]);
-    }
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        int x = rand()%sequence_pair_t::sequence_n;
-        std::swap(this->h_sequence[i], this->h_sequence[x]);
-    }
-    this->set_fix_sequence();
-}
+
 
 void sequence_pair_t::set_fix_sequence() {
     vector<int> v_map(sequence_pair_t::sequence_n),h_map(sequence_pair_t::sequence_n);
@@ -423,6 +414,12 @@ void sequence_pair_t::print_inline() {
     cout<<"]"<<endl;
 }
 
+void sequence_pair_t::print_shapes() {
+    for(int i = 0; i<sequence_n; ++i){
+        cout<< "i: "<< i<<" "<<modules_wh[i].get_x()<<" "<<modules_wh[i].get_y()<<endl;
+    }
+}
+
 
 void sequence_pair_enumerator_t::set_seed_need_n(int n) {
     this->seed_need_n = n;
@@ -447,10 +444,6 @@ sequence_pair_enumerator_t::sequence_pair_enumerator_t() {
         seed[i] = i;
     }
     seed_need_n = 0;
-    cout<< "seq got shape: "<<endl;
-    for(int i = 0; i<seq.modules_wh.size(); ++i){
-        cout<< i<<": "<<seq.modules_wh[i].get_x()<<" "<<seq.modules_wh[i].get_y()<<endl;
-    }
 }
 
 void sequence_pair_enumerator_t::generate_valid_seq(int x) {
@@ -496,6 +489,31 @@ void sequence_pair_enumerator_t::print_all_valid_seq() {
 
 vector<sequence_pair_t> sequence_pair_enumerator_t::get_all_valid_seq() {
     return this->valid_seq;
+}
+
+void sequence_pair_enumerator_t::change_size() {
+
+    for(int i = 0; i<chip_t::get_total_module_n(); ++i){
+        if(sequence_pair_t::seq_is_fix[i]){
+            seq.modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
+        }
+        else{
+            vector<vec2d_t> shapes = seq.find_w_h(sequence_pair_t::seq_soft_map[i]->get_area());
+            int id = static_cast<int>(rand())%shapes.size();
+            seq.modules_wh[i] = shapes[id];
+        }
+    }
+}
+
+void sequence_pair_enumerator_t::seq_randomize() {
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        int x = rand()%sequence_pair_t::sequence_n;
+        seq.swap_h(i, x);
+    }
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        int x = rand()%sequence_pair_t::sequence_n;
+        seq.swap_v(i, x);
+    }
 }
 
 

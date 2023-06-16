@@ -179,7 +179,7 @@ bool floorplan_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t siz
         //cout<< target_rect.get_left_lower().get_x()<<" "<<target_rect.get_left_lower().get_y()<<" "<<target_rect.get_size().get_x()<<" "<<target_rect.get_size().get_y()<<endl;
 		success = polygon_forest.add_rect(target_bd);
         //cout<<success<<endl;
-        int a = 5;
+
         //cout<< success<<endl;
 	}
 	if (success) {

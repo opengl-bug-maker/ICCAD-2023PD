@@ -35,6 +35,7 @@ public:
     static int sequence_n;
     static unordered_map<const module_t*, int> soft_module_to_id_m;
     static unordered_map<const module_t*, int> fix_module_to_id_m;
+    sequence_pair_t();
     int max_overlap;
     int max_distance;
     //floorplan_t fp;
@@ -42,7 +43,7 @@ public:
     vector<vec2d_t> modules_pos;
     pair<bool, vector<vec2d_t>> find_position(int,int);
     void build_constraint_graph();
-    sequence_pair_t();
+
 
     //essential
     pair<bool, floorplan_t> get_fp();
@@ -63,6 +64,7 @@ public:
     void print();
     void print_inline();
     void sequence_pair_validation(vector<vec2d_t>);
+    void print_shapes();
 
 };
 
@@ -80,7 +82,10 @@ public:
     void set_seed_need_n(int n);
     void generate_valid_seq(int x);
     void print_all_valid_seq();
+    void seq_randomize();
+
     void change_size();
+
 
     //set get
     vector<sequence_pair_t> get_all_valid_seq();

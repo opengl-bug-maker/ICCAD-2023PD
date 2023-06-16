@@ -20,9 +20,8 @@ void output_handler_t::parse_polygon(polygon_t &polygon) {
     }
 }
 
-void output_handler_t::set_FP(floorplanning_t &floorplanning) {
-    polygon_forest_t& polygonForest = floorplanning.get_polygon_forest();
-//    polygon_forest_t polygonForest;
+void output_handler_t::set_FP(floorplan_t &floorplanning) {
+    polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
     output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
