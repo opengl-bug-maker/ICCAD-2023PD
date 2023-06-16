@@ -80,16 +80,22 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
         this->unit_lib[new_set] = old_2_new[lib.second];
     }
 
-    for (auto ori : this->origin_unit_tree.get_values()){
-        for (auto area : ori->area_from_where){
+    for (auto& ori : this->origin_unit_tree.get_values()){
+        auto ar = ori->area_from_where;
+        ori->area_from_where.clear();
+        for (auto area : ar){
             if (old_2_new.find(area.first) != old_2_new.end()){
-                ori->area_from_where.erase(area.first);
                 ori->area_from_where[old_2_new[area.first]] = area.second;
             }
+//            else{
+//                ori->area_from_where[area.first] = area.second;
+//            }
         }
-        for (auto& conn : ori->connections){
+        auto co = ori->connections;
+        ori->connections.clear();
+        for (auto conn : co){
             if (old_2_new.find(conn) != old_2_new.end()){
-                conn = old_2_new[conn];
+                ori->connections.push_back(old_2_new[conn]);
             }
         }
     }
