@@ -19,6 +19,15 @@ polygon_forest_t::polygon_forest_t() {
     this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
 }
 
+polygon_forest_t::~polygon_forest_t() {
+//    std::cout << "deededede";
+    for(auto& polygon : this->polygons){
+        polygon.reset();
+        delete polygon.get();
+    }
+}
+
+
 std::vector<polygon_t> polygon_forest_t::get_polygons() {
     std::vector<polygon_t> vecs;
     for(int i = 4; i < this->polygons.size(); i++){

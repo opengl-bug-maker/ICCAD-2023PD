@@ -27,7 +27,7 @@ class lenf_quadtree_t {
         // 0 : upper_left, 1 : upper_right, 2 : lower_left, 3 : lower_right
         // 0 1
         // 2 3
-        std::vector<lenf_quadtree_node_t*> children = std::vector<lenf_quadtree_node_t*>(4, nullptr);
+        std::vector<std::shared_ptr<lenf_quadtree_node_t>> children = std::vector<std::shared_ptr<lenf_quadtree_node_t>>(4, nullptr);
         lenf_quadtree_node_t();
         lenf_quadtree_node_t(rect_t range);
         void split();
@@ -40,7 +40,7 @@ class lenf_quadtree_t {
 
     const static int max_element_count = 5;
     const static int max_depth = 5;
-    lenf_quadtree_node_t* rt = nullptr;
+    std::shared_ptr<lenf_quadtree_node_t> rt = nullptr;
     std::vector<std::shared_ptr<T>> values;
     lenf_quadtree_t<T>() = default;
 public:
@@ -65,10 +65,10 @@ lenf_quadtree_t<T>::lenf_quadtree_node_t::lenf_quadtree_node_t(rect_t range) : r
 
 template<typename T>
 void lenf_quadtree_t<T>::lenf_quadtree_node_t::split() {
-    children[0] = new lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_left_lower().get_x(), range.get_center().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y())));
-    children[1] = new lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_center().get_x(), range.get_center().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y())));
-    children[2] = new lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_left_lower().get_x(), range.get_left_lower().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y())));
-    children[3] = new lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_center().get_x(), range.get_left_lower().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y())));
+    children[0] = std::make_shared<lenf_quadtree_t<T>::lenf_quadtree_node_t>(lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_left_lower().get_x(), range.get_center().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y()))));
+    children[1] = std::make_shared<lenf_quadtree_t<T>::lenf_quadtree_node_t>(lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_center().get_x(), range.get_center().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y()))));
+    children[2] = std::make_shared<lenf_quadtree_t<T>::lenf_quadtree_node_t>(lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_left_lower().get_x(), range.get_left_lower().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y()))));
+    children[3] = std::make_shared<lenf_quadtree_t<T>::lenf_quadtree_node_t>(lenf_quadtree_t<T>::lenf_quadtree_node_t(rect_t(vec2d_t(range.get_center().get_x(), range.get_left_lower().get_y()), vec2d_t(range.get_size().get_half_x(), range.get_size().get_half_y()))));
 
     for(int i = elements.size() - 1; i >= 0; --i){
         int region = this->get_rect_region(elements[i]->get_bounding_rect());
@@ -190,7 +190,7 @@ void lenf_quadtree_t<T>::lenf_quadtree_node_t::print(int index) {
 
 template<typename T>
 lenf_quadtree_t<T>::lenf_quadtree_t(const rect_t &range){
-    this->rt = new lenf_quadtree_node_t(range);
+    this->rt = std::make_shared<lenf_quadtree_node_t>(lenf_quadtree_node_t(range));
     this->values.reserve(200);
 }
 

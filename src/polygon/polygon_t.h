@@ -20,7 +20,7 @@ class polygon_t : public box_t{
     lenf_quadtree_t<polygon_module_t> origin_unit_tree;
     std::vector<std::shared_ptr<polygon_module_t>> overlap_unit;
 
-    std::map<std::set<std::shared_ptr<polygon_module_t>>, std::shared_ptr<polygon_module_t>> unit_lib;
+    std::map<std::set<polygon_module_t*>, polygon_module_t*> unit_lib;
 //    std::vector<std::shared_ptr<polygon_module_t>> units;
 
 //    std::vector<polygon_overlap_area_t> overlap_areas;
@@ -33,6 +33,7 @@ class polygon_t : public box_t{
 
 public:
     explicit polygon_t(const bounding_rectangle_t& first_rect);
+    ~polygon_t();
 
     const rect_t& get_bounding_rect() const override;
 

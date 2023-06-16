@@ -23,9 +23,9 @@ polygon_t::polygon_t(const bounding_rectangle_t &rect) :
         bounding_rect(rect.getRect()),
         origin_unit_tree(rect.getRect()) {
     this->origin_unit_tree.add_value(polygon_module_t(rect));
-    auto set = std::set<std::shared_ptr<polygon_module_t>>({origin_unit_tree.get_values().front()});
+    auto set = std::set<polygon_module_t*>({origin_unit_tree.get_values().front().get()});
     this->origin_unit_tree.get_values().front()->set_area(set);
-    this->unit_lib[set] = this->origin_unit_tree.get_values().front();
+    this->unit_lib[set] = this->origin_unit_tree.get_values().front().get();
 }
 
 const rect_t &polygon_t::get_bounding_rect() const {
@@ -62,18 +62,22 @@ const std::shared_ptr<polygon_module_t> &polygon_t::get_origin_unit() {
 }
 
 bool polygon_t::merge_polygon(polygon_t &polygon) {
-    auto coli = polygon.origin_unit_tree.collision_value(this->get_origin_unit());
-    std::map<std::shared_ptr<polygon_module_t>, std::shared_ptr<polygon_module_t>> old_2_new;
+    auto coli_share = polygon.origin_unit_tree.collision_value(this->get_origin_unit());
+    auto coli = std::vector<polygon_module_t*>();
+    for(auto share : coli_share){
+        coli.push_back(share.get());
+    }
+    std::map<polygon_module_t*, polygon_module_t*> old_2_new;
     for (const auto& ori : polygon.origin_unit_tree.get_values()){
         this->origin_unit_tree.add_value(*ori.get());
-        old_2_new[ori] = this->origin_unit_tree.get_values().back();
+        old_2_new[ori.get()] = this->origin_unit_tree.get_values().back().get();
     }
     for (const auto& over : polygon.overlap_unit){
         this->overlap_unit.push_back(std::make_shared<polygon_module_t>(*over.get()));
-        old_2_new[over] = this->overlap_unit.back();
+        old_2_new[over.get()] = this->overlap_unit.back().get();
     }
     for (const auto& lib : polygon.unit_lib){
-        std::set<std::shared_ptr<polygon_module_t>> new_set;
+        std::set<polygon_module_t*> new_set;
         for (auto set : lib.first){
             new_set.insert(old_2_new[set]);
         }
@@ -106,12 +110,12 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
         }
     }
 
-    coli.push_back(this->get_origin_unit());
+    coli.push_back(this->get_origin_unit().get());
 
     for (int i = 1; i < 6; ++i) {
         auto c = polygon_t::combination_list[coli.size() - 1][i];
         for (auto sets: c) {
-            std::set<std::shared_ptr<polygon_module_t>> key_set;
+            std::set<polygon_module_t*> key_set;
             for (auto set: sets) {
                 key_set.insert(coli[set]);
             }
@@ -127,17 +131,17 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
             const polygon_module_t new_unit = polygon_module_t(bounding_rectangle_t(new_rect.second));
 
             this->overlap_unit.push_back(std::make_shared<polygon_module_t>(new_unit));
-            key_set.insert(this->get_origin_unit());
-            this->unit_lib[key_set] = this->overlap_unit.back();
+            key_set.insert(this->get_origin_unit().get());
+            this->unit_lib[key_set] = this->overlap_unit.back().get();
 //            this->overlap_unit.back()->set_area_from_where(find->set_overlap_take(this->get_origin_unit(), new_unit.get_bounding_rect().get_area()));
 
-            std::vector<std::shared_ptr<polygon_module_t>> key_set_vec(key_set.begin(), key_set.end());
+            std::vector<polygon_module_t*> key_set_vec(key_set.begin(), key_set.end());
             int sign = 1;
             for (int j = key_set.size() - 1; j >= 1; --j) {
                 sign *= -1;
                 auto sub_combi = polygon_t::combination_list[key_set.size()][j];
                 for (auto sub_sets : sub_combi){
-                    std::set<std::shared_ptr<polygon_module_t>> sub_key_set;
+                    std::set<polygon_module_t*> sub_key_set;
                     for (auto sub_set: sub_sets) {
                         sub_key_set.insert(key_set_vec[sub_set]);
                     }
@@ -147,7 +151,7 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
 
             auto conn_combi = polygon_t::combination_list[key_set.size()][key_set.size() - 1];
             for (auto sub_conn : conn_combi){
-                std::set<std::shared_ptr<polygon_module_t>> conn_key_set;
+                std::set<polygon_module_t*> conn_key_set;
                 for (auto conn_set: sub_conn) {
                     conn_key_set.insert(key_set_vec[conn_set]);
                 }
@@ -162,7 +166,7 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
     for (int i = 1; i < 6; ++i) {
         auto c = polygon_t::combination_list[coli.size() - 1][i];
         for (auto sets: c) {
-            std::set<std::shared_ptr<polygon_module_t>> key_set;
+            std::set<polygon_module_t*> key_set;
             for (auto set: sets) {
                 key_set.insert(coli[set]);
             }
@@ -171,14 +175,14 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
 
             auto find = this->unit_lib[key_set];
 
-            key_set.insert(this->get_origin_unit());
+            key_set.insert(this->get_origin_unit().get());
             auto new_unit = this->unit_lib[key_set];
-            new_unit->set_area_from_where(find->set_overlap_take(this->get_origin_unit(), new_unit->max_area));
+            new_unit->set_area_from_where(find->set_overlap_take(this->get_origin_unit().get(), new_unit->max_area));
         }
     }
 
     this->get_origin_unit()->fix_area_reset();
-    int left = this->get_origin_unit()->fix_area(this->get_origin_unit(), this->get_origin_unit()->get_module_bounding_rectangle().getLinkModule()->get_area());
+    int left = this->get_origin_unit()->fix_area(this->get_origin_unit().get(), this->get_origin_unit()->get_module_bounding_rectangle().getLinkModule()->get_area());
 
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
 
@@ -187,9 +191,9 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
 }
 
 void polygon_t::print() {
-    std::map<std::shared_ptr<polygon_module_t>, std::string> unit_to_name;
+    std::map<polygon_module_t*, std::string> unit_to_name;
     for (int i = 0; i < this->origin_unit_tree.get_values().size(); ++i) {
-        unit_to_name[this->origin_unit_tree.get_values()[i]] = std::string(1, 'A' + i);
+        unit_to_name[this->origin_unit_tree.get_values()[i].get()] = std::string(1, 'A' + i);
     }
     for (auto unit_pair : this->unit_lib){
         std::string name_set = "";
@@ -210,5 +214,11 @@ void polygon_t::print() {
         std::cout << " }";
 
         std::cout << "\n";
+    }
+}
+
+polygon_t::~polygon_t() {
+    for (auto& a : unit_lib){
+//        a.second.reset();
     }
 }
