@@ -113,6 +113,13 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
         }
     }
 
+    for (auto co : coli){
+        if(co->get_bounding_rect().is_wrap(this->get_origin_unit()->get_bounding_rect()) ||
+            this->get_origin_unit()->get_bounding_rect().is_wrap(co->get_bounding_rect())){
+            return false;
+        }
+    }
+
     coli.push_back(this->get_origin_unit().get());
 
     for (int i = 1; i < 3; ++i) {
