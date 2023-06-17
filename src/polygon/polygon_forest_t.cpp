@@ -13,10 +13,10 @@
 
 polygon_forest_t::polygon_forest_t() {
     this->polygons.reserve(204);
-    this->polygons.push_back(new polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height())))));
-    this->polygons.push_back(new polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0)))));
-    this->polygons.push_back(new polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0)))));
-    this->polygons.push_back(new polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height())))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
 }
 
 std::vector<polygon_t> polygon_forest_t::get_polygons() {
@@ -48,8 +48,7 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         return false;
         throw std::exception();
     }
-    polygon_t* new_poly = new polygon_t(boundingRectangle);
-//    polygon_t new_poly(boundingRectangle);
+    std::shared_ptr<polygon_t> new_poly = std::make_shared<polygon_t>(polygon_t(boundingRectangle));
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
     for (int i = 0; i < polygons.size(); ++i) {
@@ -69,7 +68,6 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
     for (auto poly : merging_poly) {
         if(!new_poly->merge_polygon(*polygons[poly])){
             //merge fail
-            delete new_poly;
             return false;
         }
     }
@@ -94,7 +92,7 @@ std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
             auto inter = bounding[i].getRect().intersect(bounding[j].getRect());
             if(inter.first) continue;
 
-            if(std::any_of(polygons.begin(), polygons.end(), [&inter](polygon_t* poly){
+            if(std::any_of(polygons.begin(), polygons.end(), [&inter](std::shared_ptr<polygon_t> poly){
                 return poly->is_bounding_collision(inter.second) && poly->is_collision(inter.second);
             })){
                 continue;

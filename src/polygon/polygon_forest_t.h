@@ -13,7 +13,7 @@
 
 
 class polygon_forest_t {
-    std::vector<polygon_t*> polygons;
+    std::vector<std::shared_ptr<polygon_t>> polygons;
     void test_without_collision();
 public:
     polygon_forest_t();
