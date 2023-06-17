@@ -45,7 +45,8 @@ floorplan_t& solver_t::get_best_fp() {
 }
 
 solver_t::solver_t() {
-
+    floorplan_t::init();
+    sequence_pair_t::init();
 }
 
 void solver_t::generate_seq_rand() {
