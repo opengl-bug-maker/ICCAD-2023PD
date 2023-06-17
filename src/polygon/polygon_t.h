@@ -33,7 +33,7 @@ class polygon_t : public box_t{
 
 public:
     explicit polygon_t(const bounding_rectangle_t& first_rect);
-    ~polygon_t();
+//    ~polygon_t();
 
     const rect_t& get_bounding_rect() const override;
 

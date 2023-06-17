@@ -168,6 +168,7 @@ float floorplan_t::get_wirelength()
 
 
 bool floorplan_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t size) {
+    if(soft_is_placed[i]){return false;}
 	rect_t target_rect(lower_left_pos,size);
 	//const soft_module_t* const target_module = dynamic_cast<const soft_module_t*>(soft_rects[i].getLinkModule());
 	soft_module_t* target_module = (soft_module_t*)(soft_rects[i].getLinkModule()); //due to the const->non-const :(
@@ -178,8 +179,8 @@ bool floorplan_t::place_soft_module(size_t i, vec2d_t lower_left_pos,vec2d_t siz
 	if (result.second == true) {
         //cout<< target_rect.get_left_lower().get_x()<<" "<<target_rect.get_left_lower().get_y()<<" "<<target_rect.get_size().get_x()<<" "<<target_rect.get_size().get_y()<<endl;
 		success = polygon_forest.add_rect(target_bd);
+        int temp = 0;
         //cout<<success<<endl;
-
         //cout<< success<<endl;
 	}
 	if (success) {

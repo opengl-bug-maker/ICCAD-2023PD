@@ -25,7 +25,7 @@ public:
 public:
 
     explicit polygon_module_t(const bounding_rectangle_t& bounding_rect);
-    ~polygon_module_t();
+//    ~polygon_module_t();
 
     polygon_module_t(const polygon_module_t& polygon_module);
     polygon_module_t operator=(const polygon_module_t& r);

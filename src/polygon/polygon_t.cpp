@@ -217,8 +217,8 @@ void polygon_t::print() {
     }
 }
 
-polygon_t::~polygon_t() {
-    for (auto& a : unit_lib){
-//        a.second.reset();
-    }
-}
+//polygon_t::~polygon_t() {
+//    for (auto& a : unit_lib){
+////        a.second.reset();
+//    }
+//}

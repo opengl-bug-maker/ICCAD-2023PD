@@ -125,13 +125,13 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
 
 pair<bool, floorplan_t> sequence_pair_t::get_fp() {
     build_constraint_graph();
+
     bool success = false;
-    pair<bool, vector<vec2d_t>> res;
+    pair<bool, vector<vec2d_t>> presolve_res = {false, {}};
     int overlap_v = 0, overlap_h = 0;
     for(int i = 0; i<=max_overlap; ++i){
-        pair<bool, vector<vec2d_t>> presolve_res = this->find_position(overlap_h, overlap_v);
+        presolve_res = this->find_position(overlap_h, overlap_v);
         if(presolve_res.first){
-            res = presolve_res;
             success=true;
             break;
         }
@@ -144,9 +144,9 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
     }
     floorplan_t fp;
     if(success){
-        cout<< "SUCCESS"<<endl;
+        //cout<< "SUCCESS in ILP"<<endl;
         //this->sequence_pair_validation(res.second);
-        pair<bool, floorplan_t> valid_fp = this->place_all_modules(res.second);
+        pair<bool, floorplan_t> valid_fp = this->place_all_modules(presolve_res.second);
         return valid_fp;
     }
     else{
@@ -156,9 +156,7 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
 
 
 void sequence_pair_t::build_constraint_graph() {
-    this->constraint_graph_h.clear();
-    this->constraint_graph_v.clear();
-    //TODO: accelerate by inverse pair (merge sort)
+    vector<edge_t> updated_constraint_graph_h, updated_constraint_graph_v;
     vector<int> v_map(sequence_pair_t::sequence_n),h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         v_map[v_sequence[i]] = i;
@@ -167,13 +165,15 @@ void sequence_pair_t::build_constraint_graph() {
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j) {
             if(v_map[i]<v_map[j] && h_map[i]<h_map[j]){ //{a, b}, {a, b}
-                this->constraint_graph_h.push_back({i, j, static_cast<int>(this->modules_wh[i].get_x())});
+                updated_constraint_graph_h.push_back({i, j, static_cast<int>(this->modules_wh[i].get_x())});
             }
             else if(v_map[i]<v_map[j] && h_map[j]<h_map[i]) { //{a, b}, {b,a}
-                this->constraint_graph_v.push_back({i, j, static_cast<int>(this->modules_wh[i].get_y())});
+                updated_constraint_graph_v.push_back({i, j, static_cast<int>(this->modules_wh[i].get_y())});
             }
         }
     }
+    this->constraint_graph_h = updated_constraint_graph_h;
+    this->constraint_graph_v = updated_constraint_graph_v;
 //    cout<<"horizontal constraint graph : "<<endl;
 //    for(auto& e:constraint_graph_h){
 //        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
@@ -249,14 +249,16 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
     ILP_solver.load();
     ILP_result_t ILP_result = ILP_solver.solve();
     vector<vec2d_t> result; //zero-index
-    cout<< "z : "<< ILP_result.z<<endl;
+    //cout<< "z : "<< ILP_result.z<<endl;
     for(int i = 1; i<=sequence_n; ++i){
-        result.emplace_back(ILP_result.var_values[i], ILP_result.var_values[i+sequence_n]);
+        result.push_back( {ILP_result.var_values[i], ILP_result.var_values[i+sequence_n]});
     }
     if(ILP_result.legal){
         return {true, result};
     }
     else{return {false, {}};}
+
+
 }
 
 

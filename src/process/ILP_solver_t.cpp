@@ -76,20 +76,21 @@ void ILP_solver_t::set_obj_coef(vector<int> coef) {
 
 ILP_result_t ILP_solver_t::solve() {
     glp_iocp parm;
-    parm.msg_lev = GLP_MSG_OFF;
+
     glp_init_iocp(&parm);
     parm.presolve = GLP_ON;
+    parm.msg_lev = GLP_MSG_OFF;
+
+
     int err = glp_intopt(this->ILP, &parm);
 
     int z = glp_mip_obj_val(this->ILP);
     vector<int> result(1); //due to 1-index
     for(int i = 1; i<=this->var_n; ++i){
-        result.emplace_back(glp_mip_col_val(this->ILP, i));
+        result.push_back(glp_mip_col_val(this->ILP, i));
     }
 
-
-
-
+    release_solver();
     ILP_result_t ILP_result;
     if(err!=0){
         ILP_result.legal = false;
@@ -99,10 +100,7 @@ ILP_result_t ILP_solver_t::solve() {
     ILP_result.var_values = result;
     ILP_result.z = z;
 
-    delete[] set_i_a;
-    delete[] set_j_a;
-    delete[] set_val_a;
-    glp_delete_prob(this->ILP);
+
     return ILP_result;
 }
 
@@ -116,6 +114,13 @@ void ILP_solver_t::load() {
         set_val_a[i] = this->set_val[i];
     }
     glp_load_matrix(this->ILP, set_n, set_i_a, set_j_a, set_val_a);
+}
+
+void ILP_solver_t::release_solver() {
+    delete[] set_i_a;
+    delete[] set_j_a;
+    delete[] set_val_a;
+    glp_delete_prob(this->ILP);
 }
 
 
