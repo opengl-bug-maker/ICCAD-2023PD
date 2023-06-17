@@ -134,9 +134,9 @@ int polygon_module_t::fix_area(polygon_module_t* robber, int value) {
             int32_t need = std::min((int32_t)need_area, other.second);
             if (need == 0) continue;
             int left = other_conn->fix_area(other.first, need);
-            int move = need_area - left;
+            int move = need - left;
             this->area_from_where[other.first] -= move;
-            need_area = left;
+            need_area -= move;
         }
     }
     this->area_from_where[robber] -= need_area;
