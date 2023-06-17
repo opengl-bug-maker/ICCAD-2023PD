@@ -145,12 +145,12 @@ int polygon_module_t::fix_area(polygon_module_t* robber, int value) {
 }
 
 //polygon_module_t::~polygon_module_t() {
-////    for (auto& area : this->area_from_where){
-////        auto& f = area.first;
-////    }
-////    for (auto& connection : this->connections){
-////        connection.reset();
-////    }
+//    for (auto& area : this->area_from_where){
+//        auto& f = area.first;
+//    }
+//    for (auto& connection : this->connections){
+//        connection.reset();
+//    }
 //}
 
 //bool polygon_module_t::connect(polygon_module_t &module) {

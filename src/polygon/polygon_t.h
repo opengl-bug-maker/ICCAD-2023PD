@@ -21,11 +21,6 @@ class polygon_t : public box_t{
     std::vector<std::shared_ptr<polygon_module_t>> overlap_unit;
 
     std::map<std::set<polygon_module_t*>, polygon_module_t*> unit_lib;
-//    std::vector<std::shared_ptr<polygon_module_t>> units;
-
-//    std::vector<polygon_overlap_area_t> overlap_areas;
-
-
 
     const static std::vector<std::vector<std::vector<std::vector<int>>>> combination_list;
 
