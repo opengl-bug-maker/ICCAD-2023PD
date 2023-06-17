@@ -193,7 +193,6 @@ bool polygon_t::merge_polygon(polygon_t &polygon) {
 
     this->bounding_rect = this->bounding_rect.merge_bounding_rect(polygon.bounding_rect);
 
-//    return false;
     return left == 0;
 }
 

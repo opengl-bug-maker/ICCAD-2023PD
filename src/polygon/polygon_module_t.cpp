@@ -11,43 +11,18 @@
 polygon_module_t::polygon_module_t(const bounding_rectangle_t& bounding_rect) :
         module_rect(bounding_rect),
         max_area(bounding_rect.getRect().get_area())
-//        demand_area(bounding_rect.getLinkModule()->get_area()),
-//        free_to_share_area(bounding_rect.getRect().get_area() - demand_area),
-//        shared_area(0)
-//        overlap_areas(std::vector<std::reference_wrapper<polygon_overlap_area_t>>({}))
-{
-}
+{}
 
 polygon_module_t::polygon_module_t(const polygon_module_t &r):
         module_rect(r.module_rect),
         max_area(r.max_area),
         area_from_where(r.area_from_where),
         connections(r.connections)
-//        demand_area(r.demand_area),
-//        free_to_share_area(r.free_to_share_area),
-//        shared_area(r.shared_area)
-//        overlap_areas(r.overlap_areas)
 {}
 
 polygon_module_t polygon_module_t::operator=(const polygon_module_t &r) {
     return polygon_module_t(r);
 }
-
-//std::pair<bool, uint32_t> polygon_module_t::request_area(const uint32_t& required_area) {
-//    if(required_area <= this->free_to_share_area){
-//        this->shared_area += required_area;
-//        this->free_to_share_area -= required_area;
-//        return {true, required_area};
-//    } else{
-//        this->shared_area += free_to_share_area;
-//        this->free_to_share_area = 0;
-//        return {false, this->free_to_share_area};
-//    }
-//}
-
-//std::vector<std::reference_wrapper<polygon_module_t>> polygon_module_t::get_neighbor(const polygon_overlap_area_t&) const {
-//    return std::vector<std::reference_wrapper<polygon_module_t>>({});
-//}
 
 const rect_t &polygon_module_t::get_bounding_rect() const {
     return this->module_rect.getRect();
@@ -59,7 +34,6 @@ const bounding_rectangle_t& polygon_module_t::get_module_bounding_rectangle() co
 
 void polygon_module_t::fix_max_area(int area) {
     this->max_area += area;
-//    std::cout << this << " : " << this->max_area << " : " << area << "\n";
 }
 
 void polygon_module_t::add_connection(polygon_module_t* connection) {
@@ -75,9 +49,6 @@ void polygon_module_t::set_area(std::set<polygon_module_t*> area_keys) {
             this->area_from_where[key] = 0;
         }
     }
-//    for(auto key : area_keys){
-//        this->area_from_where[key] = 0;
-//    }
 }
 
 std::map<polygon_module_t*, int32_t> polygon_module_t::set_overlap_take(polygon_module_t* requester, int32_t area) {
@@ -143,17 +114,3 @@ int polygon_module_t::fix_area(polygon_module_t* robber, int value) {
     this->if_found = false;
     return need_area;
 }
-
-//polygon_module_t::~polygon_module_t() {
-//    for (auto& area : this->area_from_where){
-//        auto& f = area.first;
-//    }
-//    for (auto& connection : this->connections){
-//        connection.reset();
-//    }
-//}
-
-//bool polygon_module_t::connect(polygon_module_t &module) {
-//    return true;
-//}
-
