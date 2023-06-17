@@ -67,6 +67,81 @@ bool rect_t::is_contain(const rect_t &rect) const {
             );
 }
 
+bool rect_t::is_wrap(const rect_t &rect) const {
+    return (
+        this->get_right_upper().get_x() > rect.get_right_upper().get_x() &&
+        this->get_right_upper().get_y() > rect.get_right_upper().get_y() &&
+        this->get_left_lower().get_x() > rect.get_left_lower().get_x() &&
+        this->get_left_lower().get_y() > rect.get_left_lower().get_y()
+    );
+}
+
+std::vector<rect_t> rect_t::cut(const rect_t &rect) const {
+    bool hasRight = this->get_right_upper().get_x() < rect.get_right_upper().get_x();
+    bool hasLeft = this->get_left_lower().get_x() > rect.get_left_lower().get_x();
+    bool hasTop = this->get_right_upper().get_y() < rect.get_right_upper().get_y();
+    bool hasBottom = this->get_left_lower().get_y() > rect.get_left_lower().get_y();
+    std::vector<rect_t> rects;
+
+    if(hasTop && hasLeft){
+        vec2d_t left_lower = vec2d_t( rect.get_left_lower().get_x(),
+                                      this->get_right_upper().get_y());
+        vec2d_t right_upper = vec2d_t(this->get_left_lower().get_x(),
+                                      rect.get_right_upper().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasTop){
+        vec2d_t left_lower = vec2d_t(std::max(this->get_left_lower().get_x(), rect.get_left_lower().get_x()),
+                                     this->get_right_upper().get_y());
+        vec2d_t right_upper = vec2d_t(std::min(this->get_right_upper().get_x(), rect.get_right_upper().get_x()),
+                                      rect.get_right_upper().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasTop && hasRight){
+        vec2d_t left_lower = vec2d_t(this->get_right_upper().get_x(),
+                                     this->get_right_upper().get_y());
+        vec2d_t right_upper = vec2d_t(rect.get_right_upper().get_x(),
+                                      rect.get_right_upper().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasRight){
+        vec2d_t left_lower = vec2d_t(this->get_right_upper().get_x(),
+                                     std::max(this->get_left_lower().get_y(), rect.get_left_lower().get_y()));
+        vec2d_t right_upper = vec2d_t(rect.get_right_upper().get_x(),
+                                      std::min(this->get_right_upper().get_y(), rect.get_right_upper().get_y()));
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasBottom && hasRight){
+        vec2d_t left_lower = vec2d_t(this->get_right_upper().get_x(),
+                                     rect.get_left_lower().get_y());
+        vec2d_t right_upper = vec2d_t(rect.get_right_upper().get_x(),
+                                      this->get_left_lower().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasBottom){
+        vec2d_t left_lower = vec2d_t(std::max(this->get_left_lower().get_x(), rect.get_left_lower().get_x()),
+                                     rect.get_left_lower().get_y());
+        vec2d_t right_upper = vec2d_t(std::min(this->get_right_upper().get_x(), rect.get_right_upper().get_x()),
+                                      this->get_left_lower().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasBottom && hasLeft){
+        vec2d_t left_lower = vec2d_t(rect.get_left_lower().get_x(),
+                                     rect.get_left_lower().get_y());
+        vec2d_t right_upper = vec2d_t(this->get_left_lower().get_x(),
+                                      this->get_left_lower().get_y());
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    if(hasLeft){
+        vec2d_t left_lower = vec2d_t(rect.get_left_lower().get_x(),
+                                     std::max(this->get_left_lower().get_y(), rect.get_left_lower().get_y()));
+        vec2d_t right_upper = vec2d_t(this->get_left_lower().get_x(),
+                                      std::min(this->get_right_upper().get_y(), rect.get_right_upper().get_y()));
+        rects.push_back(rect_t(left_lower, right_upper - left_lower));
+    }
+    return rects;
+}
+
 std::pair<bool, rect_t> rect_t::intersect(const rect_t &rect) const {
     double r2l1x = rect.get_right_upper().get_x() - this->get_left_lower().get_x();
     double r1l2x = this->get_right_upper().get_x() - rect.get_left_lower().get_x();
