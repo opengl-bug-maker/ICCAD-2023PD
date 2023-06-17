@@ -57,6 +57,14 @@ std::map<polygon_module_t*, int32_t> polygon_module_t::set_overlap_take(polygon_
     for (auto item : this->area_from_where) {
         copy[item.first] = 0;
     }
+
+    int totalArea = 0;
+    for(auto item : this->area_from_where){
+        totalArea += item.second;
+    }
+    area = totalArea - (this->max_area - area);
+    if (area <= 0) return copy;
+
     for (auto item : this->area_from_where) {
         auto value = std::min(area, item.second);
         this->area_from_where[item.first] -= value;
