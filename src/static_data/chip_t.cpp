@@ -2,6 +2,7 @@
 // Created by 林士傑 on 2023/3/8.
 //
 
+#include <iostream>
 #include "chip_t.h"
 #include "soft_module_t.h"
 #include "fixed_module_t.h"
@@ -19,6 +20,12 @@ double chip_t::module_minimum_length = 1e100;
 void chip_t::file_input(std::string fileName) {
     std::fstream file;
     file.open(fileName);
+
+    if(file.fail()){
+        file.close();
+        std::cout << "failed to open \"" << fileName << "\"" << std::endl;
+        return;
+    }
 
     int iTemp;
     std::string temp;
