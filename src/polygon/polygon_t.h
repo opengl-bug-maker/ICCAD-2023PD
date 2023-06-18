@@ -33,6 +33,8 @@ public:
 
     const std::vector<std::shared_ptr<polygon_module_t>>& get_rects() const;
 
+    const std::vector<std::shared_ptr<polygon_module_t>>& get_overlap_unit() const;
+
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
 
