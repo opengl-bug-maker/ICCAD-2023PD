@@ -37,6 +37,10 @@ const std::vector<std::shared_ptr<polygon_module_t>> &polygon_t::get_rects() con
     return this->origin_unit_tree.get_values();
 }
 
+const std::vector<std::shared_ptr<polygon_module_t>> &polygon_t::get_overlap_unit() const {
+    return this->overlap_unit;
+}
+
 bool polygon_t::is_bounding_collision(const rect_t &rect) const {
     return this->bounding_rect.is_collision(rect);
 }
@@ -229,9 +233,3 @@ void polygon_t::print() {
         std::cout << "\n";
     }
 }
-
-//polygon_t::~polygon_t() {
-//    for (auto& a : unit_lib){
-////        a.second.reset();
-//    }
-//}
