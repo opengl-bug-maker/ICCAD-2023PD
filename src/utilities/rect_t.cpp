@@ -62,8 +62,8 @@ bool rect_t::is_contain(const rect_t &rect) const {
     return (
             this->get_right_upper().get_x() >= rect.get_right_upper().get_x() &&
             this->get_right_upper().get_y() >= rect.get_right_upper().get_y() &&
-            this->get_left_lower().get_x() >= rect.get_left_lower().get_x() &&
-            this->get_left_lower().get_y() >= rect.get_left_lower().get_y()
+            this->get_left_lower().get_x() <= rect.get_left_lower().get_x() &&
+            this->get_left_lower().get_y() <= rect.get_left_lower().get_y()
             );
 }
 
@@ -71,8 +71,8 @@ bool rect_t::is_wrap(const rect_t &rect) const {
     return (
         this->get_right_upper().get_x() > rect.get_right_upper().get_x() &&
         this->get_right_upper().get_y() > rect.get_right_upper().get_y() &&
-        this->get_left_lower().get_x() > rect.get_left_lower().get_x() &&
-        this->get_left_lower().get_y() > rect.get_left_lower().get_y()
+        this->get_left_lower().get_x() < rect.get_left_lower().get_x() &&
+        this->get_left_lower().get_y() < rect.get_left_lower().get_y()
     );
 }
 
