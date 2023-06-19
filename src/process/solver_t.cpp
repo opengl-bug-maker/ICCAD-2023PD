@@ -10,22 +10,28 @@ using std::endl;
 
 
 bool solver_t::run() {
-    sequence_pair_enumerator_t sqen;
-    vector<sequence_pair_t> valid_seq = sqen.get_all_valid_seq();
+    static sequence_pair_enumerator_t sqen;
+
     bool ok = 0;
     floorplan_t fnd_fp;
-    const int epoch = 500;
+    const int epoch = 1000000;
     for(int i = 0; i<epoch&&!ok; ++i){
         cout<< "epoch: "<<i+1<<endl;
-        sqen.change_size();
         sqen.seq_randomize();
+//        sqen.seq.print_inline();
+//        for(auto& e:sqen.fix_sequence_v){cout<<e<<" ";}cout<<endl;
+//        for(auto& e:sqen.fix_sequence_h){cout<<e<<" ";}cout<<endl;
         pair<bool, floorplan_t>success_fp = sqen.seq.get_fp();
+//        if(success_fp.first==false){
+//            sqen.seq.print_inline();
+//        }
         if(success_fp.first){
             ok = 1;
             fnd_fp = success_fp.second;
         }
     }
     if(ok){
+        cout<<"SUCCESS"<<endl;
         this->best_fp = fnd_fp;
         return true;
     }

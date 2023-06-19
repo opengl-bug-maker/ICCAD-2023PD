@@ -23,6 +23,7 @@ class ILP_solver_t {
     int* set_i_a;
     int* set_j_a;
     double* set_val_a;
+    bool invalid_input = false;
 public:
     int set_n = 0,set_id;
     vector<int> set_i,set_j,set_val; //due to 1-index
@@ -43,6 +44,7 @@ public:
     ILP_result_t solve();
     void load();
 
+    bool get_is_invalid();
 };
 
 

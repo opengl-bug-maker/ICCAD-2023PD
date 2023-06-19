@@ -11,6 +11,10 @@ using std::endl;
 ILP_solver_t::ILP_solver_t(){
 }
 void ILP_solver_t::init(string name, int constraints_n, int variable_n){
+    if(constraints_n==0||variable_n==0){
+        this->invalid_input = true;
+        return;
+    }
     this->constraints_n = constraints_n;
     this->ILP = glp_create_prob();
     glp_set_prob_name(this->ILP, name.c_str());
@@ -22,10 +26,12 @@ void ILP_solver_t::init(string name, int constraints_n, int variable_n){
     set_i.resize(1); set_j.resize(1); set_val.resize(1); //due to 1-index :(
 }
 void ILP_solver_t::set_max() {
+    if(invalid_input){return;}
     glp_set_obj_dir(ILP, GLP_MAX);
 }
 
 void ILP_solver_t::set_min() {
+    if(invalid_input){return;}
     glp_set_obj_dir(ILP, GLP_MIN);
 }
 
@@ -121,6 +127,10 @@ void ILP_solver_t::release_solver() {
     delete[] set_j_a;
     delete[] set_val_a;
     glp_delete_prob(this->ILP);
+}
+
+bool ILP_solver_t::get_is_invalid() {
+    return this->invalid_input;
 }
 
 

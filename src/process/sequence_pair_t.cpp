@@ -7,12 +7,14 @@
 #include <string>
 #include <plugin/visualizer_t.h>
 #include <chrono>
-
+#include <stack>
+#include <queue>
+int sequence_pair_t::sequence_n;
+int sequence_pair_t::fix_start_idx;
 vector<std::vector<vec2d_t>> sequence_pair_t::soft_area_to_w_h_m;
 vector<bool> sequence_pair_t::seq_is_fix;
 vector<soft_module_t*> sequence_pair_t::seq_soft_map;
 vector<fixed_module_t*> sequence_pair_t::seq_fixed_map;
-int sequence_pair_t::sequence_n;
 unordered_map<const module_t*, int> sequence_pair_t::soft_module_to_id_m;
 unordered_map<const module_t*, int> sequence_pair_t::fix_module_to_id_m;
 vector<edge_t> sequence_pair_t::connections;
@@ -26,7 +28,7 @@ void sequence_pair_t::init() {
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
     sequence_pair_t::sequence_n = static_cast<int>(chip_t::get_total_module_n());
-
+    sequence_pair_t::fix_start_idx = chip_t::get_soft_modules().size();
     soft_area_to_w_h_m.resize(soft_modules.size());
     sequence_pair_t::seq_soft_map.resize(chip_t::get_total_module_n());
     sequence_pair_t::seq_fixed_map.resize(chip_t::get_total_module_n());
@@ -62,7 +64,8 @@ void sequence_pair_t::init() {
 }
 
 sequence_pair_t::sequence_pair_t() {
-    max_overlap = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width()))*0.5);
+    //max_overlap = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width()))*0.3);
+    max_overlap = 0;
     max_distance = static_cast<int>(static_cast<float>(std::max(chip_t::get_height(), chip_t::get_width()))*0,2);
     v_sequence.resize(chip_t::get_total_module_n());
     h_sequence.resize(chip_t::get_total_module_n());
@@ -87,7 +90,11 @@ sequence_pair_t::sequence_pair_t() {
 }
 
 void sequence_pair_t::set_v(std::vector<int> v_sequence) {
-    this->v_sequence = v_sequence;
+    this->v_sequence.resize(v_sequence.size());
+    for(int i = 0; i<v_sequence.size(); ++i){
+        this->v_sequence[i] = v_sequence[i];
+    }
+    //this->v_sequence = v_sequence;
 }
 
 void sequence_pair_t::set_h(std::vector<int> h_sequence) {
@@ -108,8 +115,15 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
     vector<vec2d_t> ret;
     for(uint32_t i = from; i<= sqrt(area); ++i){ //i will be the short edge
         //cout<< area<<" "<<i<<" "<<ceil(static_cast<float>(area)/static_cast<float>(i))<<endl;
+//        int x = i, y = ceil(static_cast<float>(area)/static_cast<float>(i));
+//        if(x*2>=y){
+//            ret.push_back({x, y});
+//            if(x!=y){
+//                ret.push_back({y, x});
+//            }
+//        }
         int x = i, y = ceil(static_cast<float>(area)/static_cast<float>(i));
-        if(x*2>=y){
+        if(x*1.35>=y){
             ret.push_back({x, y});
             if(x!=y){
                 ret.push_back({y, x});
@@ -142,15 +156,16 @@ pair<bool, floorplan_t> sequence_pair_t::get_fp() {
             overlap_h++;
         }
     }
-    floorplan_t fp;
+
     if(success){
+        //this->sequence_pair_validation(presolve_res.second);
+        //fgetc(stdin);
         //cout<< "SUCCESS in ILP"<<endl;
-        //this->sequence_pair_validation(res.second);
         pair<bool, floorplan_t> valid_fp = this->place_all_modules(presolve_res.second);
         return valid_fp;
     }
     else{
-        return {false, fp};
+        return {false, floorplan_t()};
     }
 }
 
@@ -190,6 +205,7 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
     //apart from constraint graph, every fix module need 2 additional condition
     ILP_solver_t ILP_solver;
     ILP_solver.init("ILP_solver", constraint_n, 2*sequence_pair_t::sequence_n);
+    if(ILP_solver.get_is_invalid()){return{false, {}};};
     ILP_solver.set_min();
 
 
@@ -200,14 +216,12 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
     //set constraints to place modules
     for(int i = 0; i<this->constraint_graph_h.size(); ++i){
         int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
-        coef_h[from]++; coef_h[to]--;
         string constraint_name = "h_c"+ std::to_string(i);
         ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_h);
         constraint_i++;
     }
     for(int i = 0; i<this->constraint_graph_v.size(); ++i){
         int from = constraint_graph_v[i].from, to = constraint_graph_v[i].to, w = constraint_graph_v[i].w;
-        coef_v[from]++; coef_v[to]--;
         string constraint_name = "v_c"+ std::to_string(i);
         ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w+overlap_v);
         constraint_i++;
@@ -228,12 +242,18 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
     for(int i = 1;i<=sequence_pair_t::sequence_n; ++i){
         string var_name = "x"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
         ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
+
     }
     for(int i = sequence_pair_t::sequence_n+1;i<=2*sequence_pair_t::sequence_n; ++i){
         string var_name = "x"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
         ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
+    }
+    for(int i = 0; i<sequence_n; ++i){
+        coef_v[i] = coef_h[i] = 1;
     }
     //prepare coefficients
     for(int i = 1; i<2*sequence_n; ++i){
@@ -262,28 +282,7 @@ pair<bool, vector<vec2d_t>> sequence_pair_t::find_position(int overlap_h, int ov
 }
 
 
-void sequence_pair_t::set_fix_sequence() {
-    vector<int> v_map(sequence_pair_t::sequence_n),h_map(sequence_pair_t::sequence_n);
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        v_map[v_sequence[i]] = i;
-        h_map[h_sequence[i]] = i;
-    }
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        for(int j = 0; j<i; ++j){ //j<i
-            if(this->seq_is_fix[i]==0||this->seq_is_fix[j]==0){continue;}
-            int x_i = static_cast<int>(sequence_pair_t::seq_fixed_map[i]->get_left_lower().get_x());
-            int x_j = static_cast<int>(sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_x());
-            int y_i = static_cast<int>(sequence_pair_t::seq_fixed_map[i]->get_left_lower().get_y());
-            int y_j = static_cast<int>(sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_y());
-            if(x_i<x_j && h_map[i]<h_map[j]&&v_map[i]<v_map[j]){ //i is left to j -> has to be <i, j>, <i, j>
-                std::swap(h_sequence[h_map[i]], h_sequence[h_map[j]]);
-            }
-            if(y_i<y_j && h_map[i]>h_map[j]&&v_map[i]<v_map[j]){ //i is below to j -> has to be <j, i>, <i, j>
-                std::swap(h_sequence[v_map[i]], h_sequence[v_map[j]]);
-            }
-        }
-    }
-}
+
 
 void sequence_pair_t::sequence_pair_validation(vector<vec2d_t> res) {
     vector<std::pair<rect_t, std::string>> rects;
@@ -401,13 +400,13 @@ void sequence_pair_t::swap_h(int a, int b) {
 }
 
 void sequence_pair_t::print_inline() {
-    cout<<"[";
+    cout<<"v: [";
     for(int i = 0; i<this->v_sequence.size(); ++i){
         cout<< v_sequence[i];
         if(i!=this->v_sequence.size()-1){cout<<", ";}
     }
     cout<<"] ";
-    cout<<"[";
+    cout<<"h: [";
     for(int i = 0; i<this->h_sequence.size(); ++i){
         cout<< h_sequence[i];
         if(i!=this->h_sequence.size()-1){cout<<", ";}
@@ -420,6 +419,22 @@ void sequence_pair_t::print_shapes() {
     for(int i = 0; i<sequence_n; ++i){
         cout<< "i: "<< i<<" "<<modules_wh[i].get_x()<<" "<<modules_wh[i].get_y()<<endl;
     }
+}
+
+void sequence_pair_t::set_vi(int i, int x) {
+    this->v_sequence[i]  = x;
+}
+
+void sequence_pair_t::set_hi(int i , int x) {
+    this->h_sequence[i]  =x;
+}
+
+int sequence_pair_t::get_vi(int i) {
+    return this->v_sequence[i];
+}
+
+int sequence_pair_t::get_hi(int i) {
+    return this->h_sequence[i];
 }
 
 
@@ -441,81 +456,305 @@ void sequence_pair_enumerator_t::fill_seeds(int x) {
 }
 
 sequence_pair_enumerator_t::sequence_pair_enumerator_t() {
+    this->fix_n = chip_t::get_fixed_modules().size();
+    this->soft_n = chip_t::get_soft_modules().size();
     this->seed.resize(sequence_pair_t::sequence_n);
+    this->legal_pairs.resize(sequence_pair_t::sequence_n);
+    this->fix_sequence_v.resize(fix_n);
+    this->fix_sequence_h.resize(fix_n);
+    for(auto& e:legal_pairs){
+        e.resize(sequence_pair_t::sequence_n);
+    }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         seed[i] = i;
     }
     seed_need_n = 0;
+    this->soft_seq_interval.resize(soft_n);
+    set_fix_sequence();
+
+    cout<< "got fix sequence: "<<endl;
+    cout<<"V: ";for(auto& e:this->fix_sequence_v){cout<<e<<" ";}cout<<endl;
+    cout<<"H: ";for(auto& e:this->fix_sequence_h){cout<<e<<" ";}cout<<endl;
+
 }
 
 void sequence_pair_enumerator_t::generate_valid_seq(int x) {
-    int continuous_v_fail = 0;
-    int continuous_h_fail = 0;
-    const int tolerance_v = 5;
-    const int jump_distance = 50;
 
-    this->valid_seq.clear();
+    //this->valid_seq.clear();
     for(int i = 0; i<seeds.size(); ++i){
         bool continuous_fail = false;
-        for(int j = 0; j<seeds.size(); ++j){
-            seq.set_h(seeds[i]);seq.set_v(seeds[j]);
-            pair<bool,floorplan_t> success_fp = seq.get_fp(); //try if the sequence pair could be a legal fp
-            if(success_fp.first==false){continue;}
+        for(int j = 0; j<seeds.size(); ++j) {
+            seq.set_h(seeds[i]);
+            seq.set_v(seeds[j]);
+            pair<bool, floorplan_t> success_fp = seq.get_fp(); //try if the sequence pair could be a legal fp
+            if (success_fp.first == false) { continue; }
 
-            this->valid_seq.push_back(seq);
-            if(valid_seq.size()>=x){return;}
+//            this->valid_seq.push_back(seq);
+//            if (valid_seq.size() >= x) { return; }
 
-            if(success_fp.first==false){continuous_v_fail++;}
-
-//            if(continuous_v_fail==tolerance_v){
-//                continuous_fail = true;
-//                break;
-//            }
         }
-        continuous_v_fail = 0;
-//        if(continuous_fail){
-//            continuous_h_fail++;
-//        }
-//        if(continuous_h_fail){
-//            continuous_h_fail++;
-//            i+=jump_distance;
-//        }
     }
 }
 
 void sequence_pair_enumerator_t::print_all_valid_seq() {
-    for(auto& valid_sequence:this->valid_seq){
-        valid_sequence.print();
-    }
+//    for(auto& valid_sequence:this->valid_seq){
+//        valid_sequence.print();
+//    }
 }
 
 vector<sequence_pair_t> sequence_pair_enumerator_t::get_all_valid_seq() {
-    return this->valid_seq;
+    //return this->valid_seq;
+    return {};
 }
 
-void sequence_pair_enumerator_t::change_size() {
-
-    for(int i = 0; i<chip_t::get_total_module_n(); ++i){
-        if(sequence_pair_t::seq_is_fix[i]){
-            seq.modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
-        }
-        else{
-            vector<vec2d_t> shapes = seq.find_w_h(sequence_pair_t::seq_soft_map[i]->get_area());
-            int id = static_cast<int>(rand())%shapes.size();
-            seq.modules_wh[i] = shapes[id];
-        }
+void sequence_pair_enumerator_t::change_size_for_i(int i){
+    if(sequence_pair_t::seq_is_fix[i]){
+        seq.modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
+    }
+    else{
+        vector<vec2d_t> shapes = seq.find_w_h(sequence_pair_t::seq_soft_map[i]->get_area());
+        int id = static_cast<int>(rand())%shapes.size();
+        seq.modules_wh[i] = shapes[id];
     }
 }
 
 void sequence_pair_enumerator_t::seq_randomize() {
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        int x = rand()%sequence_pair_t::sequence_n;
-        seq.swap_h(i, x);
+    for(int i = 0; i<soft_n; ++i){
+        change_size_for_i(i);
     }
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        int x = rand()%sequence_pair_t::sequence_n;
-        seq.swap_v(i, x);
+    for(int i = 0; i<soft_n; ++i){
+        this->find_illegal_pair_for_i(i);
+        search_legal_perm_in_fix(i);
     }
+
+    vector<int> upd_h, upd_v;
+    vector<vector<int>> fix_bucket_v(fix_n+1), fix_bucket_h(fix_n+1);
+    for(int i = 0; i<soft_n; ++i){
+        int vL = this->soft_seq_interval[i][0];
+        int vR = this->soft_seq_interval[i][1];
+        int hL = this->soft_seq_interval[i][2];
+        int hR = this->soft_seq_interval[i][3];
+        if(vL==vR){
+            fix_bucket_h[0].push_back(i);
+            fix_bucket_v[0].push_back(i);
+            continue;
+        }
+        int decided_v = sample_from_interval(vL+1, vR+1);
+        int decided_h = sample_from_interval(hL+1, hR+1);
+        fix_bucket_v[decided_v].push_back(i);
+        fix_bucket_h[decided_h].push_back(i);
+    }
+    for(auto& e:fix_bucket_h){randomize(e);}
+    for(auto& e:fix_bucket_v){randomize(e);}
+    for(int i = 0; i<fix_n; ++i){
+        for(auto& e:fix_bucket_h[i]){upd_h.push_back(e);}
+        for(auto& e:fix_bucket_v[i]){upd_v.push_back(e);}
+        upd_h.push_back(this->fix_sequence_h[i]);
+        upd_v.push_back(this->fix_sequence_v[i]);
+    }
+    for(auto& e:fix_bucket_h[fix_n]){upd_h.push_back(e);}
+    for(auto& e:fix_bucket_v[fix_n]){upd_v.push_back(e);}
+    this->seq.set_v(upd_v); this->seq.set_h(upd_h);
+    cout<<"finally got : "<<endl;
+    cout<<"V : ";
+    for(auto& e:seq.get_v()){cout<<e<<" ";}cout<<endl;
+    cout<<"H : ";
+    for(auto& e:seq.get_h()){cout<<e<<" ";}cout<<endl;
+}
+
+void sequence_pair_enumerator_t::seq_init() {
+    vector<int> v_init_sequence(sequence_pair_t::sequence_n), h_init_sequence(sequence_pair_t::sequence_n);
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        v_init_sequence[i] = h_init_sequence[i] = i;
+    }
+    this->seq.set_v(v_init_sequence);
+    this->seq.set_h(h_init_sequence);
 }
 
 
+void sequence_pair_enumerator_t::set_fix_sequence() {
+    if(this->fix_n==0){return;}
+    //fix module sort by x and y
+//    vector<int> test_v = {};
+//    vector<int> test_h = {};
+   for(int i =0; i<this->fix_n; ++i){
+       this->fix_sequence_h[i] = this->fix_sequence_v[i] = i+sequence_pair_t::fix_start_idx;
+   }
+    vector<vector<int>> fix_constraint_v(sequence_pair_t::sequence_n, vector<int>(sequence_pair_t::sequence_n, 0));
+    vector<vector<int>> fix_constraint_h(sequence_pair_t::sequence_n, vector<int>(sequence_pair_t::sequence_n, 0));
+    for(int i = sequence_pair_t::fix_start_idx; i<sequence_pair_t::sequence_n; ++i) {
+        for (int j = sequence_pair_t::fix_start_idx; j < sequence_pair_t::sequence_n; ++j) {
+            if (i == j) { continue; }
+            int ix = seq.seq_fixed_map[i]->get_left_lower().get_x();
+            int iy = seq.seq_fixed_map[i]->get_left_lower().get_y();
+            int jx = seq.seq_fixed_map[j]->get_left_lower().get_x();
+            int jy = seq.seq_fixed_map[j]->get_left_lower().get_y();
+            int iw = seq.seq_fixed_map[i]->get_size().get_x();
+            int ih = seq.seq_fixed_map[i]->get_size().get_y();
+            if (ix + iw <= jx) {
+                cout<<"fix h : "<< i<<" "<<j<<endl;
+                fix_constraint_h[i][j] = 1;
+            }
+            if (iy + ih <= jy) {
+                cout<<"fix v : "<< i<<" "<<j<<endl;
+                fix_constraint_v[i][j] = 1;
+            }
+        }
+    }
+    //now insert fix module to sequence
+    vector<int> upd_v, upd_h, v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
+    for(int i = sequence_pair_t::fix_start_idx; i<sequence_pair_t::sequence_n; ++i) {
+        for(int j = 0; j<upd_v.size(); ++j){
+            v_map[upd_v[j]] = h_map[upd_h[j]] = j;
+        }
+        bool inserted = false;
+        for(int j = 0; j<=upd_v.size()&&!inserted; ++j){
+            for(int k = 0; k<=upd_h.size()&&!inserted; ++k){
+                bool ok = true;
+                for(int p = sequence_pair_t::fix_start_idx; p<i; ++p){ // check all elements in squence
+                    int p_id_v = v_map[p], p_id_h = h_map[p];
+                    if(j<=p_id_v&&k<=p_id_h){ //V[i, p], H[i, p] then need i->p in horizontal constraints
+                        if(fix_constraint_h[i][p]){continue;}
+                        else{ok = false; break;}
+                    }
+
+                    if(j>p_id_v&&k>p_id_h){ //V[p, i], H[p, i] then need p->i in horizontal constraints
+                        if(fix_constraint_h[p][i]){continue;}
+                        else{ok = false; break;}
+                    }
+
+                    if(j<=p_id_v&&k>p_id_h){ //V[i, p], H[p, i] then need i->p in vertical constraints
+                        if(fix_constraint_v[i][p]){continue;}
+                        else{ok = false; break;}
+                    }
+
+                    if(j>p_id_v&&k<=p_id_h){ //V[p,i], H[i, p] then need p->i in vertical constraints
+                        if(fix_constraint_v[p][i]){continue;}
+                        else{ok = false; break;}
+                    }
+                }
+                if(ok){
+                    upd_v.insert(upd_v.begin()+j, i);
+                    upd_h.insert(upd_h.begin()+k, i);
+                    inserted = true;
+                }
+            }
+        }
+    }
+
+    cout<<"V :";for(auto& e:upd_v){cout<<e<<" ";}cout<<endl;
+    cout<<"H :";for(auto& e:upd_h){cout<<e<<" ";}cout<<endl;
+    this->fix_sequence_v = upd_v;
+    this->fix_sequence_h = upd_h;
+}
+
+std::set<int> sequence_pair_enumerator_t::random_choose(int upb, int n) {
+    std::set<int> selected_fix_id;
+    while(selected_fix_id.size()<n){
+        int id = rand()%upb;
+        selected_fix_id.insert(id);
+    }
+    return selected_fix_id;
+}
+
+void sequence_pair_enumerator_t::find_illegal_pair_for_i(int i) {
+    int i_h = this->seq.modules_wh[i].get_x();
+    int i_w = this->seq.modules_wh[i].get_y();
+    //cout<< i_w<<" "<<i_h<<endl;
+    for(int j = sequence_pair_t::fix_start_idx; j<sequence_pair_t::sequence_n; ++j){
+        this->legal_pairs[i][j].clear();
+        int fix_x = sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_x();
+        int fix_y = sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_y();
+        int fix_w = sequence_pair_t::seq_fixed_map[j]->get_size().get_x();
+        int fix_h = sequence_pair_t::seq_fixed_map[j]->get_size().get_y();
+        if(fix_x-i_w<0){
+            this->legal_pairs[i][j].push_back(0); //left
+            cout<< i<<" "<<j<<" left"<<endl;
+        }
+        if(fix_x+fix_w+i_w>static_cast<int>(chip_t::get_width())){
+            this->legal_pairs[i][j].push_back(1); //right
+            cout<< i<<" "<<j<<" right"<<endl;
+        }
+        if(fix_y+fix_h+i_h>static_cast<int>(chip_t::get_height())){
+            this->legal_pairs[i][j].push_back(2); //upper
+            cout<< i<<" "<<j<<" top"<<endl;
+        }
+        if(fix_y-i_h<0){
+            this->legal_pairs[i][j].push_back(3); //bottom
+            cout<< i<<" "<<j<<" bottom"<<endl;
+        }
+    }
+
+}
+
+void sequence_pair_enumerator_t::search_legal_perm_in_fix(int soft_i) {
+    int vL = -1, vR = fix_n, hL = -1, hR = fix_n;
+    vector<int> v_fix_map(sequence_pair_t::sequence_n), h_fix_map(sequence_pair_t::sequence_n);
+    for(int i = 0; i<this->fix_sequence_v.size(); ++i){
+        h_fix_map[fix_sequence_h[i]] = v_fix_map[fix_sequence_v[i]] = i;
+    }
+    for(int i = sequence_pair_t::fix_start_idx; i<sequence_pair_t::sequence_n; ++i){
+        int fix_id_v = v_fix_map[i], fix_id_h = h_fix_map[i];
+        int x = rand()%2;
+        for(int j = 0; j<this->legal_pairs[soft_i][i].size(); ++j){
+            if(this->legal_pairs[soft_i][i][j]==1){ //right
+                //cant be V:[F, S], H: [F, S]
+                if(vR<=fix_id_v||hR<=fix_id_h){continue;}
+                if(fix_id_v>vL && x){
+                    vR = std::min(vR, fix_id_v);
+                }
+                if(hL<fix_id_h && !x){
+                    hR = std::min(hR, fix_id_h);
+                }
+            }
+            else if(this->legal_pairs[soft_i][i][j]==0){ //left
+                if(vL>fix_id_v||hL>fix_id_h){continue;}
+                //cant be V:[S, F], H: [S, F]
+                if(fix_id_v<vR&&x){
+                    vL = std::max(vL, fix_id_v);
+                }
+                if(fix_id_h<hR&&!x){
+                    hL = std::max(hL, fix_id_h);
+                }
+            }
+            else if(this->legal_pairs[soft_i][i][j]==2){ //top
+                if(vR<=fix_id_v||hL>fix_id_h){continue;}
+                //cant be V:[F, S], H: [S, F]
+                if(fix_id_v>vL&&x){
+                    vR = std::min(vR, fix_id_v);
+                }
+                if(fix_id_h<hR&&!x){
+                    hL = std::max(hL, fix_id_h);
+                }
+            }
+            else if(this->legal_pairs[soft_i][i][j]==3){ //bottom
+                if(vL>fix_id_v||hR<=fix_id_h){continue;}
+                // cant be V: [S, F] H:[F,S]
+                if(vR>fix_id_v&&x){
+                    vL = std::max(vL, fix_id_v);
+                }
+                if(hL<fix_id_h&&!x){
+                    hR = std::min(hR, fix_id_h);
+                }
+
+            }
+        }
+    }
+    //cout<< vL<<" "<<vR<<" "<<hL<<" "<<hR<<endl;
+    this->soft_seq_interval[soft_i] = {vL, vR, hL, hR};
+    //this->soft_seq_interval[soft_i] = {-1, fix_n,-1, fix_n};
+}
+
+int sequence_pair_enumerator_t::sample_from_interval(int L, int R) {
+    int n = R-L;
+    int x = rand()%n; //x -> [0, n)
+    return x+L; //[L, R)
+}
+
+void sequence_pair_enumerator_t::randomize(vector<int> &v) {
+    int n = v.size();
+    for(int i = 0; i<v.size(); ++i){
+        int x = rand()%n;
+        std::swap(v[i], v[x]);
+    }
+}
