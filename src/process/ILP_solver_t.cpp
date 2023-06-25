@@ -72,7 +72,9 @@ void ILP_solver_t::set_variable_double_range(int var_i, int lb, int ub) {
 
     glp_set_col_kind(ILP, var_i, GLP_IV);
 }
-
+void ILP_solver_t::set_variable_BV(int var_i){
+    glp_set_col_kind(ILP, var_i, GLP_BV);
+}
 void ILP_solver_t::set_obj_coef(vector<int> coef) {
     for(int i = 1; i<=this->var_n; ++i){
         glp_set_obj_coef(this->ILP, i, coef[i]);

@@ -45,6 +45,8 @@ public:
     void load();
 
     bool get_is_invalid();
+
+    void set_variable_BV(int var_i);
 };
 
 

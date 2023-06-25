@@ -5,27 +5,30 @@
 #include "process/solver_t.h"
 #include "output_data/output_handler_t.h"
 #include "output_data/output_utility_t.h"
-
+#include "process/sequence_pair_t.h"
 
 int main(/*arg*/){
     std::fstream input_file;
     std::fstream output_file;
 
-    chip_t::file_input("");//fstream
+    //chip_t::file_input("../../testcase/custom-input9.txt");//fstream
+    chip_t::file_input("../../testcase/case01-input.txt");//fstream
+    sequence_pair_t::init();
+    sequence_pair_enumerator_t sqen;
+    sqen.seq.v_sequence = sqen.seq.h_sequence = {3,2};
+    sqen.set_only_fix();
+    sqen.seq.v_sequence=  {0,3,2,1};
+    sqen.seq.h_sequence=  {2,1,0,3};
+    //bool success = sqen.seq.add_soft_process(0);
+//    std::cout<< success<<std::endl;
+    sqen.seq.print_inline();
+    auto [ok, pos] = sqen.seq.find_position(0,0);
 
-    floorplanning_t::init();
-    solver_t solver;
-    solver.run();
-    floorplanning_t fp = solver.get_best_fp();
-    output_handler_t::set_FP(solver.get_best_fp());
-
-    output_file.open("", std::ios::out | std::ios::trunc);
-    output_file << "WHPL " << output_handler_t::WHPL();
-
-    for (output_utility_t& output_utility : output_handler_t::to_real()) {
-        output_file << output_utility.to_string();
+    std::cout<<ok<<std::endl;
+    if(ok){
+        sqen.seq.sequence_pair_validation(pos);
+        fgetc(stdin);
     }
-    output_file.close();
-    std::cout<<"Press any key to continue"<<std::endl;
-    fgetc(stdin);
+
+    //seq.print_soft_inline();
 }
