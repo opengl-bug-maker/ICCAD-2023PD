@@ -48,13 +48,12 @@ public:
     vector<vec2d_t> modules_pos;
     pair<bool, vector<vec2d_t>> find_position(int,int);
     void build_constraint_graph();
-
+    void change_size(int);
 
     //essential
     pair<bool, floorplan_t> get_fp();
     bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t);
     pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
-    bool add_soft_process(int);
 
     //get & set
     void set_v(std::vector<int>);
@@ -80,6 +79,8 @@ public:
     pair<bool, vector<vec2d_t>> find_soft_position(int overlap_h, int overlap_v);
 
     void build_constraint_graph_soft();
+
+    bool add_soft_process(int);
 };
 
 
