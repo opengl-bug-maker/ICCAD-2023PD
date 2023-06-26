@@ -2,7 +2,7 @@ file(GLOB SRC_FILE *.cpp *.c)
 file(GLOB HEADER_FILE *.hpp *.h)
 
 set(SRC_FILE ${SRC_FILE})
-set(HEADER_FILE ${HEADER_FILE} sequence_pair_t.h sequence_pair_t.cpp ILP_solver_t.cpp ILP_solver_t.h edge_t.cpp edge_t.h)
+set(HEADER_FILE ${HEADER_FILE} sequence_pair_t.h sequence_pair_t.cpp ILP_solver_t.cpp ILP_solver_t.h edge_t.cpp edge_t.h timer.cpp timer.h sequence_pair_enumerator_t.cpp sequence_pair_enumerator_t.h)
 
 
 set(glpk_prefix ${CMAKE_SOURCE_DIR}/glpk-5.0)

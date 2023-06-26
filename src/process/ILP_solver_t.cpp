@@ -11,7 +11,11 @@ using std::endl;
 ILP_solver_t::ILP_solver_t(){
 }
 void ILP_solver_t::init(string name, int constraints_n, int variable_n){
-    if(constraints_n==0||variable_n==0){
+//    if(constraints_n==0||variable_n==0){
+//        this->invalid_input = true;
+//        return;
+//    }
+    if(variable_n==0){
         this->invalid_input = true;
         return;
     }
@@ -19,7 +23,7 @@ void ILP_solver_t::init(string name, int constraints_n, int variable_n){
     this->ILP = glp_create_prob();
     glp_set_prob_name(this->ILP, name.c_str());
 
-    glp_add_rows(this->ILP, constraints_n);
+    glp_add_rows(this->ILP, constraints_n+1);
     glp_add_cols(this->ILP, variable_n);
     var_n = variable_n;
 
