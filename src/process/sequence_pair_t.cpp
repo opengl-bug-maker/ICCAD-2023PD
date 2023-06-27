@@ -768,4 +768,16 @@ void sequence_pair_t::wire_length_predict(bool minimize_wirelength) {
     this->predicted_wirelength = sum;
 }
 
+floorplan_t sequence_pair_t::to_fp() {
+    floorplan_t ret;
+    bool success = this->find_position(true, true, 0,0);
+    if(this->is_completed()==false||success==false){
+        return ret;
+    }
+    for(int i = 0; i<soft_n; ++i){
+        ret.place_soft_module(i, {this->positions[i]},{this->modules_wh[i]});
+    }
+    return ret;
+}
+
 

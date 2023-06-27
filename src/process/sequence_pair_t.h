@@ -55,6 +55,7 @@ public:
     pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
     bool add_soft_process(int);
     void wire_length_predict(bool);
+    floorplan_t to_fp();
 
 
     //subfunctions
