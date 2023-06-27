@@ -9,8 +9,13 @@ using std::cout;
 using std::endl;
 
 
-bool solver_t::run() {
-    return false;
+void solver_t::run() {
+    sequence_pair_t::init();
+    floorplan_t::init();
+    sequence_pair_t sequence_pair;
+    bool success = sequence_pair.add_soft_process(0);
+    floorplan_t fp = sequence_pair.to_fp();
+    this->best_fp = fp;
 }
 
 void solver_t::print_info(bool) {

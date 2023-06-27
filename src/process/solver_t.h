@@ -23,7 +23,7 @@ public:
     void generate_seq_rand();
     //essential functions
     solver_t();
-    bool run();
+    void run();
     void print_info(bool);
     vector<sequence_pair_t> valid_sequence_pairs;
     int find_valid_seq_pair(int); //number of valid seq
