@@ -25,10 +25,10 @@ class ILP_solver_t {
     double* set_val_a;
     bool invalid_input = false;
 public:
-    int set_n = 0,set_id;
+    int set_n = 0;
     vector<int> set_i,set_j,set_val; //due to 1-index
     glp_prob *ILP;
-    int constraints_n;
+    int constraints_n = 0;
     int constraint_i = 1;
     int var_n;
     ILP_solver_t();
