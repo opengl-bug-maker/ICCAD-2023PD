@@ -155,11 +155,13 @@ void sequence_pair_t::build_constraint_graph() {
 
 bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
     build_constraint_graph();
-    //int constraint_n = this->constraint_graph_h.size()+this->constraint_graph_v.size()+chip_t::get_fixed_modules().size()*2;
-    int constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 10*this->connections.size();
+    int constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2;
     int constraint_i = 1; //constraint_counter
-    int set_n = 2*(this->constraint_graph_h.size()+this->constraint_graph_v.size())+2*chip_t::get_fixed_modules().size();
-    int variable_n = 2*sequence_n + 4*this->connections.size();
+    int variable_n = 2*sequence_n;
+    if(minimize_wirelength){
+        variable_n+=4*this->connections.size();
+        constraint_n+=10*this->connections.size();
+    }
     int x_module_offset = 1;
     int y_module_offset = 1+sequence_n;
     int x_edge_offset_l = 1+2*sequence_n;
@@ -175,8 +177,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     ILP_solver.set_min();
 
 
-    vector<int> set_i(set_n+1),set_j(set_n+1),set_val(set_n+1); //due to 1-index
-    vector<int> coef(variable_n+1);
+    vector<int> coef(variable_n+1, 0);
 
     //set constraints to place modules
     //if horizontal constraint graph got i->j them x_j - x_i >= w
@@ -275,7 +276,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         //ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
         ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
     }
-    for(int i = 0; i<connections.size(); ++i){
+    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
         string var_name1 = "x_e_l"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, x_edge_offset_l+i, var_name1.c_str());
         ILP_solver.set_variable_double_range(x_edge_offset_l+i, 0.0, chip_t::get_width());
@@ -293,7 +294,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         ILP_solver.set_variable_double_range(y_edge_offset_r+i, 0.0, chip_t::get_height());
     }
     //set coefficient of the objective function
-    for(int i = 0; i<connections.size(); ++i){
+    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
         coef[i+x_edge_offset_r] = connections[i].w;
         coef[i+x_edge_offset_l] = -connections[i].w;
         coef[i+y_edge_offset_r] = connections[i].w;
