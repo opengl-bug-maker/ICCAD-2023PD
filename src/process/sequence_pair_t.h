@@ -29,14 +29,16 @@ public:
     //static variables
     static int fix_n;
     static int soft_n;
+    static int sequence_n; //number of sequences number
+
+    static int fix_start_idx; //the sequence number of the first fix module
     static vector<edge_t> connections; //all edges (only one direction)
     static vector<vector<int>> connections_VE; //VE graph
-    static int fix_start_idx; //the sequence number of the first fix module
     static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
     static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
-    static int sequence_n; //number of sequences number
+    static vector<double> modules_area;
     static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
     static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
 
@@ -96,6 +98,7 @@ public:
     vector<vec2d_t> positions;
 
 
+    void set_size(int i, int j);
 };
 
 
