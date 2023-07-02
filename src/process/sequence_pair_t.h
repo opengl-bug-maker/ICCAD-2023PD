@@ -34,6 +34,7 @@ public:
     static int fix_start_idx; //the sequence number of the first fix module
     static vector<edge_t> connections; //all edges (only one direction)
     static vector<vector<int>> connections_VE; //VE graph
+    static vector<int> deg_w;
     static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
     static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
@@ -48,7 +49,7 @@ public:
 
     //initialization
     void set_only_fix();
-    void set_modules_size();
+    void init_modules_size();
     void set_fix_sequence();
     void set_is_in_seq();
 
@@ -56,7 +57,7 @@ public:
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
     bool add_soft_process(int);
-    void wire_length_predict(bool);
+    void predict_wire_length(bool);
     floorplan_t to_fp();
 
 
@@ -65,6 +66,7 @@ public:
     bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t,int);
     void build_constraint_graph();
     void change_size(int);
+    void load_best_sequence();
 
     //get & set
     void set_v(std::vector<int>);
@@ -90,15 +92,16 @@ public:
 
     //properties
     long long predicted_wirelength = 1e13;
-    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
+    long long best_wirelength = 1e15;
+    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
-    vector<vec2d_t> modules_wh;
+    vector<vec2d_t> modules_wh, best_modules_wh;
     vector<vec2d_t> modules_pos;
     vector<vec2d_t> positions;
 
 
-    void set_size(int i, int j);
+    void set_module_size(int i, int j);
 };
 
 

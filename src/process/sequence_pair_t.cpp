@@ -21,6 +21,7 @@ unordered_map<const module_t*, int> sequence_pair_t::soft_module_to_id_m;
 unordered_map<const module_t*, int> sequence_pair_t::fix_module_to_id_m;
 vector<edge_t> sequence_pair_t::connections;
 vector<vector<int>> sequence_pair_t::connections_VE;
+vector<int> sequence_pair_t::deg_w;
 vector<double> sequence_pair_t::modules_area;
 using std::cout;
 using std::endl;
@@ -42,6 +43,7 @@ void sequence_pair_t::init() {
     sequence_pair_t::modules_area.resize(chip_t::get_total_module_n());
 
     connections_VE.resize(sequence_n);
+    deg_w.resize(sequence_n);
     for(int i = 0; i<sequence_n; ++i){connections_VE[i].resize(sequence_n);}
 
 
@@ -71,7 +73,7 @@ void sequence_pair_t::init() {
 }
 
 sequence_pair_t::sequence_pair_t() {
-    set_modules_size();
+    init_modules_size();
     set_is_in_seq();
     set_only_fix();
 }
@@ -108,7 +110,7 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
 //            }
 //        }
 //    }
-    int jump = std::max(1, static_cast<int>(sqrt(area)-from)/3);
+    int jump = std::max(1, static_cast<int>(sqrt(area)-from)/2);
     for(int i = from; i<= sqrt(area); i+=jump){ //i will be the short edge
         //cout<< area<<" "<<i<<" "<<ceil(static_cast<float>(area)/static_cast<float>(i))<<endl;
         int x = i, y = ceil(static_cast<float>(area)/static_cast<float>(i));
@@ -355,6 +357,7 @@ void sequence_pair_t::build_graph() {
                     neighbor_i = soft_module_to_id_m[neighbor.first];
                 }
                 connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
+                deg_w[i]+=neighbor.second;
                 if(i>neighbor_i){
                     connections.push_back({i, neighbor_i, neighbor.second});
                 }
@@ -373,6 +376,7 @@ void sequence_pair_t::build_graph() {
                     neighbor_i = soft_module_to_id_m[neighbor.first];
                 }
                 connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
+                deg_w[i]+=neighbor.second;
                 if(i>neighbor_i){
                     connections.push_back({i, neighbor_i, neighbor.second});
                 }
@@ -484,9 +488,19 @@ int sequence_pair_t::get_vi(int i) {
 int sequence_pair_t::get_hi(int i) {
     return this->h_sequence[i];
 }
-
 bool sequence_pair_t:: add_soft_process(int i) {
-    if(i>=fix_start_idx){return true;}
+    //TODO: early stop, pruning
+    if(i>=fix_start_idx){
+        this->predict_wire_length(true);
+        if(this->predicted_wirelength < this->best_wirelength){
+            this->best_wirelength = this->predicted_wirelength;
+            this->best_v_sequence = this->v_sequence;
+            this->best_h_sequence = this->h_sequence;
+            this->best_modules_wh = this->modules_wh;
+            cout<< "current best wirelength : "<< this->best_wirelength<<endl;
+        }
+        return true;
+    }
     if(v_sequence.size()==0){ //in case there are no fix module
         v_sequence.push_back(i);
         h_sequence.push_back(i);
@@ -501,36 +515,193 @@ bool sequence_pair_t:: add_soft_process(int i) {
         return false;
     }
 
-    for(int j = 0; j<=v_sequence.size(); ++j){
-        for(int k = 0; k<=h_sequence.size(); ++k){
-            bool success = false;
-            v_sequence.insert(v_sequence.begin()+j, i);
-            h_sequence.insert(h_sequence.begin()+k, i);
-            this->is_in_seq[i] = 1;
-            this->change_size(i);
-            success = this->find_position(false,0,0, 0);
-            if(success){
-                if(add_soft_process(i+1)){return true;}
+    if(i<5){
+        bool fnd = false;
+        for(int p = 0; p<1; ++p){
+            this->set_module_size(i, 2);
+            //this->change_size(i);
+            long long _current_wirelength = 1e16;
+            pair<int,int> best_position;
+            bool fnd_best = false;
+            for(int j = 0; j<=v_sequence.size(); ++j){
+                for(int k = 0; k<=h_sequence.size(); ++k){
+                    bool success = false;
+                    v_sequence.insert(v_sequence.begin()+j, i);
+                    h_sequence.insert(h_sequence.begin()+k, i);
+                    this->is_in_seq[i] = 1;
+                    success = this->find_position(false,false,0, 0);
+                    if(success){
+                        this->predict_wire_length(false);
+                        long long current_wirelength = this->predicted_wirelength;
+                        long long unplaced_wirelength = 0;
+                        double deg_sum = 0;
+                        for(int q = 0; q<sequence_n; ++q){
+                            if(seq_is_fix[q]==false){
+                                unplaced_wirelength+= (sequence_pair_t::deg_w[q]/2) * (0.15*(chip_t::get_width()+chip_t::get_height()));
+                            }
+                            deg_sum+=deg_w[q];
+                        }
+                        if(unplaced_wirelength+current_wirelength<this->best_wirelength){
+                            bool x = add_soft_process(i+1);
+                            fnd|=x;
+                        }
+                    }
+                    this->is_in_seq[i] = 0;
+                    v_sequence.erase(v_sequence.begin()+j);
+                    h_sequence.erase(h_sequence.begin()+k);
+//                    if(fnd){return true;}
+                }
             }
-            this->is_in_seq[i] = 0;
-            v_sequence.erase(v_sequence.begin()+j);
-            h_sequence.erase(h_sequence.begin()+k);
         }
+        return fnd;
     }
-    return false;
+    else{
+        bool fnd = false;
+        for(int p = 0; p<1; ++p){
+            //this->set_module_size(i, p);
+            this->change_size(i);
+            long long current_wirelength = 1e16;
+            pair<int,int> best_position;
+            bool fnd_in_p = false;
+            for(int j = 0; j<=v_sequence.size(); ++j){
+                for(int k = 0; k<=h_sequence.size(); ++k){
+                    bool success = false;
+                    v_sequence.insert(v_sequence.begin()+j, i);
+                    h_sequence.insert(h_sequence.begin()+k, i);
+                    this->is_in_seq[i] = 1;
+                    success = this->find_position(false,false,0, 0);
+                    if(success){
+                        this->predict_wire_length(false);
+                        if(this->predicted_wirelength < current_wirelength){
+                            current_wirelength = this->predicted_wirelength;
+                            best_position = {j,k};
+                            fnd_in_p = true;
+                        }
+                    }
+                    this->is_in_seq[i] = 0;
+                    v_sequence.erase(v_sequence.begin()+j);
+                    h_sequence.erase(h_sequence.begin()+k);
+                }
+            }
+            if(fnd_in_p){
+                this->is_in_seq[i] = 1;
+                v_sequence.insert(v_sequence.begin()+best_position.first, i);
+                h_sequence.insert(h_sequence.begin()+best_position.second, i);
+
+                long long placed_current_wirelength = this->predicted_wirelength;
+                long long unplaced_wirelength = 0;
+                double deg_sum = 0;
+                for(int q = 0; q<sequence_n; ++q){
+                    if(seq_is_fix[q]==false){
+                        unplaced_wirelength+= (sequence_pair_t::deg_w[q]/2) * (0.1*(chip_t::get_width()+chip_t::get_height()));
+                    }
+                    deg_sum+=deg_w[q];
+                }
+                if(unplaced_wirelength+placed_current_wirelength<this->best_wirelength){
+                    bool x = add_soft_process(i+1);
+                    fnd|=x;
+                }
+                v_sequence.erase(v_sequence.begin()+best_position.first);
+                h_sequence.erase(h_sequence.begin()+best_position.second);
+                this->is_in_seq[i] = 0;
+                if(fnd){
+                    return true;
+                }
+            }
+        }
+        return fnd;
+    }
+
 }
+//bool sequence_pair_t:: add_soft_process(int i) {
+//    //TODO: early stop, pruning
+//    if(i>=fix_start_idx){
+//        this->predict_wire_length(true);
+//        if(this->predicted_wirelength < this->best_wirelength){
+//
+//            this->best_wirelength = this->predicted_wirelength;
+//            this->best_v_sequence = this->v_sequence;
+//            this->best_h_sequence = this->h_sequence;
+//            this->best_modules_wh = this->modules_wh;
+//            cout<< "current best wirelength : "<< this->best_wirelength<<endl;
+//        }
+//        return true;
+//    }
+//    if(v_sequence.size()==0){ //in case there are no fix module
+//        v_sequence.push_back(i);
+//        h_sequence.push_back(i);
+//        this->is_in_seq[i] = 1;
+//        bool success = this->find_position(false,false,0, 0);
+//        if(success){
+//            if(add_soft_process(i+1)){return true;}
+//        }
+//        this->is_in_seq[i] = 0;
+//        v_sequence.pop_back();
+//        h_sequence.pop_back();
+//        return false;
+//    }
+//    bool fnd = false;
+//    for(int p = 0; p<1; ++p){
+//        //this->set_module_size(i, p);
+//        this->change_size(i);
+//        long long current_wirelength = 1e13;
+//        pair<int,int> best_position;
+//        bool fnd_in_p = false;
+//        for(int j = 0; j<=v_sequence.size(); ++j){
+//            for(int k = 0; k<=h_sequence.size(); ++k){
+//                bool success = false;
+//                v_sequence.insert(v_sequence.begin()+j, i);
+//                h_sequence.insert(h_sequence.begin()+k, i);
+//                this->is_in_seq[i] = 1;
+//                success = this->find_position(false,false,0, 0);
+//                if(success){
+//                    this->predict_wire_length(false);
+//                    if(this->predicted_wirelength < current_wirelength){
+//                        current_wirelength = this->predicted_wirelength;
+//                        best_position = {j,k};
+//                        fnd_in_p = true;
+//                    }
+//                }
+//                this->is_in_seq[i] = 0;
+//                v_sequence.erase(v_sequence.begin()+j);
+//                h_sequence.erase(h_sequence.begin()+k);
+//            }
+//        }
+//        if(fnd_in_p){
+//            this->is_in_seq[i] = 1;
+////            long long predicted_unplaced_wirelength = 0;
+////            for(int q = 0; q<soft_n;  ++q){
+////                if(this->is_in_seq[q]==false){
+////                    predicted_unplaced_wirelength+=  ((chip_t::get_width()+chip_t::get_width())*0.2)*(sequence_pair_t::deg_w[q]/2);
+////                }
+////            }
+////            if(current_wirelength + predicted_unplaced_wirelength > this->best_wirelength){
+////                continue;
+////            }
+//            v_sequence.insert(v_sequence.begin()+best_position.first, i);
+//            h_sequence.insert(h_sequence.begin()+best_position.second, i);
+//
+//            bool v = add_soft_process(i+1);
+//
+//            v_sequence.erase(v_sequence.begin()+best_position.first);
+//            h_sequence.erase(h_sequence.begin()+best_position.second);
+//            this->is_in_seq[i] = 0;
+//            if(v){return true;}
+//        }
+//    }
+//    return fnd;
+//}
 
 void sequence_pair_t::change_size(int i) {
     if(sequence_pair_t::seq_is_fix[i]){
         modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
     }
     else{
-        vector<vec2d_t> shapes = find_w_h(sequence_pair_t::seq_soft_map[i]->get_area());
-        int id = static_cast<int>(rand())%shapes.size();
-        modules_wh[i] = shapes[id];
+        int id = static_cast<int>(rand())%sequence_pair_t::soft_area_to_w_h_m[i].size();
+        modules_wh[i] = soft_area_to_w_h_m[i][id];
     }
 }
-void sequence_pair_t::set_size(int i, int j){
+void sequence_pair_t::set_module_size(int i, int j){
     this->modules_wh[i] = sequence_pair_t::soft_area_to_w_h_m[i][j];
 }
 
@@ -618,7 +789,7 @@ void sequence_pair_t::set_only_fix() {
     }
 }
 
-void sequence_pair_t::set_modules_size() {
+void sequence_pair_t::init_modules_size() {
     modules_wh.resize(sequence_pair_t::sequence_n);
     //determine the shape of the modules
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
@@ -674,12 +845,9 @@ bool sequence_pair_t::is_completed() {
     return false;
 }
 
-void sequence_pair_t::wire_length_predict(bool minimize_wirelength) {
+void sequence_pair_t::predict_wire_length(bool minimize_wirelength) {
     bool success = this->find_position(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     vector<vec2d_t> pos = this->positions;
-    if(pos.size()!=sequence_n){
-        return;
-    }
     double sum = 0;
     for(int i = 0; i<connections.size();++i){
         int from = connections[i].from, to = connections[i].to;
@@ -701,6 +869,15 @@ floorplan_t sequence_pair_t::to_fp() {
         ret.place_soft_module(i, {this->positions[i]},{this->modules_wh[i]});
     }
     return ret;
+}
+
+void sequence_pair_t::load_best_sequence() {
+    for(int i = 0; i<is_in_seq.size(); ++i){
+        is_in_seq[i] = 1;
+    }
+    this->v_sequence = this->best_v_sequence;
+    this->h_sequence = this->best_h_sequence;
+    this->modules_wh = this->best_modules_wh;
 }
 
 
