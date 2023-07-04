@@ -28,6 +28,8 @@ public:
 
     void mutation();
 
+
+
     void update_best_sequence_pair();
 
     vector<sequence_pair_t> sequence_pairs;
@@ -35,7 +37,9 @@ public:
     int max_sequences_n,greater_sequence_n, current_sequence_n;
 
 
+    sequence_pair_t crossover_operation();
 
+    void crossover(int n);
 };
 
 

@@ -52,6 +52,7 @@ public:
     void init_modules_size();
     void set_fix_sequence();
     void set_is_in_seq();
+    void set_add_order();
 
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
@@ -97,6 +98,7 @@ public:
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
     vector<vec2d_t> modules_wh, best_modules_wh;
+    vector<int> modules_wh_i;
     vector<vec2d_t> modules_pos;
     vector<vec2d_t> positions;
 

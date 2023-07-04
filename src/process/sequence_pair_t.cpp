@@ -77,6 +77,7 @@ sequence_pair_t::sequence_pair_t() {
     init_modules_size();
     set_is_in_seq();
     set_only_fix();
+    set_add_order();
 }
 
 void sequence_pair_t::set_v(std::vector<int> v_sequence) {
@@ -187,14 +188,14 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<this->constraint_graph_h.size(); ++i){
         int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
         string constraint_name = "h_c"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_h);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w);
         constraint_i++;
     }
     //if vertical constraint graph got i->j them y_j - y_i >= h
     for(int i = 0; i<this->constraint_graph_v.size(); ++i){
         int from = constraint_graph_v[i].from, to = constraint_graph_v[i].to, w = constraint_graph_v[i].w;
         string constraint_name = "v_c"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w+overlap_v);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w);
         constraint_i++;
     }
     //set constraints to fix module
@@ -517,21 +518,37 @@ bool sequence_pair_t:: add_soft_process(int i) {
         return false;
     }
     change_size(this->add_soft_order[i]);
+    //set_module_size(this->add_soft_order[i], 3);
+    vector<pair<long long, vector<int>>> legal_positions;
+    bool fnd = false;
     for(int j = 0; j<=v_sequence.size(); ++j){
         for(int k = 0; k<=h_sequence.size(); ++k){
 
             v_sequence.insert(v_sequence.begin()+j, this->add_soft_order[i]);
             h_sequence.insert(h_sequence.begin()+k, this->add_soft_order[i]);
             this->is_in_seq[this->add_soft_order[i]] = 1;
-            bool success = this->find_position(false,false,0, 0);
+            this->predict_wire_length(false);
+            bool success = (this->predicted_wirelength==-1)?false:true;
             if(success){
-                if(add_soft_process(i+1)){
-                    return true;
-                }
+                legal_positions.push_back({this->predicted_wirelength,{j,k}});
+                fnd = true;
             }
             this->is_in_seq[this->add_soft_order[i]] = 0;
             v_sequence.erase(v_sequence.begin()+j);
             h_sequence.erase(h_sequence.begin()+k);
+        }
+    }
+    std::sort(legal_positions.begin(), legal_positions.end());
+    for(int q = 0; q< legal_positions.size(); ++q){
+        v_sequence.insert(v_sequence.begin()+legal_positions[q].second[0], this->add_soft_order[i]);
+        h_sequence.insert(h_sequence.begin()+legal_positions[q].second[1], this->add_soft_order[i]);
+        this->is_in_seq[this->add_soft_order[i]] = 1;
+        bool success = add_soft_process(i+1);
+        this->is_in_seq[this->add_soft_order[i]] = 0;
+        v_sequence.erase(v_sequence.begin()+legal_positions[q].second[0]);
+        h_sequence.erase(h_sequence.begin()+legal_positions[q].second[1]);
+        if(success){
+            return true;
         }
     }
     return false;
@@ -539,15 +556,17 @@ bool sequence_pair_t:: add_soft_process(int i) {
 
 void sequence_pair_t::change_size(int i) {
     if(sequence_pair_t::seq_is_fix[i]){
-        modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
+        this->modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
     }
     else{
         int id = static_cast<int>(rand())%sequence_pair_t::soft_area_to_w_h_m[i].size();
-        modules_wh[i] = soft_area_to_w_h_m[i][id];
+        this->modules_wh[i] = soft_area_to_w_h_m[i][id];
+        this->modules_wh_i[i] = id;
     }
 }
 void sequence_pair_t::set_module_size(int i, int j){
     this->modules_wh[i] = sequence_pair_t::soft_area_to_w_h_m[i][j];
+    this->modules_wh_i[i] = j;
 }
 
 
@@ -635,7 +654,9 @@ void sequence_pair_t::set_only_fix() {
 }
 
 void sequence_pair_t::init_modules_size() {
-    modules_wh.resize(sequence_pair_t::sequence_n);
+    this->modules_wh.resize(sequence_pair_t::sequence_n);
+    //this->modules_wh_i.resize(sequence_pair_t::sequence_n);
+    this->modules_wh_i.resize(sequence_pair_t::soft_n);
     //determine the shape of the modules
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(sequence_pair_t::seq_is_fix[i]){
@@ -646,6 +667,7 @@ void sequence_pair_t::init_modules_size() {
             vector<vec2d_t> shapes = find_w_h(seq_soft_map[i]->get_area());
             int id = 0;
             this->modules_wh[i] = shapes[id];
+            this->modules_wh_i[i] =0;
         }
     }
 }
@@ -692,6 +714,10 @@ bool sequence_pair_t::is_completed() {
 
 void sequence_pair_t::predict_wire_length(bool minimize_wirelength) {
     bool success = this->find_position(minimize_wirelength,true,0, 0); //need result to calculate wirelength
+    if(success==false){
+        this->predicted_wirelength = -1;
+        return;
+    }
     vector<vec2d_t> pos = this->positions;
     double sum = 0;
     for(int i = 0; i<connections.size();++i){
@@ -723,6 +749,17 @@ void sequence_pair_t::load_best_sequence() {
     this->v_sequence = this->best_v_sequence;
     this->h_sequence = this->best_h_sequence;
     this->modules_wh = this->best_modules_wh;
+}
+
+void sequence_pair_t::set_add_order() {
+    this->add_soft_order.resize(sequence_pair_t::soft_n);
+    vector<double> areas = this->modules_area;
+    for(int i = 0; i<sequence_pair_t::soft_n; ++i){
+        this->add_soft_order[i] = i;
+    }
+    std::sort(this->add_soft_order.begin(), this->add_soft_order.end(), [&](int&a, int& b){
+        return areas[a]>areas[b];
+    });
 }
 
 
