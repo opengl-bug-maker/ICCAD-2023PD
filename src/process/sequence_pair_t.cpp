@@ -9,6 +9,7 @@
 #include <chrono>
 #include <stack>
 #include <queue>
+#include "timer.h"
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -161,8 +162,8 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     int constraint_i = 1; //constraint_counter
     int variable_n = 2*sequence_n;
     if(minimize_wirelength){
-        variable_n+=4*this->connections.size();
-        constraint_n+=10*this->connections.size();
+        variable_n+=4*sequence_pair_t::connections.size();
+        constraint_n+=10*sequence_pair_t::connections.size();
     }
     int x_module_offset = 1;
     int y_module_offset = 1+sequence_n;
@@ -501,196 +502,40 @@ bool sequence_pair_t:: add_soft_process(int i) {
         }
         return true;
     }
+
     if(v_sequence.size()==0){ //in case there are no fix module
-        v_sequence.push_back(i);
-        h_sequence.push_back(i);
-        this->is_in_seq[i] = 1;
+        v_sequence.push_back(this->add_soft_order[i]);
+        h_sequence.push_back(this->add_soft_order[i]);
+        this->is_in_seq[this->add_soft_order[i]] = 1;
         bool success = this->find_position(false,false,0, 0);
         if(success){
             if(add_soft_process(i+1)){return true;}
         }
-        this->is_in_seq[i] = 0;
+        this->is_in_seq[this->add_soft_order[i]] = 0;
         v_sequence.pop_back();
         h_sequence.pop_back();
         return false;
     }
+    change_size(this->add_soft_order[i]);
+    for(int j = 0; j<=v_sequence.size(); ++j){
+        for(int k = 0; k<=h_sequence.size(); ++k){
 
-    if(i<5){
-        bool fnd = false;
-        for(int p = 0; p<1; ++p){
-            this->set_module_size(i, 2);
-            //this->change_size(i);
-            long long _current_wirelength = 1e16;
-            pair<int,int> best_position;
-            bool fnd_best = false;
-            for(int j = 0; j<=v_sequence.size(); ++j){
-                for(int k = 0; k<=h_sequence.size(); ++k){
-                    bool success = false;
-                    v_sequence.insert(v_sequence.begin()+j, i);
-                    h_sequence.insert(h_sequence.begin()+k, i);
-                    this->is_in_seq[i] = 1;
-                    success = this->find_position(false,false,0, 0);
-                    if(success){
-                        this->predict_wire_length(false);
-                        long long current_wirelength = this->predicted_wirelength;
-                        long long unplaced_wirelength = 0;
-                        double deg_sum = 0;
-                        for(int q = 0; q<sequence_n; ++q){
-                            if(seq_is_fix[q]==false){
-                                unplaced_wirelength+= (sequence_pair_t::deg_w[q]/2) * (0.15*(chip_t::get_width()+chip_t::get_height()));
-                            }
-                            deg_sum+=deg_w[q];
-                        }
-                        if(unplaced_wirelength+current_wirelength<this->best_wirelength){
-                            bool x = add_soft_process(i+1);
-                            fnd|=x;
-                        }
-                    }
-                    this->is_in_seq[i] = 0;
-                    v_sequence.erase(v_sequence.begin()+j);
-                    h_sequence.erase(h_sequence.begin()+k);
-//                    if(fnd){return true;}
-                }
-            }
-        }
-        return fnd;
-    }
-    else{
-        bool fnd = false;
-        for(int p = 0; p<1; ++p){
-            //this->set_module_size(i, p);
-            this->change_size(i);
-            long long current_wirelength = 1e16;
-            pair<int,int> best_position;
-            bool fnd_in_p = false;
-            for(int j = 0; j<=v_sequence.size(); ++j){
-                for(int k = 0; k<=h_sequence.size(); ++k){
-                    bool success = false;
-                    v_sequence.insert(v_sequence.begin()+j, i);
-                    h_sequence.insert(h_sequence.begin()+k, i);
-                    this->is_in_seq[i] = 1;
-                    success = this->find_position(false,false,0, 0);
-                    if(success){
-                        this->predict_wire_length(false);
-                        if(this->predicted_wirelength < current_wirelength){
-                            current_wirelength = this->predicted_wirelength;
-                            best_position = {j,k};
-                            fnd_in_p = true;
-                        }
-                    }
-                    this->is_in_seq[i] = 0;
-                    v_sequence.erase(v_sequence.begin()+j);
-                    h_sequence.erase(h_sequence.begin()+k);
-                }
-            }
-            if(fnd_in_p){
-                this->is_in_seq[i] = 1;
-                v_sequence.insert(v_sequence.begin()+best_position.first, i);
-                h_sequence.insert(h_sequence.begin()+best_position.second, i);
-
-                long long placed_current_wirelength = this->predicted_wirelength;
-                long long unplaced_wirelength = 0;
-                double deg_sum = 0;
-                for(int q = 0; q<sequence_n; ++q){
-                    if(seq_is_fix[q]==false){
-                        unplaced_wirelength+= (sequence_pair_t::deg_w[q]/2) * (0.1*(chip_t::get_width()+chip_t::get_height()));
-                    }
-                    deg_sum+=deg_w[q];
-                }
-                if(unplaced_wirelength+placed_current_wirelength<this->best_wirelength){
-                    bool x = add_soft_process(i+1);
-                    fnd|=x;
-                }
-                v_sequence.erase(v_sequence.begin()+best_position.first);
-                h_sequence.erase(h_sequence.begin()+best_position.second);
-                this->is_in_seq[i] = 0;
-                if(fnd){
+            v_sequence.insert(v_sequence.begin()+j, this->add_soft_order[i]);
+            h_sequence.insert(h_sequence.begin()+k, this->add_soft_order[i]);
+            this->is_in_seq[this->add_soft_order[i]] = 1;
+            bool success = this->find_position(false,false,0, 0);
+            if(success){
+                if(add_soft_process(i+1)){
                     return true;
                 }
             }
+            this->is_in_seq[this->add_soft_order[i]] = 0;
+            v_sequence.erase(v_sequence.begin()+j);
+            h_sequence.erase(h_sequence.begin()+k);
         }
-        return fnd;
     }
-
+    return false;
 }
-//bool sequence_pair_t:: add_soft_process(int i) {
-//    //TODO: early stop, pruning
-//    if(i>=fix_start_idx){
-//        this->predict_wire_length(true);
-//        if(this->predicted_wirelength < this->best_wirelength){
-//
-//            this->best_wirelength = this->predicted_wirelength;
-//            this->best_v_sequence = this->v_sequence;
-//            this->best_h_sequence = this->h_sequence;
-//            this->best_modules_wh = this->modules_wh;
-//            cout<< "current best wirelength : "<< this->best_wirelength<<endl;
-//        }
-//        return true;
-//    }
-//    if(v_sequence.size()==0){ //in case there are no fix module
-//        v_sequence.push_back(i);
-//        h_sequence.push_back(i);
-//        this->is_in_seq[i] = 1;
-//        bool success = this->find_position(false,false,0, 0);
-//        if(success){
-//            if(add_soft_process(i+1)){return true;}
-//        }
-//        this->is_in_seq[i] = 0;
-//        v_sequence.pop_back();
-//        h_sequence.pop_back();
-//        return false;
-//    }
-//    bool fnd = false;
-//    for(int p = 0; p<1; ++p){
-//        //this->set_module_size(i, p);
-//        this->change_size(i);
-//        long long current_wirelength = 1e13;
-//        pair<int,int> best_position;
-//        bool fnd_in_p = false;
-//        for(int j = 0; j<=v_sequence.size(); ++j){
-//            for(int k = 0; k<=h_sequence.size(); ++k){
-//                bool success = false;
-//                v_sequence.insert(v_sequence.begin()+j, i);
-//                h_sequence.insert(h_sequence.begin()+k, i);
-//                this->is_in_seq[i] = 1;
-//                success = this->find_position(false,false,0, 0);
-//                if(success){
-//                    this->predict_wire_length(false);
-//                    if(this->predicted_wirelength < current_wirelength){
-//                        current_wirelength = this->predicted_wirelength;
-//                        best_position = {j,k};
-//                        fnd_in_p = true;
-//                    }
-//                }
-//                this->is_in_seq[i] = 0;
-//                v_sequence.erase(v_sequence.begin()+j);
-//                h_sequence.erase(h_sequence.begin()+k);
-//            }
-//        }
-//        if(fnd_in_p){
-//            this->is_in_seq[i] = 1;
-////            long long predicted_unplaced_wirelength = 0;
-////            for(int q = 0; q<soft_n;  ++q){
-////                if(this->is_in_seq[q]==false){
-////                    predicted_unplaced_wirelength+=  ((chip_t::get_width()+chip_t::get_width())*0.2)*(sequence_pair_t::deg_w[q]/2);
-////                }
-////            }
-////            if(current_wirelength + predicted_unplaced_wirelength > this->best_wirelength){
-////                continue;
-////            }
-//            v_sequence.insert(v_sequence.begin()+best_position.first, i);
-//            h_sequence.insert(h_sequence.begin()+best_position.second, i);
-//
-//            bool v = add_soft_process(i+1);
-//
-//            v_sequence.erase(v_sequence.begin()+best_position.first);
-//            h_sequence.erase(h_sequence.begin()+best_position.second);
-//            this->is_in_seq[i] = 0;
-//            if(v){return true;}
-//        }
-//    }
-//    return fnd;
-//}
 
 void sequence_pair_t::change_size(int i) {
     if(sequence_pair_t::seq_is_fix[i]){

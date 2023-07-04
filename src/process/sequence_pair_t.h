@@ -93,7 +93,7 @@ public:
     //properties
     long long predicted_wirelength = 1e13;
     long long best_wirelength = 1e15;
-    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence;
+    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence, add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
     vector<vec2d_t> modules_wh, best_modules_wh;
