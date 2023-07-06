@@ -187,8 +187,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     //set constraints to place modules
     //if horizontal constraint graph got i->j them x_j - x_i >= w
     for(int i = 0; i<this->constraint_graph_h.size(); ++i){
-        int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to;
-        int w = this->seq_is_fix[from]?(this->modules_wh[from].get_x()):width_offset+from;
+        int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to,w = constraint_graph_h[i].w;
         string constraint_name = "h_c"+ std::to_string(i);
         if(this->seq_is_fix[from]){
             ILP_solver.set_constraint_upb(constraint_i, 2, {from+x_module_offset, to+x_module_offset}, {1, -1}, constraint_name, -w);
@@ -289,18 +288,18 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         ILP_solver.set_constraint_upb(constraint_i, 2, {width_offset+i,height_offset+i}, {1, -2}, constraint_name2, 0.0);
         constraint_i++;
     }
-    for(int i = 0; i<soft_n; ++i){
-        string constraint_name1 = "w_h_a"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {height_offset+i,width_offset+i}, {-2, -2}, constraint_name1, -3*sqrt(this->modules_area[i]));
-        constraint_i++;
-    }
+//    for(int i = 0; i<soft_n; ++i){
+//        string constraint_name1 = "w_h_a"+ std::to_string(i);
+//        ILP_solver.set_constraint_upb(constraint_i, 2, {height_offset+i,width_offset+i}, {-1, -1}, constraint_name1, -1.5*sqrt(this->modules_area[i]));
+//        constraint_i++;
+//    }
     //set boundaires
     for(int i = 0; i<soft_n; ++i){
         string constraint_name1 = "bd_x"+ std::to_string(i);
         string constraint_name2 = "bd_y"+ std::to_string(i);
         ILP_solver.set_constraint_upb(constraint_i, 2, {x_module_offset+i,width_offset+i}, {1, 1}, constraint_name1, chip_t::get_width());
         constraint_i++;
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_module_offset+i,height_offset+i}, {1, -1}, constraint_name2, 0.0);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {y_module_offset+i,height_offset+i}, {1, 1}, constraint_name2, chip_t::get_height());
         constraint_i++;
     }
     //set variables
@@ -337,11 +336,13 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<soft_n; ++i){
         string var_name1 = "w"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, width_offset+i, var_name1.c_str());
-        ILP_solver.set_variable_double_range(width_offset+i, 0.0, this->modules_area[i]);
+        ILP_solver.set_variable_double_range(width_offset+i, ceil(sqrt(this->modules_area[i]*0.75)), ceil(sqrt(this->modules_area[i]*2)));
+        //ILP_solver.set_variable_double_range(width_offset+i, 0,this->modules_area[i]*2);
 
         string var_name2 = "h"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, height_offset+i, var_name1.c_str());
-        ILP_solver.set_variable_double_range(height_offset+i, 0.0, this->modules_area[i]);
+        glp_set_col_name(ILP_solver.ILP, height_offset+i, var_name2.c_str()); 
+        ILP_solver.set_variable_double_range(height_offset+i, ceil(sqrt(this->modules_area[i]*0.75)), ceil(sqrt(this->modules_area[i]*2)));
+        //ILP_solver.set_variable_double_range(height_offset+i, 0,this->modules_area[i]*2);
     }
     //set coefficient of the objective function
     for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
@@ -588,27 +589,30 @@ bool sequence_pair_t:: add_soft_process(int i) {
             this->predict_wire_length(false);
             bool success = (this->predicted_wirelength!=-1);
             if(success){
-                legal_positions.push_back({this->predicted_wirelength,{j,k}});
-                fnd = true;
+                if(add_soft_process(i+1)){
+                    return true;
+                }
+//                legal_positions.push_back({this->predicted_wirelength,{j,k}});
+//                fnd = true;
             }
             this->is_in_seq[this->add_soft_order[i]] = 0;
             v_sequence.erase(v_sequence.begin()+j);
             h_sequence.erase(h_sequence.begin()+k);
         }
     }
-    std::sort(legal_positions.begin(), legal_positions.end());
-    for(int q = 0; q< legal_positions.size(); ++q){
-        v_sequence.insert(v_sequence.begin()+legal_positions[q].second[0], this->add_soft_order[i]);
-        h_sequence.insert(h_sequence.begin()+legal_positions[q].second[1], this->add_soft_order[i]);
-        this->is_in_seq[this->add_soft_order[i]] = 1;
-        bool success = add_soft_process(i+1);
-        this->is_in_seq[this->add_soft_order[i]] = 0;
-        v_sequence.erase(v_sequence.begin()+legal_positions[q].second[0]);
-        h_sequence.erase(h_sequence.begin()+legal_positions[q].second[1]);
-        if(success){
-            return true;
-        }
-    }
+//    std::sort(legal_positions.begin(), legal_positions.end());
+//    for(int q = 0; q< legal_positions.size(); ++q){
+//        v_sequence.insert(v_sequence.begin()+legal_positions[q].second[0], this->add_soft_order[i]);
+//        h_sequence.insert(h_sequence.begin()+legal_positions[q].second[1], this->add_soft_order[i]);
+//        this->is_in_seq[this->add_soft_order[i]] = 1;
+//        bool success = add_soft_process(i+1);
+//        this->is_in_seq[this->add_soft_order[i]] = 0;
+//        v_sequence.erase(v_sequence.begin()+legal_positions[q].second[0]);
+//        h_sequence.erase(h_sequence.begin()+legal_positions[q].second[1]);
+//        if(success){
+//            return true;
+//        }
+//    }
     return false;
 }
 
@@ -819,5 +823,6 @@ void sequence_pair_t::set_add_order() {
         return this->modules_area[a]>this->modules_area[b];
     });
 }
+
 
 
