@@ -85,7 +85,7 @@ public:
     //debug
     void print();
     void print_inline();
-    void sequence_pair_validation(vector<vec2d_t>);
+    void sequence_pair_validation();
     void print_shapes();
     void print_fix_sequence();
     void print_connections();
