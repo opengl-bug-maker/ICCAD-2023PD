@@ -4,7 +4,7 @@
 
 #include "genetic_solver_t.h"
 #include <algorithm>
-
+#include "timer.h"
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -25,6 +25,7 @@ void genetic_solver_t::generate_sequence_pair(int n){
                 sequence_pair.load_best_sequence();
                 sequence_pair.predict_wire_length(false);
                 if(sequence_pair.predicted_wirelength==-1){
+                    cout<<"FUCK UP"<<endl;
                     continue;
                 }
             }
@@ -108,6 +109,7 @@ bool genetic_solver_t::find_legal_neighbor(sequence_pair_t& seq){
 //    return false;
 //}
 void genetic_solver_t::selection(){
+    this->sort_sequence_pair();
     while(this->sequence_pairs.size()>this->greater_sequence_n){
         this->sequence_pairs.pop_back();
     }
@@ -141,6 +143,44 @@ sequence_pair_t genetic_solver_t::crossover_operation(){
     new_sequence_pair.predict_wire_length(false);
     return new_sequence_pair;
 }
+void genetic_solver_t::growth_operation(int i){
+    long long current_wirelength = sequence_pairs[i].predicted_wirelength;
+    vector<vector<int>> legal_swaps;
+   vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
+    for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
+        v_map[sequence_pairs[i].v_sequence[j]] = h_map[sequence_pairs[i].h_sequence[j]] = j;
+    }
+    for(int j = 0; j<sequence_pair_t::soft_n; ++j){
+        for(int k = j+1; k<sequence_pair_t::soft_n; ++k){
+            sequence_pairs[i].swap_v(v_map[j],v_map[k]);
+            sequence_pairs[i].swap_h(h_map[j],h_map[k]);
+            sequence_pairs[i].predict_wire_length(false);
+            long long after_wirelength = sequence_pairs[i].predicted_wirelength;
+            if(after_wirelength!=-1 && after_wirelength<current_wirelength){
+                legal_swaps.push_back({j,k});
+            }
+            sequence_pairs[i].swap_v(v_map[j],v_map[k]);
+            sequence_pairs[i].swap_h(h_map[j],h_map[k]);
+        }
+    }
+    if(legal_swaps.size()==0){
+        sequence_pairs[i].predict_wire_length(false);
+        if(sequence_pairs[i].predicted_wirelength==-1){
+            cout<<"FUCK UP"<<endl;
+        }
+        return;
+    }
+    int x = rand()%(legal_swaps.size());
+    sequence_pairs[i].swap_v(v_map[legal_swaps[x][0]],v_map[legal_swaps[x][1]]);
+    sequence_pairs[i].swap_h(h_map[legal_swaps[x][0]],h_map[legal_swaps[x][1]]);
+    sequence_pairs[i].predict_wire_length(false);
+
+}
+void genetic_solver_t::growth(){
+    for(int i = 0; i<sequence_pairs.size(); ++i){
+        growth_operation(i);
+    }
+}
 void genetic_solver_t::update_best_sequence_pair(){
     if(this->sequence_pairs[0].predicted_wirelength<this->best_sequence_pair.predicted_wirelength){
         this->best_sequence_pair = this->sequence_pairs[0];
@@ -151,22 +191,22 @@ void genetic_solver_t::run() {
     this->sequence_pairs.clear();
     this->generate_sequence_pair(this->greater_sequence_n);
 
-    const int epoch = 1;
-    vector<long long> epoch_log;
+    const int epoch = 10;
+    vector<pair<double, long long>> epoch_log;
     for(int t = 0; t<epoch; ++t){
-        this->crossover(10);
-        this->sort_sequence_pair();
+        timer epoch_timer("epoch_timer");
+        epoch_timer.timer_start();
         this->selection();
+        this->crossover(20);
+        //this->generate_sequence_pair(10);
+        this->growth();
+        //this->growth();
         this->update_best_sequence_pair();
-        epoch_log.push_back(this->best_sequence_pair.predicted_wirelength);
-        cout<<endl;
-        for(auto& e:this->sequence_pairs) {
-            for(auto& shape_i:e.modules_wh_i){
-                cout<<shape_i<<" ";
-            }
-            cout<<", wirelength : "<<e.predicted_wirelength<<endl;
-        }
-        cout<<endl;
+
+        epoch_timer.timer_end();
+        epoch_log.push_back({epoch_timer.get_time_elapsed(), this->best_sequence_pair.predicted_wirelength});
+
+        cout<< "Epoch : "<<t+1<<", got wirelength : "<<epoch_log[t].second<<"->"<<epoch_log[t].first<<"ms. "<<endl;
     }
     for(auto& e:this->sequence_pairs) {
         for(auto& shape_i:e.modules_wh_i){
@@ -176,7 +216,7 @@ void genetic_solver_t::run() {
     }
     cout<<endl;
     for(int i = 0; i<epoch_log.size(); ++i){
-        cout<< "Epoch : "<<i+1<<", got wirelength : "<<this->best_sequence_pair.predicted_wirelength<<endl;
+        cout<< "Epoch : "<<i+1<<", got wirelength : "<<epoch_log[i].second<<"->"<<epoch_log[i].first<<"ms. "<<endl;
     }
     this->best_sequence_pair.predict_wire_length(true);
 }

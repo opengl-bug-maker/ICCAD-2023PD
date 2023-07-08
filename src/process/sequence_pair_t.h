@@ -104,6 +104,8 @@ public:
 
 
     void set_module_size(int i, int j);
+
+    bool find_position_dynamic(bool minimize_wirelength, bool load_result, int overlap_h, int overlap_v);
 };
 
 

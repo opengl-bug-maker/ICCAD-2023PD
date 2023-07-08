@@ -95,24 +95,25 @@ ILP_result_t ILP_solver_t::solve() {
 
 
     int err = glp_intopt(this->ILP, &parm);
-
     int z = glp_mip_obj_val(this->ILP);
+    int feasible = glp_mip_status(this->ILP);
     vector<int> result(1); //due to 1-index
     for(int i = 1; i<=this->var_n; ++i){
-        result.push_back(glp_mip_col_val(this->ILP, i));
+        result.push_back(static_cast<int>(glp_mip_col_val(this->ILP, i)));
     }
 
-    release_solver();
+
     ILP_result_t ILP_result;
-    if(err!=0){
-        ILP_result.legal = false;
-        return ILP_result;
+    if(feasible==GLP_FEAS||feasible==GLP_OPT){
+        ILP_result.legal = true;
+        ILP_result.var_values = result;
+        ILP_result.z = z;
+
     }
-    ILP_result.legal = true;
-    ILP_result.var_values = result;
-    ILP_result.z = z;
-
-
+    else{
+        ILP_result.legal = false;
+    }
+    release_solver();
     return ILP_result;
 }
 

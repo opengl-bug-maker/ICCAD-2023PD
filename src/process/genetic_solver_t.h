@@ -40,6 +40,10 @@ public:
     sequence_pair_t crossover_operation();
 
     void crossover(int n);
+
+    void growth_operation(int i);
+
+    void growth();
 };
 
 
