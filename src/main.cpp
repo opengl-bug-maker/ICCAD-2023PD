@@ -14,14 +14,10 @@ int main(/*arg*/){
     std::fstream output_file;
 
     //chip_t::file_input("../../testcase/custom-input7.txt");//fstream
-    chip_t::file_input("../../testcase/Case03.txt");//fstream
+    chip_t::file_input("../../testcase/Case01.txt");//fstream
     //chip_t::file_input("../../testcase/case01-input.txt");//fstream
-    sequence_pair_t::init();
-    floorplan_t::init();
-    sequence_pair_t sequence_pair_1;
-    bool success = sequence_pair_1.add_soft_process(0);
-    floorplan_t fp = sequence_pair_1.to_fp();
-    fp.GUI_validation();
+    solver_t solver;
+    solver.run();
 
     main_timer.timer_end();
     main_timer.print_time_elapsed();
