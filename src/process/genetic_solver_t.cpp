@@ -14,25 +14,25 @@ genetic_solver_t::genetic_solver_t(int greater_sequence_n,int max_sequence_n) {
     this->max_sequences_n = max_sequence_n;
 }
 void genetic_solver_t::generate_sequence_pair(int n){
-    //TODO: add a timeout to stop the process on time
-    bool timeout = false;
-    for(int i = 0; i<n; ++i){
-        sequence_pair_t sequence_pair;
-        bool done = false;
-        while(!done){
-            done = sequence_pair.add_soft_process(0);
-            if(done){
-                sequence_pair.load_best_sequence();
-                sequence_pair.predict_wire_length(false);
-                if(sequence_pair.predicted_wirelength==-1){
-                    cout<<"FUCK UP"<<endl;
-                    continue;
-                }
-            }
-        }
-        this->sequence_pairs.push_back(sequence_pair);
-        if(timeout){break;}
-    }
+//    //TODO: add a timeout to stop the process on time
+//    bool timeout = false;
+//    for(int i = 0; i<n; ++i){
+//        sequence_pair_t sequence_pair;
+//        bool done = false;
+//        while(!done){
+//            done = sequence_pair.add_soft_process(0);
+//            if(done){
+//                sequence_pair.load_best_sequence();
+//                sequence_pair.predict_wire_length(false);
+//                if(sequence_pair.predicted_wirelength==-1){
+//                    cout<<"FUCK UP"<<endl;
+//                    continue;
+//                }
+//            }
+//        }
+//        this->sequence_pairs.push_back(sequence_pair);
+//        if(timeout){break;}
+//    }
 }
 void genetic_solver_t::sort_sequence_pair(){
     std::sort(this->sequence_pairs.begin(), this->sequence_pairs.end(), [](sequence_pair_t& a, sequence_pair_t& b){

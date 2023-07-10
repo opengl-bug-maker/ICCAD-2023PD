@@ -14,6 +14,7 @@
 #include "floorplan_t.h"
 #include "edge_t.h"
 #include "ILP_solver_t.h"
+#include "timer.h"
 using std::vector;
 using std::unordered_map;
 
@@ -85,6 +86,7 @@ public:
     //debug
     void print();
     void print_inline();
+    void print_logs();
     void sequence_pair_validation();
     void print_shapes();
     void print_fix_sequence();
@@ -94,6 +96,8 @@ public:
     //properties
     long long predicted_wirelength = 1e13;
     long long best_wirelength = 1e15;
+    int searched_n = 0;
+    bool fnd_legal = false;
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence, add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
@@ -101,6 +105,9 @@ public:
     vector<int> modules_wh_i;
     vector<vec2d_t> modules_pos;
     vector<vec2d_t> positions;
+
+    //debug properties
+    vector<pair<double, double>> logs;
 
 
     void set_module_size(int i, int j);
