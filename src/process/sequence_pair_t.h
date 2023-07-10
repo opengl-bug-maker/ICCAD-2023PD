@@ -91,6 +91,7 @@ public:
     void print_shapes();
     void print_fix_sequence();
     void print_connections();
+    void print_result();
 
 
     //properties
