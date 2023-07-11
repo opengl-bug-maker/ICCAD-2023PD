@@ -475,7 +475,6 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         return false;
     }
 
-
 }
 void sequence_pair_t::sequence_pair_validation() {
     vector<std::pair<rect_t, std::string>> rects;
@@ -659,7 +658,7 @@ bool sequence_pair_t:: add_soft_process(int i) {
         v_sequence.push_back(this->add_soft_order[i]);
         h_sequence.push_back(this->add_soft_order[i]);
         this->is_in_seq[this->add_soft_order[i]] = 1;
-        bool success = this->find_position(false,false,0, 0);
+        bool success = this->find_position_with_area(false,false,0, 0);
         this->is_in_seq[this->add_soft_order[i]] = 0;
         v_sequence.pop_back();
         h_sequence.pop_back();
@@ -669,12 +668,11 @@ bool sequence_pair_t:: add_soft_process(int i) {
     bool fnd = false;
     for(int j = 0; j<=v_sequence.size(); ++j){
         for(int k = 0; k<=h_sequence.size(); ++k){
+            change_size(i);
             v_sequence.insert(v_sequence.begin()+j, this->add_soft_order[i]);
             h_sequence.insert(h_sequence.begin()+k, this->add_soft_order[i]);
             this->is_in_seq[this->add_soft_order[i]] = 1;
-            //this->predict_wire_length(false);
-            //bool success = (this->predicted_wirelength!=-1);
-            bool success = this->find_position(false, false, 0, 0);
+            bool success = this->find_position_with_area(false, false, 0, 0);
 
             if(success){
                 if(add_soft_process(i+1)){
@@ -859,13 +857,13 @@ bool sequence_pair_t::is_completed() {
         if(this->is_in_seq[i]==0){return false;}
     }
     //then find the position of each module
-    bool success = this->find_position(false,false,0, 0);
+    bool success = this->find_position_with_area(false,false,0, 0);
     if(success){return true;}
     return false;
 }
 
 void sequence_pair_t::predict_wire_length(bool minimize_wirelength) {
-    bool success = this->find_position(minimize_wirelength,true,0, 0); //need result to calculate wirelength
+    bool success = this->find_position_with_area(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     if(success==false){
         this->predicted_wirelength = -1;
         return;
@@ -885,7 +883,7 @@ void sequence_pair_t::predict_wire_length(bool minimize_wirelength) {
 floorplan_t sequence_pair_t::to_fp() {
     floorplan_t ret;
     int placed_n = 0;
-    bool success = this->find_position(true, true, 0,0);
+    bool success = this->find_position_with_area(true, true, 0,0);
     if(this->is_completed()==false||success==false){
         return ret;
     }
@@ -912,10 +910,10 @@ void sequence_pair_t::set_add_order() {
     for(int i = 0; i<sequence_pair_t::soft_n; ++i){
         this->add_soft_order[i] = i;
     }
-    for(int i = 0; i<sequence_pair_t::soft_n; ++i){
-        int x =rand()%soft_n;
-        std::swap(add_soft_order[i], add_soft_order[x]);
-    }
+//    for(int i = 0; i<sequence_pair_t::soft_n; ++i){
+//        int x =rand()%soft_n;
+//        std::swap(add_soft_order[i], add_soft_order[x]);
+//    }
     std::sort(this->add_soft_order.begin(), this->add_soft_order.end(), [&](int&a, int& b){
         return this->modules_area[a] > this->modules_area[b];
         //return this->deg_w[a] > this->deg_w[b];
@@ -926,6 +924,176 @@ void sequence_pair_t::print_logs() {
     for(auto& log:this->logs){
         cout<<"After "<<log.first<<"s, got wire length"<<log.second<<endl;
     }
+}
+
+bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
+    build_constraint_graph();
+    int constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2;
+    int constraint_i = 1; //constraint_counter
+    int variable_n = 2*sequence_n;
+    if(minimize_wirelength){
+        variable_n+=4*sequence_pair_t::connections.size();
+        constraint_n+=10*sequence_pair_t::connections.size();
+    }
+    int x_module_offset = 1;
+    int y_module_offset = 1+sequence_n;
+    int x_edge_offset_l = 1+2*sequence_n;
+    int x_edge_offset_r = 1+2*sequence_n+this->connections.size();
+    int y_edge_offset_l = 1+2*sequence_n+2*this->connections.size();
+    int y_edge_offset_r = 1+2*sequence_n+3*this->connections.size();
+    //apart from constraint graph, every fix module need 2 additional condition
+    ILP_solver_t ILP_solver;
+    ILP_solver.init("ILP_solver", constraint_n, variable_n);
+    if(ILP_solver.get_is_invalid()){return false;}
+    ILP_solver.set_min();
+
+
+    vector<int> coef(variable_n+1, 0);
+
+    //set constraints to place modules
+    //if horizontal constraint graph got i->j them x_j - x_i >= w
+    for(int i = 0; i<this->constraint_graph_h.size(); ++i){
+        int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
+        string constraint_name = "h_c"+ std::to_string(i);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_h);
+        constraint_i++;
+    }
+    //if vertical constraint graph got i->j them y_j - y_i >= h
+    for(int i = 0; i<this->constraint_graph_v.size(); ++i){
+        int from = constraint_graph_v[i].from, to = constraint_graph_v[i].to, w = constraint_graph_v[i].w;
+        string constraint_name = "v_c"+ std::to_string(i);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w+overlap_v);
+        constraint_i++;
+    }
+    //set constraints to fix module
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        if(sequence_pair_t::seq_is_fix[i]){
+            string x_constraint_name = "fix_x_c"+ std::to_string(i);
+            string y_constraint_name = "fix_y_c"+ std::to_string(i);
+            vec2d_t ll_pos = sequence_pair_t::seq_fixed_map[i]->get_left_lower();
+            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1}, {1}, x_constraint_name, static_cast<int>(ll_pos.get_x()));
+            constraint_i++;
+            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1+sequence_n}, {1}, y_constraint_name, static_cast<int>(ll_pos.get_y()));
+            constraint_i++;
+        }
+    }
+    //set constraints to give the direction to the edges
+    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
+        string x_constraint_name = "x_r_e"+ std::to_string(i);
+        string y_constraint_name = "y_r_e"+ std::to_string(i);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i, x_edge_offset_r+i}, {1, -1}, x_constraint_name, 0.0);
+        constraint_i++;
+        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i, y_edge_offset_r+i}, {1, -1}, y_constraint_name, 0.0);
+        constraint_i++;
+    }
+    //set edge and block left(bottom) constraints
+    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
+        int b1 = connections[i].from;
+        int b2 = connections[i].to;
+        if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
+            continue;
+        }
+        string x_l_1_constraint_name = "x_e_1_b_l"+ std::to_string(i);
+        string y_l_1_constraint_name = "y_e_1_b_l"+ std::to_string(i);
+        string x_l_2_constraint_name = "x_e_2_b_l"+ std::to_string(i);
+        string y_l_2_constraint_name = "y_e_2_b_l"+ std::to_string(i);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b1+x_module_offset}, {1, -1}, x_l_1_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b2+x_module_offset}, {1, -1}, x_l_2_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b1+y_module_offset}, {1, -1}, y_l_1_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b2+y_module_offset}, {1, -1}, y_l_2_constraint_name, 0.0);
+        constraint_i++;
+    }
+    //set edge and block right(top) constraints
+    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
+        int b1 = connections[i].from;
+        int b2 = connections[i].to;
+        if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
+            continue;
+        }
+        string x_r_1_constraint_name = "x_e_1_b_r"+ std::to_string(i);
+        string y_r_1_constraint_name = "y_e_1_b_r"+ std::to_string(i);
+        string x_r_2_constraint_name = "x_e_2_b_r"+ std::to_string(i);
+        string y_r_2_constraint_name = "y_e_2_b_r"+ std::to_string(i);
+        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_1_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_2_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_1_constraint_name, 0.0);
+        constraint_i++;
+
+        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_2_constraint_name, 0.0);
+        constraint_i++;
+    }
+
+    //set variables
+    for(int i = 1;i<=sequence_n; ++i){
+        string var_name = "x"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
+        ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
+
+    }
+    for(int i = sequence_pair_t::sequence_n+1;i<=2*sequence_n; ++i){
+        string var_name = "x"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
+        ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
+    }
+    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
+        string var_name1 = "x_e_l"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, x_edge_offset_l+i, var_name1.c_str());
+        ILP_solver.set_variable_double_range(x_edge_offset_l+i, 0.0, chip_t::get_width());
+
+        string var_name2 = "x_e_r"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, x_edge_offset_r+i, var_name2.c_str());
+        ILP_solver.set_variable_double_range(x_edge_offset_r+i, 0.0, chip_t::get_width());
+
+        string var_name3 = "y_e_l"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, y_edge_offset_l+i, var_name3.c_str());
+        ILP_solver.set_variable_double_range(y_edge_offset_l+i, 0.0, chip_t::get_height());
+
+        string var_name4 = "y_e_r"+ std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, y_edge_offset_r+i, var_name4.c_str());
+        ILP_solver.set_variable_double_range(y_edge_offset_r+i, 0.0, chip_t::get_height());
+    }
+    //set coefficient of the objective function
+    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
+        coef[i+x_edge_offset_r] = connections[i].w;
+        coef[i+x_edge_offset_l] = -connections[i].w;
+        coef[i+y_edge_offset_r] = connections[i].w;
+        coef[i+y_edge_offset_l] = -connections[i].w;
+    }
+    //solve
+    ILP_solver.set_obj_coef(coef);
+    ILP_solver.load();
+    ILP_result_t ILP_result = ILP_solver.solve();
+    vector<vec2d_t> result; //zero-index
+    for(int i = 1; i<=sequence_n; ++i){
+        if(this->is_in_seq[i-1]==0){
+            result.push_back({-1, -1});
+        }
+        else {
+            result.push_back( {ILP_result.var_values[i], ILP_result.var_values[i+sequence_n]});
+        }
+
+    }
+    if(load_result){
+        this->positions = result;
+    }
+    if(ILP_result.legal){
+        return true;
+    }
+    else{return false;}
+
+
 }
 
 

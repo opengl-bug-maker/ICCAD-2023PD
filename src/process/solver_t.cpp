@@ -31,9 +31,8 @@ void solver_t::run() {
     bool success = sequence_pair.add_soft_process(0);
 
     if(success){
-        sequence_pair.load_best_sequence();
+        //sequence_pair.load_best_sequence();
         sequence_pair.predict_wire_length(true);
-        cout<<sequence_pair.predicted_wirelength<<endl;
 
         cout<<"SUCCESS"<<endl;
         sequence_pair.print_inline();
