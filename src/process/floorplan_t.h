@@ -39,12 +39,12 @@ class floorplan_t {
 
 
     // evaluation & output
-    float score;
-    float wirelength;
+    double score;
+    double wirelength;
 
     void calculate_wirelength();
-    float bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
-    float VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
+    double bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b);
+    double VE_calculator(const bounding_rectangle_t& bd_rect, pair<const module_t* const, const int> neighbor);
 
 public:
     static  uint32_t min_w_h[2];
@@ -64,10 +64,10 @@ public:
     const size_t get_soft_rect_n() const;
     const size_t get_fixed_rect_n() const;
     polygon_forest_t get_polygon_forest();
-    float get_wirelength();
+    double get_wirelength();
     vector<int> get_unplaced_id();
     const vector<uint32_t>& get_soft_deg();
-    const float get_score() const;
+    const double get_score() const;
 
     //debug
     void print_info(bool);

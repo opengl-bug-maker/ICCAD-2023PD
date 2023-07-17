@@ -28,6 +28,12 @@ public:
     vector<sequence_pair_t> valid_sequence_pairs;
     int find_valid_seq_pair(int); //number of valid seq
     floorplan_t& get_best_fp();
+
+    void test1();
+
+    void test_specific();
+
+    void test2();
 };
 
 

@@ -39,7 +39,7 @@ void ILP_solver_t::set_min() {
     glp_set_obj_dir(ILP, GLP_MIN);
 }
 
-void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name,int upb) {
+void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name,double upb) {
     for(int i = 0; i<variable_n; ++i){
         set_i.push_back(row_i);
         set_j.push_back(variable_i[i]); //due to sequence# to coefficient#
@@ -47,12 +47,12 @@ void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> var
         set_n++;
     }
     glp_set_row_name(ILP, constraint_i, name.c_str());
-    glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, upb); //x_i-x_j<=- w
+    glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, static_cast<int>(upb)); //x_i-x_j<=- w
 
     this->constraint_i++;
 }
 
-void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name, int fix) {
+void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name, double fix) {
     for(int i = 0; i<variable_n; ++i){
         set_i.push_back(row_i);
         set_j.push_back(variable_i[i]); //due to sequence# to coefficient#
@@ -65,7 +65,7 @@ void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> vari
     this->constraint_i++;
 }
 
-void ILP_solver_t::set_variable_double_range(int var_i, int lb, int ub) {
+void ILP_solver_t::set_variable_double_range(int var_i, int lb, double ub) {
     //glp_set_col_bnds(ILP, i, GLP_LO, 0.0, inf);
     if(lb==ub){
         glp_set_col_bnds(ILP, var_i, GLP_FX, lb, ub);
@@ -74,7 +74,7 @@ void ILP_solver_t::set_variable_double_range(int var_i, int lb, int ub) {
         glp_set_col_bnds(ILP, var_i, GLP_DB, lb, ub);
     }
 
-    glp_set_col_kind(ILP, var_i, GLP_IV);
+    //glp_set_col_kind(ILP, var_i, GLP_IV);
 }
 void ILP_solver_t::set_variable_BV(int var_i){
     glp_set_col_kind(ILP, var_i, GLP_BV);
@@ -87,22 +87,37 @@ void ILP_solver_t::set_obj_coef(vector<int> coef) {
 }
 
 ILP_result_t ILP_solver_t::solve() {
-    glp_iocp parm;
 
+    glp_iocp parm;
     glp_init_iocp(&parm);
     parm.presolve = GLP_ON;
     parm.msg_lev = GLP_MSG_OFF;
-
-
     int err = glp_intopt(this->ILP, &parm);
     int z = glp_mip_obj_val(this->ILP);
     int feasible = glp_mip_status(this->ILP);
+
+//    glp_smcp parm;
+//    glp_init_smcp(&parm);
+//    parm.presolve = GLP_ON;
+//    parm.msg_lev = GLP_MSG_OFF;
+//    glp_simplex(this->ILP, &parm);
+//    int z = glp_get_obj_val(this->ILP);
+//    int feasible = glp_get_status(this->ILP);
+
+
+//    glp_iptcp parm;
+//    glp_init_iptcp(&parm);
+//    //parm.msg_lev = GLP_MSG_OFF;
+//    glp_interior(this->ILP, &parm);
+//    int z = glp_ipt_obj_val(this->ILP);
+//    int feasible = glp_ipt_status(this->ILP);
+
     vector<int> result(1); //due to 1-index
     for(int i = 1; i<=this->var_n; ++i){
         result.push_back(static_cast<int>(glp_mip_col_val(this->ILP, i)));
+        //result.push_back(static_cast<int>(glp_get_col_prim(this->ILP, i)));
+        //result.push_back(static_cast<int>(glp_ipt_col_prim(this->ILP, i)));
     }
-
-
     ILP_result_t ILP_result;
     if(feasible==GLP_FEAS||feasible==GLP_OPT){
         ILP_result.legal = true;

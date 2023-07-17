@@ -59,8 +59,7 @@ public:
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
-    bool add_soft_process(int);
-    void predict_wire_length(bool);
+    void predict_wirelength(bool, bool);
     floorplan_t to_fp();
 
 
@@ -70,19 +69,25 @@ public:
     void build_constraint_graph();
     void change_size(int);
     void load_best_sequence();
+    void swap_seq_number(int a, int b,bool, bool);
+
 
     //get & set
+    void swap_v(int,int);
+    void swap_h(int,int);
+
     void set_v(std::vector<int>);
     void set_h(std::vector<int>);
     void set_vi(int,int);
     void set_hi(int,int);
-    void swap_v(int,int);
-    void swap_h(int,int);
+    void set_module_size(int i, int j);
 
-    std::vector<int> get_v();
-    std::vector<int> get_h();
     int get_vi(int);
     int get_hi(int);
+    double get_wirelength(bool minimize, bool with_area);
+    std::vector<int> get_v();
+    std::vector<int> get_h();
+
 
     //debug
     void print();
@@ -93,13 +98,11 @@ public:
     void print_fix_sequence();
     void print_connections();
     void print_result();
+    void print_wirelength(bool,bool);
 
 
     //properties
     long long predicted_wirelength = 1e13;
-    long long best_wirelength = 1e15;
-    int searched_n = 0;
-    bool fnd_legal = false;
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence, add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
@@ -112,9 +115,7 @@ public:
     vector<pair<double, double>> logs;
 
 
-    void set_module_size(int i, int j);
 
-    bool find_position_dynamic(bool minimize_wirelength, bool load_result, int overlap_h, int overlap_v);
 };
 
 

@@ -36,9 +36,9 @@ public:
     void set_max();
     void set_min();
 
-    void set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values,string,int);
-    void set_constraint_fx(int row_i, int variable_n, vector<int>variable_i,vector<int> values, string,int);
-    void set_variable_double_range(int var_i, int lb, int ub);
+    void set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values,string,double);
+    void set_constraint_fx(int row_i, int variable_n, vector<int>variable_i,vector<int> values, string,double);
+    void set_variable_double_range(int var_i, int lb, double ub);
     void set_obj_coef(vector<int>);
     void release_solver();
     ILP_result_t solve();

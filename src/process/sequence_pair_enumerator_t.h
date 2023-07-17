@@ -6,25 +6,29 @@
 #define ICCAD2023PD_SEQUENCE_PAIR_ENUMERATOR_T_H
 
 #include "sequence_pair_t.h"
-
+#include "timer.h"
 class sequence_pair_enumerator_t{
-    int fix_n = 0;
-    int soft_n = 0;
 
 public:
     sequence_pair_enumerator_t();
 
-    void seq_randomize();
-    void find_illegal_pair_for_i(int);
-    void search_legal_perm_in_fix(int);
-    void randomize(vector<int>&);
     std::set<int> random_choose(int upb, int x);
+
     int sample_from_interval(int,int);
 
-    vector<vector<int>> soft_seq_interval;
-    vector<vector<vector<int>>> legal_pairs; // 0->left, 1->right, 2 ->upper, 3->bottom //soft->fix  illegal
-    vector<int> fix_sequence_v, fix_sequence_h;
-    sequence_pair_t seq;
+    void generate_sequence_pairs(int n);
+
+    bool add_soft_process(int, bool,int);
+
+    void validate_all_SP();
+
+    void validate_all_SP_print_all();
+
+    bool find_greater(sequence_pair_t&);
+
+    vector<sequence_pair_t> valid_sequence_pairs;
+    sequence_pair_t seed_SP;
+    int target_sp_n = 0;
 };
 
 #endif //ICCAD2023PD_SEQUENCE_PAIR_ENUMERATOR_T_H

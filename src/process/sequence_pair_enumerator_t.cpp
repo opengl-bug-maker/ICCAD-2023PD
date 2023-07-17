@@ -4,28 +4,13 @@
 
 #include "sequence_pair_enumerator_t.h"
 #include <iostream>
-sequence_pair_enumerator_t::sequence_pair_enumerator_t() {
-    this->fix_n = chip_t::get_fixed_modules().size();
-    this->soft_n = chip_t::get_soft_modules().size();
-    this->legal_pairs.resize(sequence_pair_t::sequence_n);
-    this->fix_sequence_v.resize(fix_n);
-    this->fix_sequence_h.resize(fix_n);
+#include <iomanip>
+using std::cout;
+using std::endl;
+sequence_pair_enumerator_t::sequence_pair_enumerator_t() = default;
 
-    for(auto& e:legal_pairs){
-        e.resize(sequence_pair_t::sequence_n);
-    }
-    this->soft_seq_interval.resize(soft_n);
 
-}
 
-void sequence_pair_enumerator_t::seq_randomize() {
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        int x = rand()%sequence_pair_t::sequence_n;
-        int y = rand()%sequence_pair_t::sequence_n;
-        this->seq.swap_h(i, x);
-        this->seq.swap_v(i, y);
-    }
-}
 
 
 std::set<int> sequence_pair_enumerator_t::random_choose(int upb, int n) {
@@ -37,102 +22,148 @@ std::set<int> sequence_pair_enumerator_t::random_choose(int upb, int n) {
     return selected_fix_id;
 }
 
-void sequence_pair_enumerator_t::find_illegal_pair_for_i(int i) {
-    int i_h = this->seq.modules_wh[i].get_x();
-    int i_w = this->seq.modules_wh[i].get_y();
-    //cout<< i_w<<" "<<i_h<<endl;
-    for(int j = sequence_pair_t::fix_start_idx; j<sequence_pair_t::sequence_n; ++j){
-        this->legal_pairs[i][j].clear();
-        int fix_x = sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_x();
-        int fix_y = sequence_pair_t::seq_fixed_map[j]->get_left_lower().get_y();
-        int fix_w = sequence_pair_t::seq_fixed_map[j]->get_size().get_x();
-        int fix_h = sequence_pair_t::seq_fixed_map[j]->get_size().get_y();
-        if(fix_x-i_w<0){
-            this->legal_pairs[i][j].push_back(0); //left
-            //std::cout<< i<<" "<<j<<" left"<<std::endl;
-        }
-        if(fix_x+fix_w+i_w>static_cast<int>(chip_t::get_width())){
-            this->legal_pairs[i][j].push_back(1); //right
-            //std::cout<< i<<" "<<j<<" right"<<std::endl;
-        }
-        if(fix_y+fix_h+i_h>static_cast<int>(chip_t::get_height())){
-            this->legal_pairs[i][j].push_back(2); //upper
-            //std::cout<< i<<" "<<j<<" top"<<std::endl;
-        }
-        if(fix_y-i_h<0){
-            this->legal_pairs[i][j].push_back(3); //bottom
-            //std::cout<< i<<" "<<j<<" bottom"<<std::endl;
-        }
-    }
-
-}
 int sequence_pair_enumerator_t::sample_from_interval(int L, int R) {
     int n = R-L;
     int x = rand()%n; //x -> [0, n)
     return x+L; //[L, R)
 }
 
-void sequence_pair_enumerator_t::randomize(vector<int> &v) {
-    int n = v.size();
-    for(int i = 0; i<v.size(); ++i){
-        int x = rand()%n;
-        std::swap(v[i], v[x]);
-    }
-}
-void sequence_pair_enumerator_t::search_legal_perm_in_fix(int soft_i) {
-    int vL = -1, vR = fix_n, hL = -1, hR = fix_n;
-    vector<int> v_fix_map(sequence_pair_t::sequence_n), h_fix_map(sequence_pair_t::sequence_n);
-    for(int i = 0; i<this->fix_sequence_v.size(); ++i){
-        h_fix_map[fix_sequence_h[i]] = v_fix_map[fix_sequence_v[i]] = i;
-    }
-    for(int i = sequence_pair_t::fix_start_idx; i<sequence_pair_t::sequence_n; ++i){
-        int fix_id_v = v_fix_map[i], fix_id_h = h_fix_map[i];
-        int x = rand()%2;
-        for(int j = 0; j<this->legal_pairs[soft_i][i].size(); ++j){
-            if(this->legal_pairs[soft_i][i][j]==1){ //right
-                //cant be V:[F, S], H: [F, S]
-                if(vR<=fix_id_v||hR<=fix_id_h){continue;}
-                if(fix_id_v>vL && x){
-                    vR = std::min(vR, fix_id_v);
-                }
-                if(hL<fix_id_h && !x){
-                    hR = std::min(hR, fix_id_h);
-                }
-            }
-            else if(this->legal_pairs[soft_i][i][j]==0){ //left
-                if(vL>fix_id_v||hL>fix_id_h){continue;}
-                //cant be V:[S, F], H: [S, F]
-                if(fix_id_v<vR&&x){
-                    vL = std::max(vL, fix_id_v);
-                }
-                if(fix_id_h<hR&&!x){
-                    hL = std::max(hL, fix_id_h);
-                }
-            }
-            else if(this->legal_pairs[soft_i][i][j]==2){ //top
-                if(vR<=fix_id_v||hL>fix_id_h){continue;}
-                //cant be V:[F, S], H: [S, F]
-                if(fix_id_v>vL&&x){
-                    vR = std::min(vR, fix_id_v);
-                }
-                if(fix_id_h<hR&&!x){
-                    hL = std::max(hL, fix_id_h);
-                }
-            }
-            else if(this->legal_pairs[soft_i][i][j]==3){ //bottom
-                if(vL>fix_id_v||hR<=fix_id_h){continue;}
-                // cant be V: [S, F] H:[F,S]
-                if(vR>fix_id_v&&x){
-                    vL = std::max(vL, fix_id_v);
-                }
-                if(hL<fix_id_h&&!x){
-                    hR = std::min(hR, fix_id_h);
-                }
+void sequence_pair_enumerator_t::generate_sequence_pairs(int n) {
+    timer init_timer("init");
+    init_timer.timer_start();
 
+    this->target_sp_n = n;
+    this->add_soft_process(0, true, 5);
+
+    init_timer.timer_end();
+    init_timer.print_time_elapsed();
+}
+
+bool sequence_pair_enumerator_t::add_soft_process(int i, bool with_area, int cutoff) {
+    if(this->valid_sequence_pairs.size()>=target_sp_n){
+        return false;
+    }
+    if(i>=this->seed_SP.fix_start_idx){
+        this->seed_SP.predict_wirelength(true, with_area); //minimize wirelength at last
+        this->valid_sequence_pairs.push_back(this->seed_SP);
+        return true;
+    }
+
+    if(seed_SP.v_sequence.size() == 0){ //in case there are no fix module
+
+        //TODO: fix this
+        seed_SP.v_sequence.push_back(this->seed_SP.add_soft_order[i]);
+        seed_SP.h_sequence.push_back(this->seed_SP.add_soft_order[i]);
+        this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
+        bool success;
+        if(with_area){
+            success = this->seed_SP.find_position_with_area(false, false, 0, 0);
+        }
+        else{
+            success = this->seed_SP.find_position(false, false, 0, 0);
+        }
+        this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
+        seed_SP.v_sequence.pop_back();
+        seed_SP.h_sequence.pop_back();
+        return false;
+    }
+
+    int success_n = 0;
+    bool fnd = false;
+    for(int j = 0; j <= seed_SP.v_sequence.size(); ++j){
+        for(int k = 0; k <= seed_SP.h_sequence.size(); ++k){
+            seed_SP.change_size(i);
+            seed_SP.v_sequence.insert(seed_SP.v_sequence.begin() + j, this->seed_SP.add_soft_order[i]);
+            seed_SP.h_sequence.insert(seed_SP.h_sequence.begin() + k, this->seed_SP.add_soft_order[i]);
+            this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
+            bool success;
+            if(with_area){
+                success = this->seed_SP.find_position_with_area(false, false, 0, 0);
+
+            }
+            else{
+                success = this->seed_SP.find_position(false, false, 0, 0);
+            }
+            if(success){
+                success_n++;
+                if(this->add_soft_process(i+1, with_area, cutoff)){
+                    fnd|=1;
+                }
+            }
+            this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
+            seed_SP.v_sequence.erase(seed_SP.v_sequence.begin() + j);
+            seed_SP.h_sequence.erase(seed_SP.h_sequence.begin() + k);
+            if(fnd&&i>=cutoff){
+                return true;
             }
         }
     }
-    //cout<< vL<<" "<<vR<<" "<<hL<<" "<<hR<<endl;
-    this->soft_seq_interval[soft_i] = {vL, vR, hL, hR};
-    //this->soft_seq_interval[soft_i] = {-1, fix_n,-1, fix_n};
+    //cout<<i<<" : success n  = "<<success_n<<endl;
+    return false;
+}
+
+void sequence_pair_enumerator_t::validate_all_SP() {
+    cout<< "currently got "<< this->valid_sequence_pairs.size()<<" sequences pairs"<<endl;
+    for(int i = 0; i<this->valid_sequence_pairs.size(); ++i){
+        bool valid = this->valid_sequence_pairs[i].find_position_with_area(false,false, 0, 0);
+        if(valid==false){
+            cout<<"invalid SP"<<endl;
+        }
+        else{
+            double wirelength = this->valid_sequence_pairs[i].get_wirelength(true, true);
+            cout<<"valid SP : "<<std::setprecision(16)<<wirelength<<endl;
+
+        }
+    }
+}
+
+
+void sequence_pair_enumerator_t::validate_all_SP_print_all() {
+    cout<< "currently got "<< this->valid_sequence_pairs.size()<<" sequences pairs"<<endl;
+    for(int i = 0; i<this->valid_sequence_pairs.size(); ++i){
+        this->valid_sequence_pairs[i].print_inline();
+        bool valid = this->valid_sequence_pairs[i].find_position_with_area(false,false, 0, 0);
+        if(valid==false){
+            cout<<"invalid SP"<<endl;
+        }
+        else{
+            double wirelength = this->valid_sequence_pairs[i].get_wirelength(true, true);
+            cout<<"valid SP : "<<std::setprecision(16)<<wirelength<<endl;
+
+        }
+
+    }
+}
+
+bool sequence_pair_enumerator_t::find_greater(sequence_pair_t& sequence_pair) {
+    timer find_greater_timer("find greater");
+    find_greater_timer.timer_start();
+
+    bool fnd = false;
+    double wirelength = sequence_pair.get_wirelength(true, false);
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        for(int j = i+1; j<sequence_pair_t::sequence_n; ++j){
+            for(int p = 0; p<=1; ++p){
+                for(int q = 0; q<=1; ++q){
+                    if(p==0&&q==0){continue;}
+                    sequence_pair.swap_seq_number(i, j,p,q);
+                    if(sequence_pair.find_position_with_area(false,false,0,0)){
+
+                        sequence_pair.predict_wirelength(true, true);
+
+                        if(sequence_pair.predicted_wirelength<wirelength){
+                            fnd |= true;
+                            wirelength = sequence_pair.predicted_wirelength;
+                            continue;
+                        }
+                    }
+                    sequence_pair.swap_seq_number(i, j,p,q);
+                }
+            }
+        }
+    }
+
+    find_greater_timer.timer_end();
+    find_greater_timer.print_time_elapsed();
+    return fnd;
 }

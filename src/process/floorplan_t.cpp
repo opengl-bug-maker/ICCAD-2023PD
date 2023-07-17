@@ -80,17 +80,17 @@ floorplan_t::floorplan_t() {
 }
 
 
-float floorplan_t::bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b){
+double floorplan_t::bd_distance(const bounding_rectangle_t& a, const bounding_rectangle_t& b){
 	rect_t rect_a = a.getRect();
 	rect_t rect_b = b.getRect();
 	vec2d_t dis = rect_a.get_center() - rect_b.get_center();
 	return fabs(dis.get_x()) + fabs(dis.get_y()); //must be fabs
 }
-float floorplan_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor){
+double floorplan_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const module_t* const, const int> neighbor){
 	const module_t* neighbor_module = neighbor.first;
 	const bounding_rectangle_t* neighbor_rect;
 	int neighbor_rect_i = -1;
-	float sum = 0;
+	double sum = 0;
 	
 	if (module_to_bd_soft_rect_i_m.count(neighbor_module)) {
 		neighbor_rect_i = module_to_bd_soft_rect_i_m[neighbor_module];
@@ -102,14 +102,14 @@ float floorplan_t::VE_calculator(const bounding_rectangle_t& bd_rect,pair<const 
 		neighbor_rect_i = module_to_bd_fixed_rect_i_m[neighbor_module];
 		sum += bd_distance(fixed_rects[neighbor_rect_i], bd_rect);
 	}
-	return sum*static_cast<float>(neighbor.second);
+	return sum*static_cast<double>(neighbor.second);
 }
 
 void floorplan_t::calculate_wirelength(){
 	if (fp_status == fail_on_placing_fixed_modules) {
 		return;
 	}
-	float sum = 0;
+	double sum = 0;
 	for (int i = 0; i < fixed_rects.size(); ++i) {
 		const module_t* fixed_module = fixed_rects[i].getLinkModule();
 		const vector<std::pair<const module_t* const, const int>> neighbors 
@@ -159,7 +159,7 @@ void floorplan_t::print_info(bool position){
 	cout << "current wirelength : " << wirelength << endl;
     cout<<"current score : "<<score<<endl;
 }
-float floorplan_t::get_wirelength()
+double floorplan_t::get_wirelength()
 {
 	calculate_wirelength();
 	return wirelength;
@@ -235,7 +235,7 @@ vector<vec2d_t> floorplan_t::find_w_h(uint32_t area){
 }
 
 
-const float floorplan_t::get_score() const{
+const double floorplan_t::get_score() const{
     return score;
 }
 
