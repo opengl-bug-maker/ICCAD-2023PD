@@ -74,7 +74,19 @@ void ILP_solver_t::set_variable_double_range(int var_i, int lb, double ub) {
         glp_set_col_bnds(ILP, var_i, GLP_DB, lb, ub);
     }
 
-    //glp_set_col_kind(ILP, var_i, GLP_IV);
+
+}
+
+void ILP_solver_t::set_variable_double_range_int(int var_i, int lb, double ub) {
+    //glp_set_col_bnds(ILP, i, GLP_LO, 0.0, inf);
+    if(lb==ub){
+        glp_set_col_bnds(ILP, var_i, GLP_FX, lb, ub);
+    }
+    else{
+        glp_set_col_bnds(ILP, var_i, GLP_DB, lb, ub);
+    }
+
+    glp_set_col_kind(ILP, var_i, GLP_IV);
 }
 void ILP_solver_t::set_variable_BV(int var_i){
     glp_set_col_kind(ILP, var_i, GLP_BV);
@@ -86,23 +98,28 @@ void ILP_solver_t::set_obj_coef(vector<int> coef) {
 
 }
 
-ILP_result_t ILP_solver_t::solve() {
+ILP_result_t ILP_solver_t::solve(bool int_needed) {
+    int feasible,z;
+    if(int_needed){
+        glp_iocp parm;
+        glp_init_iocp(&parm);
+        parm.presolve = GLP_ON;
+        parm.msg_lev = GLP_MSG_OFF;
+        int err = glp_intopt(this->ILP, &parm);
+        z = glp_mip_obj_val(this->ILP);
+        feasible = glp_mip_status(this->ILP);
+    }
+    else{
+        glp_smcp parm;
+        glp_init_smcp(&parm);
+        parm.presolve = GLP_ON;
+        parm.msg_lev = GLP_MSG_OFF;
+        glp_simplex(this->ILP, &parm);
+        z = glp_get_obj_val(this->ILP);
+        feasible = glp_get_status(this->ILP);
+    }
 
-    glp_iocp parm;
-    glp_init_iocp(&parm);
-    parm.presolve = GLP_ON;
-    parm.msg_lev = GLP_MSG_OFF;
-    int err = glp_intopt(this->ILP, &parm);
-    int z = glp_mip_obj_val(this->ILP);
-    int feasible = glp_mip_status(this->ILP);
 
-//    glp_smcp parm;
-//    glp_init_smcp(&parm);
-//    parm.presolve = GLP_ON;
-//    parm.msg_lev = GLP_MSG_OFF;
-//    glp_simplex(this->ILP, &parm);
-//    int z = glp_get_obj_val(this->ILP);
-//    int feasible = glp_get_status(this->ILP);
 
 
 //    glp_iptcp parm;
@@ -114,8 +131,14 @@ ILP_result_t ILP_solver_t::solve() {
 
     vector<int> result(1); //due to 1-index
     for(int i = 1; i<=this->var_n; ++i){
-        result.push_back(static_cast<int>(glp_mip_col_val(this->ILP, i)));
-        //result.push_back(static_cast<int>(glp_get_col_prim(this->ILP, i)));
+
+        if(int_needed){
+            result.push_back(static_cast<int>(glp_mip_col_val(this->ILP, i)));
+        }
+        else{
+            result.push_back(static_cast<int>(glp_get_col_prim(this->ILP, i)));
+        }
+
         //result.push_back(static_cast<int>(glp_ipt_col_prim(this->ILP, i)));
     }
     ILP_result_t ILP_result;

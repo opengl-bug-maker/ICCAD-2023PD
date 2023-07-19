@@ -41,12 +41,14 @@ public:
     void set_variable_double_range(int var_i, int lb, double ub);
     void set_obj_coef(vector<int>);
     void release_solver();
-    ILP_result_t solve();
+    ILP_result_t solve(bool);
     void load();
 
     bool get_is_invalid();
 
     void set_variable_BV(int var_i);
+
+    void set_variable_double_range_int(int var_i, int lb, double ub);
 };
 
 

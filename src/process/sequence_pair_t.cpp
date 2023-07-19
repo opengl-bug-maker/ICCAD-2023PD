@@ -389,27 +389,27 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<soft_n; ++i){
         string var_name1 = "shape1"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_1_offset + i, var_name1.c_str());
-        ILP_solver.set_variable_double_range(shape_type_1_offset + i, 0, 1);
+        ILP_solver.set_variable_double_range_int(shape_type_1_offset + i, 0, 1);
         //ILP_solver.set_variable_BV(shape_type_1_offset + i);
 
         string var_name2 = "shape2"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_2_offset + i, var_name2.c_str());
-        ILP_solver.set_variable_double_range(shape_type_2_offset + i, 0, 1);
+        ILP_solver.set_variable_double_range_int(shape_type_2_offset + i, 0, 1);
         //ILP_solver.set_variable_BV(shape_type_2_offset + i);
 
         string var_name3 = "shape3"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_3_offset + i, var_name3.c_str());
-        ILP_solver.set_variable_double_range(shape_type_3_offset + i, 0, 1);
+        ILP_solver.set_variable_double_range_int(shape_type_3_offset + i, 0, 1);
         //ILP_solver.set_variable_BV(shape_type_3_offset + i);
 
         string var_name4 = "shape4"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_4_offset + i, var_name4.c_str());
-        ILP_solver.set_variable_double_range(shape_type_4_offset + i, 0, 1);
+        ILP_solver.set_variable_double_range_int(shape_type_4_offset + i, 0, 1);
         //ILP_solver.set_variable_BV(shape_type_4_offset + i);
 
         string var_name5 = "shape5"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_5_offset + i, var_name5.c_str());
-        ILP_solver.set_variable_double_range(shape_type_5_offset + i, 0, 1);
+        ILP_solver.set_variable_double_range_int(shape_type_5_offset + i, 0, 1);
         //ILP_solver.set_variable_BV(shape_type_5_offset + i);
 
 
@@ -424,7 +424,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     //solve
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
-    ILP_result_t ILP_result = ILP_solver.solve();
+    ILP_result_t ILP_result = ILP_solver.solve(true);
 
 
     if(ILP_result.legal){
@@ -477,8 +477,11 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
                     }
                 }
             }
-            this->positions = result_pos;
-            this->modules_wh = result_wh;
+            this->modules_positions = result_pos;
+            for(int i = 0; i<sequence_pair_t::soft_n; ++i){
+                this->modules_wh[i] = result_wh[i];
+            }
+
             this->modules_wh_i = result_wh_i;
         }
         return true;
@@ -491,12 +494,12 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
 void sequence_pair_t::sequence_pair_validation() {
     vector<std::pair<rect_t, std::string>> rects;
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        if(this->positions[i].get_x()<0||this->positions[i].get_y()<0){continue;}
+        if(this->modules_positions[i].get_x() < 0 || this->modules_positions[i].get_y() < 0){continue;}
         if(this->seq_is_fix[i]){
-            rects.push_back({{this->positions[i], this->modules_wh[i]}, "f"+ std::to_string(i)});
+            rects.push_back({{this->modules_positions[i], this->modules_wh[i]}, "f" + std::to_string(i)});
         }
         else{
-            rects.push_back({{this->positions[i], this->modules_wh[i]}, "s"+ std::to_string(i)});
+            rects.push_back({{this->modules_positions[i], this->modules_wh[i]}, "s" + std::to_string(i)});
         }
     }
     visualizer_t::show_fp_rect_no_border(rects, "SQP");
@@ -625,10 +628,17 @@ void sequence_pair_t::print_inline() {
         cout<< h_sequence[i];
         if(i!=this->h_sequence.size()-1){cout<<", ";}
     }
-
     cout<<"}"<<endl;
+    this->print_shapes_i();
+//    for(int i = 0; i<this->soft_n; ++i){
+//        for(auto& shape:sequence_pair_t::soft_area_to_w_h_m[i]){
+//            cout<<"{"<<shape.get_x()<<","<<shape.get_y()<<"} ";
+//        }
+//    }
+    cout<<endl;
+
 }
-void sequence_pair_t::print_shapes() {
+void sequence_pair_t::print_shapes_i() {
     cout<<"shapes of the SP : {";
     for(int i = 0; i<soft_n; ++i){
         cout<<this->modules_wh_i[i];
@@ -826,7 +836,7 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         this->predicted_wirelength = -1;
         return;
     }
-    vector<vec2d_t> pos = this->positions;
+    vector<vec2d_t> pos = this->modules_positions;
     double sum = 0;
     for(int i = 0; i<connections.size();++i){
         int from = connections[i].from, to = connections[i].to;
@@ -848,21 +858,14 @@ floorplan_t sequence_pair_t::to_fp() {
 //        return ret;
 //    }
     for(int i = 0; i<soft_n; ++i){
-        bool ok = ret.place_soft_module(i, {this->positions[i]},{this->modules_wh[i]});
+        bool ok = ret.place_soft_module(i, {this->modules_positions[i]}, {this->modules_wh[i]});
         if(ok){placed_n++;}
     }
     cout<<"placed "<<placed_n<<" modules"<<endl;
     return ret;
 }
 
-void sequence_pair_t::load_best_sequence() {
-    for(int i = 0; i<is_in_seq.size(); ++i){
-        is_in_seq[i] = 1;
-    }
-    this->v_sequence = this->best_v_sequence;
-    this->h_sequence = this->best_h_sequence;
-    this->modules_wh = this->best_modules_wh;
-}
+
 
 void sequence_pair_t::set_add_order() {
     this->add_soft_order.resize(sequence_pair_t::soft_n);
@@ -1042,7 +1045,7 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
     //solve
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
-    ILP_result_t ILP_result = ILP_solver.solve();
+    ILP_result_t ILP_result = ILP_solver.solve(false);
     vector<vec2d_t> result; //zero-index
     //cout<< "got z : "<<ILP_result.z<<endl;
     for(int i = 1; i<=sequence_n; ++i){
@@ -1055,7 +1058,7 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
 
     }
     if(load_result){
-        this->positions = result;
+        this->modules_positions = result;
     }
     if(ILP_result.legal){
         return true;
@@ -1080,7 +1083,11 @@ void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {
 }
 
 double sequence_pair_t::get_wirelength(bool minimize, bool with_area) {
+    timer a1("get wirelength");
+    a1.timer_start();
     this->predict_wirelength(minimize, with_area);
+    a1.timer_end();
+    //a1.print_time_elapsed();
     return this->predicted_wirelength;
 }
 

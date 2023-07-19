@@ -7,6 +7,8 @@
 
 #include "sequence_pair_t.h"
 #include "timer.h"
+#include <set>
+using std::set;
 class sequence_pair_enumerator_t{
 
 public:
@@ -26,8 +28,11 @@ public:
 
     bool find_greater(sequence_pair_t&);
 
+    void updated_best_SP();
+
+    set<int> failed_insertion_id;
     vector<sequence_pair_t> valid_sequence_pairs;
-    sequence_pair_t seed_SP;
+    sequence_pair_t seed_SP, best_SP;
     int target_sp_n = 0;
 };
 

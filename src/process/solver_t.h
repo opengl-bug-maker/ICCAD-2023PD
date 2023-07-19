@@ -29,7 +29,7 @@ public:
     int find_valid_seq_pair(int); //number of valid seq
     floorplan_t& get_best_fp();
 
-    void test1();
+    void test_initial();
 
     void test_specific();
 

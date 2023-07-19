@@ -18,7 +18,6 @@
 using std::vector;
 using std::unordered_map;
 
-class sequence_pair_enumerator_t;
 class sequence_pair_t{
 public:
     //static function
@@ -68,7 +67,6 @@ public:
     bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t,int);
     void build_constraint_graph();
     void change_size(int);
-    void load_best_sequence();
     void swap_seq_number(int a, int b,bool, bool);
 
 
@@ -94,7 +92,7 @@ public:
     void print_inline();
     void print_logs();
     void sequence_pair_validation();
-    void print_shapes();
+    void print_shapes_i();
     void print_fix_sequence();
     void print_connections();
     void print_result();
@@ -103,13 +101,13 @@ public:
 
     //properties
     long long predicted_wirelength = 1e13;
-    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h, best_h_sequence, best_v_sequence, add_soft_order;
+    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
+    vector<int> add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<int> is_in_seq;
-    vector<vec2d_t> modules_wh, best_modules_wh;
+    vector<vec2d_t> modules_wh;
     vector<int> modules_wh_i;
-    vector<vec2d_t> modules_pos;
-    vector<vec2d_t> positions;
+    vector<vec2d_t> modules_positions;
 
     //debug properties
     vector<pair<double, double>> logs;
