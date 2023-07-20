@@ -14,22 +14,21 @@ class sequence_pair_enumerator_t{
 public:
     sequence_pair_enumerator_t();
 
-    std::set<int> random_choose(int upb, int x);
-
-    int sample_from_interval(int,int);
-
     void generate_sequence_pairs(int n);
 
     bool add_soft_process(int, bool,int);
 
-    void validate_all_SP();
+    bool add_soft_process_cont(int i,bool with_area, int cutoff, int start_j, int start_k);
 
+    void validate_all_SP();
     void validate_all_SP_print_all();
 
     bool find_greater(sequence_pair_t&);
 
     void updated_best_SP();
 
+    vector<int> find_LCS_v(int i, int j);
+    vector<int> find_LCS_h(int i, int j);
     set<int> failed_insertion_id;
     vector<sequence_pair_t> valid_sequence_pairs;
     sequence_pair_t seed_SP, best_SP;
