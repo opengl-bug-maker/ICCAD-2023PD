@@ -11,7 +11,12 @@ void random_helper::shuffle(vector<vector<int>>& a) {
         std::swap(a[i], a[x]);
     }
 }
-
+void random_helper::shuffle(vector<int>& a) {
+    for(int i = 0; i<a.size(); ++i){
+        int x = rand()%a.size();
+        std::swap(a[i], a[x]);
+    }
+}
 vector<int> random_helper::get_random_int_vec(int n) {
     vector<int> a(n);
     for(int i = 0; i<n; ++i){

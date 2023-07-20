@@ -10,7 +10,10 @@ using std::vector;
 class random_helper {
 public:
     static void shuffle(vector<vector<int>>&);
+
     static vector<int> get_random_int_vec(int n);
+
+    static void shuffle(vector<int> &a);
 };
 
 
