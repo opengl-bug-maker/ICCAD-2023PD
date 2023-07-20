@@ -33,7 +33,7 @@ public:
 
     void test_specific();
 
-    void test2();
+    void test_initial_and_find_greater();
 };
 
 
