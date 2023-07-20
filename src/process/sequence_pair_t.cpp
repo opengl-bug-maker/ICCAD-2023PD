@@ -110,10 +110,41 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
         double y = area/x;
 
         if(ceil(x)*2>=ceil(y)){
-            res.push_back({ceil(x), ceil(y)});
+            double xx = ceil(x), yy = ceil(y);
+            if(xx-1>=yy *0.5&& (xx-1)*yy>=area){
+                xx-=1;
+            }
+            if(yy-1>=0.5*xx && (yy-1)*xx>=area){
+                yy-=1;
+            }
+            double diff = xx*yy-area;
+//            cout<<"Area : "<<area<<", "<<"diff = "<<diff<<" "<<"ratio : "<<xx/yy<<endl;
+//            cout<<"x : "<<xx<<"y : "<<yy<<endl;
+            res.push_back({xx, yy});
         }
     }
     return res;
+////TODO: select only 5 shapes
+//    if(area==1){return {{1,1}};}
+//    double p = sqrt(static_cast<double>(area)*0.5);
+//    double b = pow(2, 0.25);
+//    vector<vec2d_t> res;
+//
+//    for(int i = 0; i<=4; ++i){ //i will be the short edge
+//
+//        double x = floor(p*pow(b, i));
+//        double y = ceil(area/x);
+//        if(y/x>2){x = ceil(p*pow(b, i));}
+//        if(y/x<0.5){y = floor(area/x);}
+//        double diff = x*y-area;
+//        if(diff<0||x/y>2||x/y<0.5){
+//            cout<<"Area : "<<area<<", "<<"diff = "<<diff<<" "<<"ratio : "<<x/y<<endl;
+//            int a = 5;
+//        }
+//
+//        res.push_back({x, y});
+//    }
+//    return res;
 }
 
 
