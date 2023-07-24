@@ -18,7 +18,7 @@
 #include <time.h>
 
 class solver_t {
-    floorplan_t best_fp;
+
 public:
     void generate_seq_rand();
     //essential functions
@@ -42,9 +42,11 @@ public:
 
     void test_genetic_solver();
 
-    void test_SA_solver();
+    void SA_solver();
 
     void test_other();
+
+    floorplan_t best_fp;
 };
 
 
