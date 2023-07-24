@@ -23,17 +23,28 @@ public:
     void generate_seq_rand();
     //essential functions
     solver_t();
+
     void run();
+
     void print_info(bool);
-    vector<sequence_pair_t> valid_sequence_pairs;
+
     int find_valid_seq_pair(int); //number of valid seq
+
     floorplan_t& get_best_fp();
 
     void test_initial();
 
     void test_specific();
 
+    void test_LCS();
+
     void test_initial_and_find_greater();
+
+    void test_genetic_solver();
+
+    void test_SA_solver();
+
+    void test_other();
 };
 
 

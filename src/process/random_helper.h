@@ -14,6 +14,8 @@ public:
     static vector<int> get_random_int_vec(int n);
 
     static void shuffle(vector<int> &a);
+
+    static vector<int> rand_list(int n);
 };
 
 

@@ -98,10 +98,10 @@ std::vector<int> sequence_pair_t::get_h() {
 }
 
 vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
-    //TODO: select only 5 shapes
+    //select only 5 shapes
     if(area==1){return {{1,1}};}
-    double p = sqrt(static_cast<double>(area)*0.5);
-    double b = pow(2, 0.25);
+    double p = sqrt(static_cast<double>(area)/1.95);
+    double b = pow(1.95, 0.25);
     vector<vec2d_t> res;
 
     for(int i = 0; i<=4; ++i){ //i will be the short edge
@@ -233,7 +233,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
                                            shape_type_3_offset + from,
                                            shape_type_4_offset + from,
                                            shape_type_5_offset + from},
-                                      {1, -1, w1,w2 ,w3,w4, w5}, constraint_name, 0);
+                                      {1, -1, w1,w2 ,w3,w4, w5}, constraint_name, -1e-5);
         }
         constraint_i++;
     }
@@ -259,7 +259,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
                                        shape_type_3_offset + from,
                                        shape_type_4_offset + from,
                                        shape_type_5_offset + from},
-                               {1, -1,h1,h2,h3,h4, h5}, constraint_name, 0);
+                               {1, -1,h1,h2,h3,h4, h5}, constraint_name, -1e-5);
         }
         constraint_i++;
     }
@@ -350,7 +350,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<soft_n; ++i){
         string constraint_name1 = "w_h_11"+ std::to_string(i);
         ILP_solver.set_constraint_fx(constraint_i, 5,
-        {shape_type_1_offset + i, shape_type_2_offset + i,shape_type_3_offset + i,shape_type_4_offset+i, shape_type_5_offset+i}, {1, 1,1,1,1}, constraint_name1, 1);
+        {shape_type_1_offset + i, shape_type_2_offset + i,shape_type_3_offset + i,shape_type_4_offset+i, shape_type_5_offset+i}, {1, 1,1,1,1}, constraint_name1, 1.001);
         constraint_i++;
     }
     //set boundaires
@@ -420,28 +420,28 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<soft_n; ++i){
         string var_name1 = "shape1"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_1_offset + i, var_name1.c_str());
-        ILP_solver.set_variable_double_range_int(shape_type_1_offset + i, 0, 1);
-        //ILP_solver.set_variable_BV(shape_type_1_offset + i);
+        ILP_solver.set_variable_double_range(shape_type_1_offset + i, 0, 1);
+        //ILP_solver.set_variable_double_range_int(shape_type_1_offset + i, 0, 1);
 
         string var_name2 = "shape2"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_2_offset + i, var_name2.c_str());
-        ILP_solver.set_variable_double_range_int(shape_type_2_offset + i, 0, 1);
-        //ILP_solver.set_variable_BV(shape_type_2_offset + i);
+        ILP_solver.set_variable_double_range(shape_type_2_offset + i, 0, 1);
+        //ILP_solver.set_variable_double_range_int(shape_type_2_offset + i, 0, 1);
 
         string var_name3 = "shape3"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_3_offset + i, var_name3.c_str());
-        ILP_solver.set_variable_double_range_int(shape_type_3_offset + i, 0, 1);
-        //ILP_solver.set_variable_BV(shape_type_3_offset + i);
+        ILP_solver.set_variable_double_range(shape_type_3_offset + i, 0, 1);
+        //ILP_solver.set_variable_double_range_int(shape_type_3_offset + i, 0, 1);
 
         string var_name4 = "shape4"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_4_offset + i, var_name4.c_str());
-        ILP_solver.set_variable_double_range_int(shape_type_4_offset + i, 0, 1);
-        //ILP_solver.set_variable_BV(shape_type_4_offset + i);
+        ILP_solver.set_variable_double_range(shape_type_4_offset + i, 0, 1);
+        //ILP_solver.set_variable_double_range_int(shape_type_4_offset + i, 0, 1);
 
         string var_name5 = "shape5"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, shape_type_5_offset + i, var_name5.c_str());
-        ILP_solver.set_variable_double_range_int(shape_type_5_offset + i, 0, 1);
-        //ILP_solver.set_variable_BV(shape_type_5_offset + i);
+        ILP_solver.set_variable_double_range(shape_type_5_offset + i, 0, 1);
+        //ILP_solver.set_variable_double_range_int(shape_type_5_offset + i, 0, 1);
 
 
     }
@@ -455,7 +455,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     //solve
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
-    ILP_result_t ILP_result = ILP_solver.solve(true);
+    ILP_result_t ILP_result = ILP_solver.solve(false);
 
 
     if(ILP_result.legal){
@@ -472,48 +472,51 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
                     result_pos.push_back({-1, -1});
                 }
                 else {
-                    result_pos.push_back({ILP_result.var_values[i+x_module_offset], ILP_result.var_values[i+y_module_offset]});
+                    result_pos.push_back({static_cast<int>(ILP_result.var_values[i+x_module_offset]),
+                                          static_cast<int>(ILP_result.var_values[i + y_module_offset])});
                 }
             }
             for(int i = 0; i<soft_n; ++i){
                 if(this->is_in_seq[i]==0){
                     result_wh.push_back({-1, -1});
+                    result_wh_i.push_back(-1);
                 }
                 else{
-                    int shape1 = ILP_result.var_values[i + shape_type_1_offset];
-                    int shape2 = ILP_result.var_values[i + shape_type_2_offset];
-                    int shape3 = ILP_result.var_values[i + shape_type_3_offset];
-                    int shape4 = ILP_result.var_values[i + shape_type_4_offset];
-                    int shape5 = ILP_result.var_values[i + shape_type_5_offset];
+                    double shape1 = ILP_result.var_values[i + shape_type_1_offset];
+                    double shape2 = ILP_result.var_values[i + shape_type_2_offset];
+                    double shape3 = ILP_result.var_values[i + shape_type_3_offset];
+                    double shape4 = ILP_result.var_values[i + shape_type_4_offset];
+                    double shape5 = ILP_result.var_values[i + shape_type_5_offset];
+                    double shapes[5]  = {shape1, shape2, shape3, shape4, shape5};
                     //cout<< "s : "<<shape1<<" "<<shape2<<" "<<shape3<<" "<<shape4<<" "<<shape5<<endl;
-                    if(shape1){
-                        result_wh.push_back(sequence_pair_t::soft_area_to_w_h_m[i][0]);
-                        result_wh_i.push_back(0);
+                    double x = 0, y = 0;
+                    for(int j = 0; j<5; ++j){
+                        x+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m[i][j].get_x();
+                        y+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m[i][j].get_y();
                     }
-                    else if(shape2){
-                        result_wh.push_back(sequence_pair_t::soft_area_to_w_h_m[i][1]);
-                        result_wh_i.push_back(1);
+//                    x = ceil(x);
+//                    y = ceil(y);
+                    x = floor(x);
+                    y = floor(y);
+                    double area = x*y;
+                    double ratio = x/y;
+                    if(area<sequence_pair_t::modules_area[i] || ratio<0.5 || ratio >2){
+//                        cout<< "Area ::::"<<sequence_pair_t::modules_area[i]<<" "<<"x : "<<x<<" "<<"y : "<<y<<endl;
+//                        cout<<"xy : "<<area<<" "<<"ratio : " <<ratio<<endl;
+//                        int a = 5;
                     }
-                    else if(shape3){
-                        result_wh.push_back(sequence_pair_t::soft_area_to_w_h_m[i][2]);
-                        result_wh_i.push_back(2);
-                    }
-                    else if(shape4){
-                        result_wh.push_back(sequence_pair_t::soft_area_to_w_h_m[i][3]);
-                        result_wh_i.push_back(3);
-                    }
-                    else if(shape5){
-                        result_wh.push_back(sequence_pair_t::soft_area_to_w_h_m[i][4]);
-                        result_wh_i.push_back(4);
-                    }
+
+
+                    result_wh.push_back({x, y});
+                    result_wh_i.push_back(-1);
                 }
             }
-            this->modules_positions = result_pos;
             for(int i = 0; i<sequence_pair_t::soft_n; ++i){
                 this->modules_wh[i] = result_wh[i];
-            }
 
+            }
             this->modules_wh_i = result_wh_i;
+            this->modules_positions = result_pos;
         }
         return true;
     }
@@ -666,8 +669,7 @@ void sequence_pair_t::print_inline() {
 //            cout<<"{"<<shape.get_x()<<","<<shape.get_y()<<"} ";
 //        }
 //    }
-    cout<<endl;
-
+    cout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
 }
 void sequence_pair_t::print_shapes_i() {
     cout<<"shapes of the SP : {";
@@ -1124,6 +1126,23 @@ double sequence_pair_t::get_wirelength(bool minimize, bool with_area) {
 
 void sequence_pair_t::print_wirelength(bool minimize, bool with_area) {
     cout<<std::setprecision(16)<<this->get_wirelength(minimize,with_area)<<endl;
+}
+
+void sequence_pair_t::print_v() {
+    cout<<"v: {";
+    for(int i = 0; i<this->v_sequence.size(); ++i){
+        cout<< v_sequence[i];
+        if(i!=this->v_sequence.size()-1){cout<<", ";}
+    }
+    cout<<"} "<<endl;
+}
+void sequence_pair_t::print_h(){
+    cout<<"h: {";
+    for(int i = 0; i<this->h_sequence.size(); ++i){
+        cout<< h_sequence[i];
+        if(i!=this->h_sequence.size()-1){cout<<", ";}
+    }
+    cout<<"}"<<endl;
 }
 
 

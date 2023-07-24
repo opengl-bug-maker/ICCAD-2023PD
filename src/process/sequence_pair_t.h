@@ -90,6 +90,8 @@ public:
     //debug
     void print();
     void print_inline();
+    void print_v();
+    void print_h();
     void print_logs();
     void sequence_pair_validation();
     void print_shapes_i();

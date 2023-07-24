@@ -47,7 +47,7 @@ void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> var
         set_n++;
     }
     glp_set_row_name(ILP, constraint_i, name.c_str());
-    glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, static_cast<int>(upb)); //x_i-x_j<=- w
+    glp_set_row_bnds(ILP, constraint_i, GLP_UP, 0, static_cast<double>(upb)); //x_i-x_j<=- w
 
     this->constraint_i++;
 }
@@ -129,14 +129,14 @@ ILP_result_t ILP_solver_t::solve(bool int_needed) {
 //    int z = glp_ipt_obj_val(this->ILP);
 //    int feasible = glp_ipt_status(this->ILP);
 
-    vector<int> result(1); //due to 1-index
+    vector<double> result(1); //due to 1-index
     for(int i = 1; i<=this->var_n; ++i){
 
         if(int_needed){
             result.push_back(static_cast<int>(glp_mip_col_val(this->ILP, i)));
         }
         else{
-            result.push_back(static_cast<int>(glp_get_col_prim(this->ILP, i)));
+            result.push_back((glp_get_col_prim(this->ILP, i)));
         }
 
         //result.push_back(static_cast<int>(glp_ipt_col_prim(this->ILP, i)));

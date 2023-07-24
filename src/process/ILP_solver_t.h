@@ -14,7 +14,7 @@ class ILP_result_t{
 public:
     bool legal;
     int z;
-    vector<int> var_values;
+    vector<double> var_values;
     ILP_result_t(){
         var_values.resize(1);
     }

@@ -28,3 +28,15 @@ vector<int> random_helper::get_random_int_vec(int n) {
     }
     return a;
 }
+
+vector<int> random_helper::rand_list(int n) {
+    vector<int> res(n);
+    for(int i = 0; i<n; ++i){
+        res[i] = i;
+    }
+    for(int i = 0; i<n; ++i){
+        int x = rand()%n;
+        std::swap(res[i], res[x]);
+    }
+    return res;
+}
