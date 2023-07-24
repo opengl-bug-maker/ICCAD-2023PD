@@ -15,7 +15,7 @@ using std::endl;
 using std::setw;
 
 void solver_t::run() {
-    this->test_SA_solver();
+    this->SA_solver();
 }
 void solver_t::test_initial(){
     timer solver_timer("solved timer");
@@ -191,7 +191,7 @@ void solver_t::test_other() {
     }
 }
 
-void solver_t::test_SA_solver() {
+void solver_t::SA_solver() {
     double init_timeout = 600*1000;
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = init_timeout;
@@ -204,9 +204,10 @@ void solver_t::test_SA_solver() {
     SA_solver_t SA_solver;
     SA_solver.run(SPEN, 600*1000);
     SPEN.updated_best_SP();
-    SPEN.best_SP.print_inline();
-    floorplan_t fp = SPEN.best_SP.to_fp();
-    fp.GUI_validation();
-    cout<<"--------------------------------------"<<endl;
-    cout<<"finally got wirelength = "<<std::setprecision(16)<<fp.get_wirelength()<<endl;
+    this->best_fp = SPEN.best_SP.to_fp();
+//    SPEN.best_SP.print_inline();
+//    floorplan_t fp = SPEN.best_SP.to_fp();
+//    fp.GUI_validation();
+//    cout<<"--------------------------------------"<<endl;
+//    cout<<"finally got wirelength = "<<std::setprecision(16)<<fp.get_wirelength()<<endl;
 }
