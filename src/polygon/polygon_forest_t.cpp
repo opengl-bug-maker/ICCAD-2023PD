@@ -1,5 +1,5 @@
 //
-// Created by 林士傑 on 2023/3/27.
+// Created by 林士傑 on 2023/6/9.
 //
 
 #include <algorithm>
@@ -11,13 +11,22 @@
 #include "utilities/rect_t.h"
 #include "utilities/vec2d_t.h"
 
-polygon_forest_t::polygon_forest_t() : quadtree(quadtree_t<polygon_t>(rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), chip_t::get_height())))){
-    this->polygons.reserve(200);
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
-    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module,rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
+polygon_forest_t::polygon_forest_t() {
+    this->polygons.reserve(204);
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(0, chip_t::get_height()))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, 0), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(0, chip_t::get_height()), vec2d_t(chip_t::get_width(), 0))))));
+    this->polygons.push_back(std::make_shared<polygon_t>(polygon_t(bounding_rectangle_t(&soft_module_t::void_module, rect_t(vec2d_t(chip_t::get_width(), 0), vec2d_t(0, chip_t::get_height()))))));
 }
+
+//polygon_forest_t::~polygon_forest_t() {
+////    std::cout << "deededede";
+//    for(auto& polygon : this->polygons){
+//        polygon.reset();
+////        delete polygon.get();
+//    }
+//}
+
 
 std::vector<polygon_t> polygon_forest_t::get_polygons() {
     std::vector<polygon_t> vecs;
@@ -45,13 +54,13 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         boundingRectangle.getRect().get_right_upper().get_x() > chip_t::get_width() ||
         boundingRectangle.getRect().get_right_upper().get_y() > chip_t::get_height()){
         //haha got you!
+        return false;
         throw std::exception();
     }
     std::shared_ptr<polygon_t> new_poly = std::make_shared<polygon_t>(boundingRectangle);
 //    polygon_t new_poly(boundingRectangle);
     std::vector<int> merging_poly;
     // check any polygon collision new_rect
-    auto collision_polygons = quadtree.collision_value(*new_poly.get());
     for (int i = 0; i < polygons.size(); ++i) {
         if(polygons[i]->is_bounding_collision(boundingRectangle)){
             if(polygons[i]->is_collision(boundingRectangle)){
@@ -60,12 +69,12 @@ bool polygon_forest_t::add_rect(const bounding_rectangle_t& boundingRectangle) {
         }
     }
     // add new polygon
-    if(collision_polygons.empty()){
+    if(merging_poly.empty()){
         //no one touch
-        quadtree.add_value(*new_poly.get());
         polygons.push_back(std::move(new_poly));
         return true;
     }
+    return false;
     // merge all collision polygon
     for (auto poly : merging_poly) {
         if(!new_poly->merge_polygon(*polygons[poly].get())){
@@ -85,7 +94,7 @@ std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
     std::vector<bounding_rectangle_t> bounding;
     for (auto poly : polygons) {
         for(auto bd : poly->get_rects()){
-            bounding.push_back(bd.get_module_bounding_rectangle());
+            bounding.push_back(bd->get_module_bounding_rectangle());
         }
     }
 
@@ -104,18 +113,4 @@ std::vector<rect_t> polygon_forest_t::get_empty_spaces() {
         }
     }
     return spaces;
-}
-
-void polygon_forest_t::test_without_collision() {
-    auto fix = chip_t::get_fixed_modules();
-    auto bd = fix[0]->make_bd();
-    rect_t r = rect_t(vec2d_t(4, 9), vec2d_t(6, 6));
-    auto bd1 = chip_t::get_soft_modules()[0]->make_bd(r);
-    auto tt = &r;
-    auto ttt = &bd1.first.getRect();
-    auto re = this->add_rect(bd);
-    auto ree =this->add_rect(bd1.first);
-    auto bdd = fix[1]->make_bd();
-    ree = this->add_rect(bdd);
-    int a = 0;
 }

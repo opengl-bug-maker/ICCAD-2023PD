@@ -15,6 +15,7 @@ class bounding_rectangle_t {
     friend class soft_module_t;
     //evil
     friend class polygon_forest_t;
+    friend class polygon_t;
     //evil
     module_t* link_module;
     rect_t rect;

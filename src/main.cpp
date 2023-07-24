@@ -5,27 +5,24 @@
 #include "process/solver_t.h"
 #include "output_data/output_handler_t.h"
 #include "output_data/output_utility_t.h"
-
-
+#include "process/sequence_pair_t.h"
+#include "process/timer.h"
 int main(/*arg*/){
+    timer main_timer("main");
+    main_timer.timer_start();
     std::fstream input_file;
     std::fstream output_file;
 
-    chip_t::file_input("");//fstream
-
-    floorplanning_t::init();
+    //chip_t::file_input("../../testcase/custom-input7.txt");//fstream
+    chip_t::file_input("../../testcase/Case01.txt");//fstream
+    //chip_t::file_input("../../testcase/case01-input.txt");//fstream
     solver_t solver;
     solver.run();
-    floorplanning_t fp = solver.get_best_fp();
-    output_handler_t::set_FP(solver.get_best_fp());
 
-    output_file.open("", std::ios::out | std::ios::trunc);
-    output_file << "WHPL " << output_handler_t::WHPL();
+    main_timer.timer_end();
+    main_timer.print_time_elapsed();
 
-    for (output_utility_t& output_utility : output_handler_t::to_real()) {
-        output_file << output_utility.to_string();
-    }
-    output_file.close();
-    std::cout<<"Press any key to continue"<<std::endl;
     fgetc(stdin);
+    //seq.print_soft_inline();
+
 }

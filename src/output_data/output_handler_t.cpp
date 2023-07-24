@@ -9,20 +9,19 @@ std::vector<output_utility_t> output_handler_t::utilities;
 
 void output_handler_t::parse_polygon(polygon_t &polygon) {
     for (auto rect : polygon.get_rects()) {
-        utilities.push_back(output_utility_t(rect.get_module_bounding_rectangle().getLinkModule()->getName(), {
-            rect.get_module_bounding_rectangle().getRect().get_left_lower(),
-            vec2d_t(rect.get_module_bounding_rectangle().getRect().get_right_upper().get_x(),
-                    rect.get_module_bounding_rectangle().getRect().get_left_lower().get_y()),
-            rect.get_module_bounding_rectangle().getRect().get_right_upper(),
-            vec2d_t(rect.get_module_bounding_rectangle().getRect().get_left_lower().get_x(),
-                    rect.get_module_bounding_rectangle().getRect().get_right_upper().get_y())
+        utilities.push_back(output_utility_t(rect->get_module_bounding_rectangle().getLinkModule()->getName(), {
+            rect->get_module_bounding_rectangle().getRect().get_left_lower(),
+            vec2d_t(rect->get_module_bounding_rectangle().getRect().get_right_upper().get_x(),
+                    rect->get_module_bounding_rectangle().getRect().get_left_lower().get_y()),
+            rect->get_module_bounding_rectangle().getRect().get_right_upper(),
+            vec2d_t(rect->get_module_bounding_rectangle().getRect().get_left_lower().get_x(),
+                    rect->get_module_bounding_rectangle().getRect().get_right_upper().get_y())
         }));
     }
 }
 
-void output_handler_t::set_FP(floorplanning_t &floorplanning) {
-    polygon_forest_t& polygonForest = floorplanning.get_polygon_forest();
-//    polygon_forest_t polygonForest;
+void output_handler_t::set_FP(floorplan_t &floorplanning) {
+    polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
     output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);

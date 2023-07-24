@@ -6,24 +6,45 @@
 #define INC_2023PD_GENETIC_ALGO_T_H
 
 #include "polygon/polygon_forest_t.h"
-#include "process/floorplanning_t.h"
+#include "process/floorplan_t.h"
 #include "static_data/chip_t.h"
 #include "quadratic/quadratic_t.h"
+#include "sequence_pair_t.h"
 #include <map>
 #include <set>
 #include <algorithm>
 #include <iterator>
 #include <random>
-#include<time.h>
+#include <time.h>
+
 class solver_t {
-    vector<floorplanning_t> floorplannings;
-    floorplanning_t best_fp;
+    floorplan_t best_fp;
 public:
+    void generate_seq_rand();
+    //essential functions
     solver_t();
+
     void run();
+
     void print_info(bool);
-    floorplanning_t get_fp(size_t);
-    floorplanning_t& get_best_fp();
+
+    int find_valid_seq_pair(int); //number of valid seq
+
+    floorplan_t& get_best_fp();
+
+    void test_initial();
+
+    void test_specific();
+
+    void test_LCS();
+
+    void test_initial_and_find_greater();
+
+    void test_genetic_solver();
+
+    void test_SA_solver();
+
+    void test_other();
 };
 
 
