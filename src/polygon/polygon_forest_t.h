@@ -17,7 +17,6 @@ class polygon_forest_t {
     void test_without_collision();
 public:
     polygon_forest_t();
-    //~polygon_forest_t();
 
     std::vector<polygon_t> get_polygons();
 
