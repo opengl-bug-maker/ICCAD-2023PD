@@ -1,28 +1,37 @@
 #include <iostream>
+#include <fstream>
 
-#include "fstream"
 #include "static_data/chip_t.h"
 #include "process/solver_t.h"
+#include "process/floorplan_t.h"
 #include "output_data/output_handler_t.h"
 #include "output_data/output_utility_t.h"
-#include "process/sequence_pair_t.h"
-#include "process/timer.h"
-int main(/*arg*/){
-    timer main_timer("main");
-    main_timer.timer_start();
-    std::fstream input_file;
-    std::fstream output_file;
 
-    //chip_t::file_input("../../testcase/custom-input7.txt");//fstream
-    chip_t::file_input("../../testcase/Case01.txt");//fstream
-    //chip_t::file_input("../../testcase/case01-input.txt");//fstream
+
+int main(/*arg*/){
+    std::string input_file_name = "";
+    std::string output_file_name = "";
+
+    input_file_name = "../../testcase/Case01.txt";
+
+    chip_t::file_input(input_file_name);//fstream
+
     solver_t solver;
     solver.run();
 
-    main_timer.timer_end();
-    main_timer.print_time_elapsed();
+    floorplan_t fp = solver.get_best_fp();
+    output_handler_t::set_FP(fp);
+
+    std::fstream output_file;
+    output_file.open(output_file_name, std::ios::out | std::ios::trunc);
+
+    output_file << "HPWL " << output_handler_t::HPWL();
+
+    for (output_utility_t& output_utility : output_handler_t::to_real()) {
+        output_file << output_utility.to_string();
+    }
+    output_file.close();
 
     fgetc(stdin);
-    //seq.print_soft_inline();
-
+    std::cout << "press any key to end the program" << std::endl;
 }

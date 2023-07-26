@@ -5,6 +5,7 @@
 #ifndef INC_2023PD_RECT_H
 #define INC_2023PD_RECT_H
 
+#include <vector>
 #include "vec2d_t.h"
 #include "utilities/box_t.h"
 
@@ -34,6 +35,10 @@ public:
     bool is_collision(const rect_t& rect) const;
 
     bool is_contain(const rect_t& rect) const;
+
+    bool is_wrap(const rect_t& rect) const;
+
+    std::vector<rect_t> cut(const rect_t& rect) const;
 
     std::pair<bool, rect_t> intersect(const rect_t& rect) const;
 

@@ -21,11 +21,6 @@ class polygon_t : public box_t{
     std::vector<std::shared_ptr<polygon_module_t>> overlap_unit;
 
     std::map<std::set<polygon_module_t*>, polygon_module_t*> unit_lib;
-//    std::vector<std::shared_ptr<polygon_module_t>> units;
-
-//    std::vector<polygon_overlap_area_t> overlap_areas;
-
-
 
     const static std::vector<std::vector<std::vector<std::vector<int>>>> combination_list;
 
@@ -33,11 +28,12 @@ class polygon_t : public box_t{
 
 public:
     explicit polygon_t(const bounding_rectangle_t& first_rect);
-//    ~polygon_t();
 
     const rect_t& get_bounding_rect() const override;
 
     const std::vector<std::shared_ptr<polygon_module_t>>& get_rects() const;
+
+    const std::vector<std::shared_ptr<polygon_module_t>>& get_overlap_unit() const;
 
     bool is_bounding_collision(const rect_t& rect) const;
     bool is_bounding_collision(const bounding_rectangle_t& rect) const;
