@@ -12,17 +12,17 @@ public:
 
     bool sample_p(double delta_c);
 
-    bool neighbor_fnd = false;
 
     void run(sequence_pair_enumerator_t&,double);
 
     double get_delta(sequence_pair_t&, sequence_pair_t&);
 
+    double set_parameters();
     sequence_pair_t find_neighbor(sequence_pair_t);
     sequence_pair_t sequence_pair;
     sequence_pair_t best_sequence_pair;
-    double t, r = 0.95;
-    timer run_time = timer("run time");
+    double t = 1, r = 0.95;
+    timer run_time = timer("SA run time");
 };
 
 

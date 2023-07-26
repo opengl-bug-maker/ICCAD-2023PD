@@ -64,7 +64,6 @@ public:
 
     //subfunctions
     bool is_completed();
-    bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t,int);
     void build_constraint_graph();
     void change_size(int);
     void swap_seq_number(int a, int b,bool, bool);
@@ -102,7 +101,7 @@ public:
 
 
     //properties
-    long long predicted_wirelength = 1e13;
+    long long predicted_wirelength = -1;
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
     vector<int> add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;

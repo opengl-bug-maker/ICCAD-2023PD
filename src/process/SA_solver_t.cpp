@@ -13,8 +13,9 @@ using std::cout;
 using std::endl;
 bool SA_solver_t::sample_p(double delta_c) {
     double p = exp(-delta_c/t);
-    //let p x 100 be the percentage that we will take the result
-    p*=100;
+
+    p*=1000;//let p x 100 be the percentage that we will take the result
+    //cout<<"p: "<<p<<endl;
     int x = rand()%100;
     if(p>=x){
         return true;
@@ -39,7 +40,12 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
         if(run_time.get_time_elapsed()>= timeout){break;}
         SPEN.updated_best_SP(); //update best SP first, because SA may cause SPs to get worse
         for(auto& SP:SPEN.valid_sequence_pairs){
+
+            timer a1("find neighbor");
+            a1.timer_start();
             sequence_pair_t after = find_neighbor(SP);
+            a1.timer_end();
+            //a1.print_time_elapsed();
             double delta = get_delta(SP, after);
             bool change = sample_p(delta);
             if(change){
@@ -49,11 +55,17 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
                 best_sp = SP;
             }
         }
-        cout<<"It : "<<it<<", t = "<<this->t<<endl;
-        cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
-        it++; this->t*=r;
-        //SPEN.validate_all_SP_print_all();
-        cout<<"------------------------------"<<endl;
+        if(it%10==0){
+            cout<<"It : "<<it<<", t = "<<this->t<<endl;
+            cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
+            cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
+            this->t*=r;
+            cout<<"------------------------------"<<endl;
+
+            run_time.timer_end();
+            run_time.print_time_elapsed();
+        }
+        it++;
     }
     SPEN.validate_all_SP_print_all();
     SPEN.valid_sequence_pairs[0] = best_sp;
@@ -76,9 +88,12 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
                     if(m==0&&n==0){continue;}
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
-
-                    if(neighbor.find_position(false, true, 0, 0)){
-                        this->neighbor_fnd = true;
+                    timer a1("find position 85");
+                    a1.timer_start();
+                    bool success = neighbor.find_position(false, true, 0, 0); //6ms at most
+                    a1.timer_end();
+                    //a1.print_time_elapsed();
+                    if(success){
                         return neighbor;
                     }
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
@@ -89,12 +104,16 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
 
         }
     }
-    this->neighbor_fnd = false;
     return SP; //can't find any neighbor
 }
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.get_wirelength(true, true);
     double after_wirelength = after.get_wirelength(true, true);
-    return (after_wirelength-ori_wirelength)/ori_wirelength;
+    double delta = (after_wirelength-ori_wirelength)/ori_wirelength;
+    return delta*10.0;
+}
+
+double SA_solver_t::set_parameters() {
+
 }
