@@ -104,8 +104,7 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
     double b = pow(1.95, 0.25);
     vector<vec2d_t> res;
 
-    for(int i = 0; i<=4; ++i){ //i will be the short edge
-        //cout<< area<<" "<<i<<" "<<ceil(static_cast<float>(area)/static_cast<float>(i))<<endl;
+    for(int i = 0; i<=4; ++i){ //i will be the shorter edge
         double x = p*pow(b, i);
         double y = area/x;
 
@@ -118,33 +117,11 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
                 yy-=1;
             }
             double diff = xx*yy-area;
-//            cout<<"Area : "<<area<<", "<<"diff = "<<diff<<" "<<"ratio : "<<xx/yy<<endl;
-//            cout<<"x : "<<xx<<"y : "<<yy<<endl;
             res.push_back({xx+1, yy+1});
         }
     }
     return res;
-////TODO: select only 5 shapes
-//    if(area==1){return {{1,1}};}
-//    double p = sqrt(static_cast<double>(area)*0.5);
-//    double b = pow(2, 0.25);
-//    vector<vec2d_t> res;
-//
-//    for(int i = 0; i<=4; ++i){ //i will be the short edge
-//
-//        double x = floor(p*pow(b, i));
-//        double y = ceil(area/x);
-//        if(y/x>2){x = ceil(p*pow(b, i));}
-//        if(y/x<0.5){y = floor(area/x);}
-//        double diff = x*y-area;
-//        if(diff<0||x/y>2||x/y<0.5){
-//            cout<<"Area : "<<area<<", "<<"diff = "<<diff<<" "<<"ratio : "<<x/y<<endl;
-//            int a = 5;
-//        }
-//
-//        res.push_back({x, y});
-//    }
-//    return res;
+
 }
 
 
@@ -168,14 +145,6 @@ void sequence_pair_t::build_constraint_graph() {
     }
     this->constraint_graph_h = updated_constraint_graph_h;
     this->constraint_graph_v = updated_constraint_graph_v;
-//    cout<<"horizontal constraint graph : "<<endl;
-//    for(auto& e:constraint_graph_h){
-//        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
-//    }
-//    cout<<"vertical constraint graph : "<<endl;
-//    for(auto& e:constraint_graph_v){
-//        cout<< "{"<<e.from<<"->"<<e.to<<", "<<e.w<<"}"<<endl;
-//    }
 }
 
 bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
@@ -460,11 +429,6 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
 
     if(ILP_result.legal){
         if(load_result){
-//            cout<<"value : ";
-//            for(auto& e:ILP_result.var_values){
-//                cout<<e<<" ";
-//            }
-//            cout<<endl;
             vector<vec2d_t> result_pos, result_wh;
             vector<int> result_wh_i; //zero-index
             for(int i = 0; i<sequence_n; ++i){
@@ -494,17 +458,10 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
                         x+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m[i][j].get_x();
                         y+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m[i][j].get_y();
                     }
-//                    x = ceil(x);
-//                    y = ceil(y);
                     x = floor(x);
                     y = floor(y);
                     double area = x*y;
                     double ratio = x/y;
-                    if(area<sequence_pair_t::modules_area[i] || ratio<0.5 || ratio >2){
-//                        cout<< "Area ::::"<<sequence_pair_t::modules_area[i]<<" "<<"x : "<<x<<" "<<"y : "<<y<<endl;
-//                        cout<<"xy : "<<area<<" "<<"ratio : " <<ratio<<endl;
-//                        int a = 5;
-                    }
 
 
                     result_wh.push_back({x, y});
@@ -583,22 +540,6 @@ void sequence_pair_t::build_graph() {
     }
 }
 
-pair<bool, floorplan_t> sequence_pair_t::place_all_modules(vector<vec2d_t> res) {
-
-    floorplan_t fp;
-    bool all_module_placed = true;
-    for(int i = 0; i<res.size(); ++i){
-        if(seq_is_fix[i]){ continue;}
-        //bool success = fp.place_soft_module(i, res[i], modules_wh[i]);
-        bool success = place_8d(fp,i, res[i], modules_wh[i], 0);
-        if(success==false){
-            all_module_placed = false;
-            break;
-        }
-    }
-    return {all_module_placed, fp};
-}
-
 void sequence_pair_t::print() {
     for(int i = 0; i<chip_t::get_total_module_n(); ++i){
         cout<< "seq# "<<i<<":";
@@ -622,24 +563,6 @@ void sequence_pair_t::print() {
     }
     cout<<"}"<<endl;
 
-}
-
-bool sequence_pair_t::place_8d( floorplan_t& fp,int id,vec2d_t res, vec2d_t wh, int offset) {
-
-    const int dir_x[8] = {0,0,1,-1,1,1,-1,-1};
-    const int dir_y[8] = {1,-1,0,0,1,-1,1,-1};
-    bool finish = false;
-    for(int i = 0; i<=offset&&!finish; ++i){
-        for(int j = 0; j<8 && !finish; ++j){
-            for(int k = 0; k<8 && !finish; ++k){
-                int nx = res.get_x()+dir_x[j]*i, ny = res.get_y()+dir_y[k]*i;
-                if(nx<0||nx>=chip_t::get_width()||ny<0||ny>=chip_t::get_height()){break;}
-                bool success = fp.place_soft_module(id, {nx, ny}, wh);
-                if(success){finish = true;}
-            }
-        }
-    }
-    return finish;
 }
 
 void sequence_pair_t::swap_v(int a,  int b) {
