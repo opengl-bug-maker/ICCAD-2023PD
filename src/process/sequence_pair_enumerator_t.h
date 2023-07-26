@@ -27,6 +27,7 @@ public:
 
     void updated_best_SP();
 
+    void load_specific();
 
     set<int> failed_insertion_id;
 

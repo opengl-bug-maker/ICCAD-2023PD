@@ -120,7 +120,7 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
             double diff = xx*yy-area;
 //            cout<<"Area : "<<area<<", "<<"diff = "<<diff<<" "<<"ratio : "<<xx/yy<<endl;
 //            cout<<"x : "<<xx<<"y : "<<yy<<endl;
-            res.push_back({xx, yy});
+            res.push_back({xx+1, yy+1});
         }
     }
     return res;
