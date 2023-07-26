@@ -4,7 +4,9 @@
 
 #include "output_handler_t.h"
 
-uint64_t output_handler_t::whpl;
+
+uint64_t output_handler_t::hpwl;
+
 std::vector<output_utility_t> output_handler_t::utilities;
 
 void output_handler_t::parse_polygon(polygon_t &polygon) {
@@ -159,7 +161,7 @@ void output_handler_t::parse_polygon(polygon_t &polygon) {
 
 void output_handler_t::set_FP(floorplan_t &floorplanning) {
     polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
-    output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
+    output_handler_t::hpwl = floorplanning.get_wirelength();//float to int?
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
     }
@@ -198,11 +200,10 @@ void output_handler_t::set_FP(floorplan_t &floorplanning) {
             wire_length += (uint32_t)(chip_t::get_connection_table()[i][j] * std::abs(dis.get_x()) + std::abs(dis.get_y()));
         }
     }
-    output_handler_t::whpl = wire_length;
 }
 
-uint64_t output_handler_t::WHPL() {
-    return output_handler_t::whpl;
+uint64_t output_handler_t::HPWL() {
+    return output_handler_t::hpwl;
 }
 
 std::vector<output_utility_t> output_handler_t::to_real() {
@@ -211,7 +212,7 @@ std::vector<output_utility_t> output_handler_t::to_real() {
 
 void output_handler_t::test(polygon_forest_t& polygonForest) {
 //    polygon_forest_t& polygonForest ;
-//    output_handler_t::whpl = floorplanning.get_wirelength();//float to int?
+//    output_handler_t::hpwl = floorplanning.get_wirelength();//float to int?
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
     }
