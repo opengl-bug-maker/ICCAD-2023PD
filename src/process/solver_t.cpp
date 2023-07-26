@@ -23,7 +23,7 @@ solver_t::solver_t() {
     sequence_pair_t::init();
 
 }
-void solver_t::SA_solver() {
+void solver_t::SA_process() {
     double init_timeout = 1800*1000; //30 minutes at most
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = init_timeout;
@@ -43,4 +43,8 @@ void solver_t::SA_solver() {
     SPEN.updated_best_SP();
     this->best_fp = SPEN.best_SP.to_fp();
     cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+}
+
+void solver_t::run() {
+    this->SA_process();
 }

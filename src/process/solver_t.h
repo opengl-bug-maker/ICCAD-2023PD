@@ -25,8 +25,9 @@ public:
 
     floorplan_t& get_best_fp();
 
-    void SA_solver();
+    void SA_process();
 
+    void run();
     floorplan_t best_fp;
 };
 
