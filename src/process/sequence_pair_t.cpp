@@ -814,7 +814,9 @@ floorplan_t sequence_pair_t::to_fp() {
 //        return ret;
 //    }
     for(int i = 0; i<soft_n; ++i){
-        bool ok = ret.place_soft_module(i, {this->modules_positions[i]}, {this->modules_wh[i]});
+        bool ok = ret.place_soft_module(i, {
+                                                vec2d_t(static_cast<int32_t>(this->modules_positions[i].get_x()),static_cast<int32_t>(this->modules_positions[i].get_y()))},
+                                        {vec2d_t(static_cast<int32_t>(this->modules_wh[i].get_x()),static_cast<int32_t>(this->modules_wh[i].get_y()))});
         if(ok){placed_n++;}
     }
     cout<<"placed "<<placed_n<<" modules"<<endl;
