@@ -32,7 +32,6 @@ void solver_t::SA_process() {
     //load immediately
     SPEN.validate_all_SP_print_all();
     cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
-
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
         cout<< "Failure in initialization. "<<endl;
@@ -46,5 +45,16 @@ void solver_t::SA_process() {
 }
 
 void solver_t::run() {
+    set_timer();
     this->SA_process();
+}
+
+void solver_t::set_timer() {
+    this->runtime_timer.timer_start();
+}
+
+double solver_t::get_time_left() {
+    this->runtime_timer.timer_end();
+    double current_time = this->runtime_timer.get_time_elapsed();
+    return runtime-current_time;
 }
