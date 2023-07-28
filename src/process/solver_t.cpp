@@ -21,7 +21,10 @@ floorplan_t& solver_t::get_best_fp() {
 solver_t::solver_t() {
     floorplan_t::init();
     sequence_pair_t::init();
-
+    if(chip_t::get_total_module_n()<1){
+        this->invalid_input = true;
+        return;
+    }
 }
 void solver_t::SA_process() {
     double init_timeout = 1800*1000; //30 minutes at most
@@ -45,6 +48,10 @@ void solver_t::SA_process() {
 }
 
 void solver_t::run() {
+    if(this->invalid_input){
+        cout<<"The process was terminated due to invalid inputs"<<endl;
+        return;
+    }
     set_timer();
     this->SA_process();
 }
