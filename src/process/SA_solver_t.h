@@ -12,17 +12,23 @@ public:
 
     bool sample_p(double delta_c);
 
-
     void run(sequence_pair_enumerator_t&,double);
 
     double get_delta(sequence_pair_t&, sequence_pair_t&);
 
-    double set_parameters();
+    void parameters_init();
+    void update_parameters();
+
+    double get_time_left();
+
     sequence_pair_t find_neighbor(sequence_pair_t);
+
     sequence_pair_t sequence_pair;
     sequence_pair_t best_sequence_pair;
-    double t = 1, r = 0.95;
-    timer run_time = timer("SA run time");
+    double t = 1, r = 0.999;
+    double time_limit = 0, it_average_time = 0;
+    timer runtime_timer = timer("SA run time");
+    timer it_timer = timer("it time");
 };
 
 

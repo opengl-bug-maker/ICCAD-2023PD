@@ -21,7 +21,10 @@ floorplan_t& solver_t::get_best_fp() {
 solver_t::solver_t() {
     floorplan_t::init();
     sequence_pair_t::init();
-
+    if(chip_t::get_total_module_n()<1){
+        this->invalid_input = true;
+        return;
+    }
 }
 void solver_t::SA_process() {
     double init_timeout = 1800*1000; //30 minutes at most
@@ -32,19 +35,34 @@ void solver_t::SA_process() {
     //load immediately
     SPEN.validate_all_SP_print_all();
     cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
-
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
         cout<< "Failure in initialization. "<<endl;
         return;
     }
     SA_solver_t SA_solver;
-    SA_solver.run(SPEN, 120*1000);
+    double time_left = std::min(this->get_time_left(), this->SA_runtime);
+    SA_solver.run(SPEN, time_left);
     SPEN.updated_best_SP();
     this->best_fp = SPEN.best_SP.to_fp();
     cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {
+    if(this->invalid_input){
+        cout<<"The process was terminated due to invalid inputs"<<endl;
+        return;
+    }
+    set_timer();
     this->SA_process();
+}
+
+void solver_t::set_timer() {
+    this->runtime_timer.timer_start();
+}
+
+double solver_t::get_time_left() {
+    this->runtime_timer.timer_end();
+    double current_time = this->runtime_timer.get_time_elapsed();
+    return runtime-current_time;
 }

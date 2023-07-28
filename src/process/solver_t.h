@@ -28,6 +28,14 @@ public:
     void SA_process();
 
     void run();
+
+    double get_time_left(); //ms
+
+    void set_timer();
+
+    double runtime = 25*60*1000, SA_runtime = 2*60*1000; // ms
+    bool invalid_input = false;
+    timer runtime_timer = timer("run time");
     floorplan_t best_fp;
 };
 

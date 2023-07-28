@@ -26,21 +26,26 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 
 SA_solver_t::SA_solver_t() {
-    this->t = 1;
+    this->parameters_init();
 }
 
 void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
+    this->runtime_timer.timer_start();
+    this->time_limit = timeout;
     int SP_n = SPEN.valid_sequence_pairs.size();
+
     SPEN.updated_best_SP();
     sequence_pair_t best_sp = SPEN.best_SP;
-    this->run_time.timer_start();
+
     int it = 1;
     while(true){
-        run_time.timer_end();
-        if(run_time.get_time_elapsed()>= timeout){break;}
+        runtime_timer.timer_end();
+        if(runtime_timer.get_time_elapsed() >= timeout){break;}
+
+        this->it_timer.timer_start();
+
         SPEN.updated_best_SP(); //update best SP first, because SA may cause SPs to get worse
         for(auto& SP:SPEN.valid_sequence_pairs){
-
             timer a1("find neighbor");
             a1.timer_start();
             sequence_pair_t after = find_neighbor(SP);
@@ -59,12 +64,14 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
-            this->t*=r;
             cout<<"------------------------------"<<endl;
-
-            run_time.timer_end();
-            run_time.print_time_elapsed();
+            runtime_timer.timer_end();
+            runtime_timer.print_time_elapsed();
         }
+        this->t*=r;
+        this->it_timer.timer_end();
+        this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
+        update_parameters();
         it++;
     }
     SPEN.validate_all_SP_print_all();
@@ -114,6 +121,21 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     return delta*10.0;
 }
 
-double SA_solver_t::set_parameters() {
+void SA_solver_t::parameters_init() {
+    this->t = 1;
+    this->r = 0.999;
+}
 
+double SA_solver_t::get_time_left() {
+    this->runtime_timer.timer_end();
+    double current_time = this->runtime_timer.get_time_elapsed();
+    return time_limit - current_time;
+}
+
+void SA_solver_t::update_parameters() {
+    double time_left = this->get_time_left();
+    double it_time = this->it_average_time;
+    double it_left = std::max(time_left/it_time, 1.0);
+    double new_r = pow((0.005)/this->t, 1/it_left);
+    this->r =  new_r;
 }
