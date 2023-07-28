@@ -116,8 +116,6 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
 
     bool fnd = false;
     if(seed_SP.v_sequence.size() == 0){ //in case there are no fix module
-
-        //TODO: fix this
         seed_SP.v_sequence.push_back(this->seed_SP.add_soft_order[i]);
         seed_SP.h_sequence.push_back(this->seed_SP.add_soft_order[i]);
         this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
@@ -246,6 +244,7 @@ void sequence_pair_enumerator_t::updated_best_SP() {
         return;
     }
     double current_best_wirelength = this->valid_sequence_pairs[0].get_wirelength(true, false);
+    this->best_SP = this->valid_sequence_pairs[0];
     for(auto SP:this->valid_sequence_pairs){
         double v = SP.get_wirelength(true, true);
         if(v < current_best_wirelength){
