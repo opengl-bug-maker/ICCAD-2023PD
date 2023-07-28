@@ -19,6 +19,7 @@ class output_handler_t {
     static void parse_polygon(polygon_t& polygon);
     static void test(polygon_forest_t& polygonForest);
 public:
+    static void ttt();
     static void set_FP(floorplan_t& floorplanning);
     static int WHPL();
     static std::vector<output_utility_t> to_real();
