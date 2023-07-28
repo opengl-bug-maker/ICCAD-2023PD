@@ -41,7 +41,8 @@ void solver_t::SA_process() {
         return;
     }
     SA_solver_t SA_solver;
-    SA_solver.run(SPEN, 120*1000);
+    double time_left = std::min(this->get_time_left(), this->SA_runtime);
+    SA_solver.run(SPEN, time_left);
     SPEN.updated_best_SP();
     this->best_fp = SPEN.best_SP.to_fp();
     cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
