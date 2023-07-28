@@ -13,7 +13,7 @@
 #include "output_data/output_utility_t.h"
 
 class output_handler_t {
-    static int whpl;
+    static uint64_t hpwl;
     static std::vector<output_utility_t> utilities;
     //todo: wait upgrade
     static void parse_polygon(polygon_t& polygon);
@@ -21,7 +21,7 @@ class output_handler_t {
 public:
     static void ttt();
     static void set_FP(floorplan_t& floorplanning);
-    static int WHPL();
+    static uint64_t HPWL();
     static std::vector<output_utility_t> to_real();
 };
 

@@ -17,6 +17,7 @@ public:
     std::string module_name;
     std::vector<vec2d_t> points;
     std::vector<line_t> lines;
+    rect_t bounding_rect = rect_t(vec2d_t::default_position, vec2d_t::default_position);
     void reconstruct();
 public:
     output_utility_t();
