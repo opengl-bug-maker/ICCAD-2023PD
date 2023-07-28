@@ -10,6 +10,7 @@
 #include "SA_solver_t.h"
 #include "sequence_pair_enumerator_t.h"
 #include "LCS_helper_t.h"
+#include "random_helper.h"
 using std::cout;
 using std::endl;
 using std::setw;
@@ -19,8 +20,11 @@ floorplan_t& solver_t::get_best_fp() {
 }
 
 solver_t::solver_t() {
+    random_helper::set_seed();
+
     floorplan_t::init();
     sequence_pair_t::init();
+
     if(chip_t::get_total_module_n()<1){
         this->invalid_input = true;
         return;
