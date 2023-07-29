@@ -16,7 +16,7 @@ bool SA_solver_t::sample_p(double delta_c) {
 
     p*=1000;//let p x 100 be the percentage that we will take the result
     //cout<<"p: "<<p<<endl;
-    int x = rand()%100;
+    int x = random_helper::get_rand()%100;
     if(p>=x){
         return true;
     }

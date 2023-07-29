@@ -10,7 +10,8 @@
 #include <stack>
 #include <queue>
 #include "timer.h"
-#include<iomanip>
+#include <iomanip>
+#include "random_helper.h"
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -29,8 +30,6 @@ using std::cout;
 using std::endl;
 using std::string;
 void sequence_pair_t::init() {
-    srand(time(NULL));
-
     const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
     const std::vector<fixed_module_t*>& fixed_modules = chip_t::get_fixed_modules();
     sequence_pair_t::fix_n =  static_cast<int>(chip_t::get_fixed_modules().size());
@@ -625,7 +624,7 @@ void sequence_pair_t::change_size(int i) {
         this->modules_wh[i] = sequence_pair_t::seq_fixed_map[i]->get_size();
     }
     else{
-        int id = static_cast<int>(rand())%sequence_pair_t::soft_area_to_w_h_m[i].size();
+        int id = static_cast<int>(random_helper::get_rand())%sequence_pair_t::soft_area_to_w_h_m[i].size();
         this->modules_wh[i] = soft_area_to_w_h_m[i][id];
         this->modules_wh_i[i] = id;
     }
@@ -1068,6 +1067,26 @@ void sequence_pair_t::print_h(){
         if(i!=this->h_sequence.size()-1){cout<<", ";}
     }
     cout<<"}"<<endl;
+}
+
+void sequence_pair_t::write_inline() {
+    std::fstream fout;
+    fout.open("../../output_SP.txt", std::ios::out | std::ios::trunc);
+    fout<<"v: {";
+    for(int i = 0; i<this->v_sequence.size(); ++i){
+        fout<< v_sequence[i];
+        if(i!=this->v_sequence.size()-1){fout<<", ";}
+    }
+    fout<<"} "<<endl;
+    fout<<"h: {";
+    for(int i = 0; i<this->h_sequence.size(); ++i){
+        fout<< h_sequence[i];
+        if(i!=this->h_sequence.size()-1){fout<<", ";}
+    }
+    fout<<"}"<<endl;
+    //this->print_shapes_i();
+    fout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
+    fout.close();
 }
 
 
