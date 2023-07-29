@@ -37,7 +37,7 @@ void solver_t::SA_process() {
     SPEN.generate_sequence_pairs(1);
 
     //load immediately
-    SPEN.validate_all_SP_print_all();
+    //SPEN.validate_all_SP_print_all();
     cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
@@ -49,6 +49,8 @@ void solver_t::SA_process() {
     SA_solver.run(SPEN, time_left);
     SPEN.updated_best_SP();
     this->best_fp = SPEN.best_SP.to_fp();
+    SPEN.best_SP.write_inline();
+    SPEN.best_SP.print_inline();
     cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
@@ -69,4 +71,15 @@ double solver_t::get_time_left() {
     this->runtime_timer.timer_end();
     double current_time = this->runtime_timer.get_time_elapsed();
     return runtime-current_time;
+}
+
+void solver_t::load_best() {
+    //case01
+    sequence_pair_t SP;
+    SP.v_sequence = {16, 5, 1, 0, 15, 6, 3, 10, 12, 7, 9, 4, 8, 14, 11, 18, 13, 2, 17, 19};
+    SP.h_sequence = {9, 15, 5, 11, 12, 10, 14, 0, 4, 19, 16, 6, 2, 17, 13, 7, 1, 8, 3, 18};
+    for(auto& e:SP.is_in_seq){e = 1;}
+    SP.find_position(true, true, 0, 0);
+    SP.print_inline();
+    this->best_fp = SP.to_fp();
 }

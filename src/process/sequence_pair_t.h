@@ -97,6 +97,7 @@ public:
     void print_fix_sequence();
     void print_connections();
     void print_result();
+    void write_inline();
     void print_wirelength(bool,bool);
 
 

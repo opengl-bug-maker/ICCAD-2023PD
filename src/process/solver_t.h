@@ -33,6 +33,8 @@ public:
 
     void set_timer();
 
+    void load_best();
+
     double runtime = 25*60*1000, SA_runtime = 2*60*1000; // ms
     bool invalid_input = false;
     timer runtime_timer = timer("run time");

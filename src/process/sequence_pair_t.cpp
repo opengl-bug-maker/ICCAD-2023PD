@@ -1069,5 +1069,25 @@ void sequence_pair_t::print_h(){
     cout<<"}"<<endl;
 }
 
+void sequence_pair_t::write_inline() {
+    std::fstream fout;
+    fout.open("../../output_SP.txt", std::ios::out | std::ios::trunc);
+    fout<<"v: {";
+    for(int i = 0; i<this->v_sequence.size(); ++i){
+        fout<< v_sequence[i];
+        if(i!=this->v_sequence.size()-1){fout<<", ";}
+    }
+    fout<<"} "<<endl;
+    fout<<"h: {";
+    for(int i = 0; i<this->h_sequence.size(); ++i){
+        fout<< h_sequence[i];
+        if(i!=this->h_sequence.size()-1){fout<<", ";}
+    }
+    fout<<"}"<<endl;
+    //this->print_shapes_i();
+    fout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
+    fout.close();
+}
+
 
 
