@@ -35,9 +35,9 @@ void solver_t::SA_process() {
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = init_timeout;
     SPEN.generate_sequence_pairs(1);
-
     //load immediately
     //SPEN.validate_all_SP_print_all();
+    for(auto& e:SPEN.valid_sequence_pairs){e.find_position(true, true, 0, 0);}
     cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
