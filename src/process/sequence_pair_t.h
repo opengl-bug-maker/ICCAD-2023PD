@@ -65,6 +65,7 @@ public:
     //subfunctions
     bool is_completed();
     void build_constraint_graph();
+    void simplify_constraint_graph();
     void change_size(int);
     void swap_seq_number(int a, int b,bool, bool);
 
@@ -110,7 +111,6 @@ public:
     vector<vec2d_t> modules_wh;
     vector<int> modules_wh_i;
     vector<vec2d_t> modules_positions;
-
     //debug properties
     vector<pair<double, double>> logs;
 

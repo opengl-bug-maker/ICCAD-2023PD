@@ -75,7 +75,6 @@ double solver_t::get_time_left() {
 }
 
 void solver_t::load_specific_best() {
-
 //Case01
 //    v: {16, 2, 18, 3, 11, 15, 14, 7, 6, 10, 13, 4, 9, 8, 0, 1, 12, 19, 5, 17}
 //    h: {15, 4, 19, 3, 0, 7, 6, 9, 11, 13, 8, 14, 10, 12, 5, 1, 16, 2, 17, 18}
@@ -157,9 +156,19 @@ void solver_t::load_specific_best() {
         SP.h_sequence = {25, 24, 26, 27, 12, 28, 16, 13, 23, 14, 22, 18, 17, 21, 15, 19, 20, 9, 7, 6, 11, 1, 8, 0, 29, 33, 10, 30, 2, 3, 4, 5, 31, 32};
         fnd_cases = true;
     }
+    for(auto& e:SP.is_in_seq){e = 1;}
     if(fnd_cases){
-        for(auto& e:SP.is_in_seq){e = 1;}
+        timer t1("find pos");
+        t1.timer_start();
         SP.find_position(true, true, 0, 0);
-        this->best_fp = SP.to_fp();
+        t1.timer_end();
+        //t1.print_time_elapsed();
+        //SP.sequence_pair_validation();
+
+        floorplan_t loaded_fp = SP.to_fp();
+        if(loaded_fp.get_wirelength()<this->best_fp.get_wirelength()){
+            this->best_fp = loaded_fp;
+        }
     }
+
 }
