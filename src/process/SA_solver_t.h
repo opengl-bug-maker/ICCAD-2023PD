@@ -23,8 +23,10 @@ public:
 
     sequence_pair_t find_neighbor(sequence_pair_t);
 
-    double t = 1, r = 0.999;
+    double t = 0.5, r = 0.999;
     double time_limit = 0, it_average_time = 0;
+    int load_back_it = 500;
+    bool load_back = false;
     timer runtime_timer = timer("SA run time");
     timer it_timer = timer("it time");
 };

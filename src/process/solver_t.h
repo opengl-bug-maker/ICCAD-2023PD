@@ -37,8 +37,8 @@ public:
 
     void load_specific_without_cmp();
 
-    double runtime = 40*60*1000, SA_runtime = 0.5*60*1000; // ms
-    int SA_times = 10;
+    double runtime = 30*60*1000, SA_runtime = 5*60*1000; // ms
+    int SA_times = 1;
     bool invalid_input = false;
     timer runtime_timer = timer("run time");
     floorplan_t best_fp;

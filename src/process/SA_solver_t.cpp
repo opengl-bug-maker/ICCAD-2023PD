@@ -70,7 +70,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
             runtime_timer.timer_end();
             runtime_timer.print_time_elapsed();
         }
-        if(it%100==0){
+        if(it%this->load_back_it==0 && load_back){
             SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
         }
 
@@ -135,7 +135,7 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
 
 void SA_solver_t::parameters_init() {
     this->t = 1;
-    this->r = 0.999;
+    this->r = 0.7;
 }
 
 double SA_solver_t::get_time_left() {
