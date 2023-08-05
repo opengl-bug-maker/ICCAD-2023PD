@@ -81,7 +81,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
 
         it++;
     }
-    SPEN.validate_all_SP_print_all();
+    //SPEN.validate_all_SP_print_all();
     SPEN.valid_sequence_pairs[0] = best_sp; //reload the SP back into sequence pairs
 }
 
