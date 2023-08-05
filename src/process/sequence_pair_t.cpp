@@ -125,7 +125,7 @@ vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area) {
 
 
 void sequence_pair_t::build_constraint_graph() {
-    vector<edge_t> updated_constraint_graph_h, updated_constraint_graph_v;
+    this->constraint_graph_h.clear(); this->constraint_graph_v.clear();
     vector<int> v_map(sequence_pair_t::sequence_n),h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<v_sequence.size(); ++i){
         v_map[v_sequence[i]] = i;
@@ -135,15 +135,14 @@ void sequence_pair_t::build_constraint_graph() {
         for(int j = 0; j<sequence_n; ++j) {
             if(is_in_seq[i]==0||is_in_seq[j]==0){continue;}
             if(v_map[i]<v_map[j] && h_map[i]<h_map[j]){ //{a, b}, {a, b}
-                updated_constraint_graph_h.push_back({i, j, static_cast<int>(this->modules_wh[i].get_x())});
+                this->constraint_graph_h.push_back({i, j, static_cast<int>(this->modules_wh[i].get_x())});
             }
             else if(v_map[i]<v_map[j] && h_map[j]<h_map[i]) { //{i, j}, {j,i}
-                updated_constraint_graph_v.push_back({i, j, static_cast<int>(this->modules_wh[i].get_y())});
+                this->constraint_graph_v.push_back({i, j, static_cast<int>(this->modules_wh[i].get_y())});
             }
         }
     }
-    this->constraint_graph_h = updated_constraint_graph_h;
-    this->constraint_graph_v = updated_constraint_graph_v;
+    simplify_constraint_graph();
 }
 
 bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
@@ -410,7 +409,6 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         glp_set_col_name(ILP_solver.ILP, shape_type_5_offset + i, var_name5.c_str());
         ILP_solver.set_variable_double_range(shape_type_5_offset + i, 0, 1);
         //ILP_solver.set_variable_double_range_int(shape_type_5_offset + i, 0, 1);
-
 
     }
     //set coefficient of the objective function
@@ -819,6 +817,9 @@ floorplan_t sequence_pair_t::to_fp() {
         if(ok){placed_n++;}
     }
     cout<<"placed "<<placed_n<<" modules"<<endl;
+    if(placed_n==chip_t::get_soft_modules().size()){
+        cout<< "Done!"<<endl;
+    }
     return ret;
 }
 
@@ -1087,6 +1088,54 @@ void sequence_pair_t::write_inline() {
     //this->print_shapes_i();
     fout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
     fout.close();
+}
+
+void sequence_pair_t::simplify_constraint_graph() {
+    int N = sequence_pair_t::sequence_n;
+    {
+        vector<vector<int>> G(N, vector<int>(N, 0));
+        vector<edge_t> simplified;
+        for(auto& e:this->constraint_graph_v){
+            G[e.from][e.to] = 1;
+        }
+        for(int i = 0; i<N; ++i){
+            for(int j = 0; j<N; ++j){
+                for(int k = 0; k<N; ++k){
+                    if(G[i][k]&&G[k][j]){
+                        G[i][j] = 0;
+                    }
+                }
+            }
+        }
+        for(auto& e: this->constraint_graph_v){
+            if(G[e.from][e.to]){
+                simplified.push_back(e);
+            }
+        }
+        this->constraint_graph_v = simplified;
+    }
+    {
+        vector<vector<int>> G(N, vector<int>(N, 0));
+        vector<edge_t> simplified;
+        for(auto& e:this->constraint_graph_h){
+            G[e.from][e.to] = 1;
+        }
+        for(int i = 0; i<N; ++i){
+            for(int j = 0; j<N; ++j){
+                for(int k = 0; k<N; ++k){
+                    if(G[i][k]&&G[k][j]){
+                        G[i][j] = 0;
+                    }
+                }
+            }
+        }
+        for(auto& e: this->constraint_graph_h){
+            if(G[e.from][e.to]){
+                simplified.push_back(e);
+            }
+        }
+        this->constraint_graph_h = simplified;
+    }
 }
 
 

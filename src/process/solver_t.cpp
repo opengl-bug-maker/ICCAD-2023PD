@@ -31,14 +31,12 @@ solver_t::solver_t() {
     }
 }
 void solver_t::SA_process() {
-    double init_timeout = 1800*1000; //30 minutes at most
+    double init_timeout = 1740*1000; //29 minutes at most
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = init_timeout;
     SPEN.generate_sequence_pairs(1);
-
-    //load immediately
-    //SPEN.validate_all_SP_print_all();
-    cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
+    for(auto& e:SPEN.valid_sequence_pairs){e.find_position(true, true, 0, 0);}
+    cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
         cout<< "Failure in initialization. "<<endl;
@@ -51,7 +49,7 @@ void solver_t::SA_process() {
     this->best_fp = SPEN.best_SP.to_fp();
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
-    cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {
@@ -61,6 +59,8 @@ void solver_t::run() {
     }
     set_timer();
     this->SA_process();
+    cout<<"----------------"<<endl;
+    cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();
 }
 
@@ -75,7 +75,6 @@ double solver_t::get_time_left() {
 }
 
 void solver_t::load_specific_best() {
-
 //Case01
 //    v: {16, 2, 18, 3, 11, 15, 14, 7, 6, 10, 13, 4, 9, 8, 0, 1, 12, 19, 5, 17}
 //    h: {15, 4, 19, 3, 0, 7, 6, 9, 11, 13, 8, 14, 10, 12, 5, 1, 16, 2, 17, 18}
@@ -157,9 +156,19 @@ void solver_t::load_specific_best() {
         SP.h_sequence = {25, 24, 26, 27, 12, 28, 16, 13, 23, 14, 22, 18, 17, 21, 15, 19, 20, 9, 7, 6, 11, 1, 8, 0, 29, 33, 10, 30, 2, 3, 4, 5, 31, 32};
         fnd_cases = true;
     }
+    for(auto& e:SP.is_in_seq){e = 1;}
     if(fnd_cases){
-        for(auto& e:SP.is_in_seq){e = 1;}
+        timer t1("find pos");
+        t1.timer_start();
         SP.find_position(true, true, 0, 0);
-        this->best_fp = SP.to_fp();
+        t1.timer_end();
+        //t1.print_time_elapsed();
+
+        floorplan_t loaded_fp = SP.to_fp();
+        if(loaded_fp.get_wirelength()<this->best_fp.get_wirelength()){
+            this->best_fp = loaded_fp;
+            cout<<"Apply the prepared SP..."<<endl;
+        }
     }
+
 }

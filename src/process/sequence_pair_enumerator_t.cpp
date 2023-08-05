@@ -243,7 +243,7 @@ void sequence_pair_enumerator_t::updated_best_SP() {
     if(this->valid_sequence_pairs.size()<1){
         return;
     }
-    double current_best_wirelength = this->valid_sequence_pairs[0].get_wirelength(true, false);
+    double current_best_wirelength = this->valid_sequence_pairs[0].get_wirelength(true, true);
     this->best_SP = this->valid_sequence_pairs[0];
     for(auto SP:this->valid_sequence_pairs){
         double v = SP.get_wirelength(true, true);
