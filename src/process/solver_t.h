@@ -16,7 +16,7 @@
 #include <iterator>
 #include <random>
 #include <time.h>
-
+#include "process/sequence_pair_enumerator_t.h"
 class solver_t {
 
 public:
@@ -25,7 +25,7 @@ public:
 
     floorplan_t& get_best_fp();
 
-    void SA_process();
+    void SA_process(sequence_pair_enumerator_t&);
 
     void run();
 
@@ -35,7 +35,10 @@ public:
 
     void load_specific_best();
 
-    double runtime = 40*60*1000, SA_runtime = 20*60*1000; // ms
+    void load_specific_without_cmp();
+
+    double runtime = 30*60*1000, SA_runtime = 5*60*1000; // ms
+    int SA_times = 1;
     bool invalid_input = false;
     timer runtime_timer = timer("run time");
     floorplan_t best_fp;

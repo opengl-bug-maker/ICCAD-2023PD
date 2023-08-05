@@ -13,7 +13,6 @@ using std::cout;
 using std::endl;
 bool SA_solver_t::sample_p(double delta_c) {
     double p = exp(-delta_c/t);
-    p*=10; //modified the scale
     p*=100;//to be the percentage that we will take the result
     //cout<<"p: "<<p<<endl;
     int x = random_helper::get_rand()%100;
@@ -70,6 +69,9 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
 
             runtime_timer.timer_end();
             runtime_timer.print_time_elapsed();
+        }
+        if(it%this->load_back_it==0 && load_back){
+            SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
         }
 
         this->t*=r;
@@ -133,7 +135,7 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
 
 void SA_solver_t::parameters_init() {
     this->t = 1;
-    this->r = 0.999;
+    this->r = 0.7;
 }
 
 double SA_solver_t::get_time_left() {
