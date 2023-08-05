@@ -31,14 +31,12 @@ solver_t::solver_t() {
     }
 }
 void solver_t::SA_process() {
-    double init_timeout = 1800*1000; //30 minutes at most
+    double init_timeout = 1740*1000; //29 minutes at most
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = init_timeout;
     SPEN.generate_sequence_pairs(1);
-    //load immediately
-    //SPEN.validate_all_SP_print_all();
     for(auto& e:SPEN.valid_sequence_pairs){e.find_position(true, true, 0, 0);}
-    cout<<"inital stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
+    cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     if(SPEN.valid_sequence_pairs.size()<1){
         cout<< "Failure in initialization. "<<endl;
@@ -51,7 +49,7 @@ void solver_t::SA_process() {
     this->best_fp = SPEN.best_SP.to_fp();
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
-    cout<<"finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {
@@ -61,6 +59,8 @@ void solver_t::run() {
     }
     set_timer();
     this->SA_process();
+    cout<<"----------------"<<endl;
+    cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();
 }
 
@@ -163,11 +163,11 @@ void solver_t::load_specific_best() {
         SP.find_position(true, true, 0, 0);
         t1.timer_end();
         //t1.print_time_elapsed();
-        //SP.sequence_pair_validation();
 
         floorplan_t loaded_fp = SP.to_fp();
         if(loaded_fp.get_wirelength()<this->best_fp.get_wirelength()){
             this->best_fp = loaded_fp;
+            cout<<"Apply the prepared SP..."<<endl;
         }
     }
 
