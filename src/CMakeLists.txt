@@ -1,5 +1,5 @@
 set(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_CXX_FLAGS "-O3")
+#SET(CMAKE_CXX_FLAGS "-O3")
 
 add_subdirectory(output_data)
 add_subdirectory(plugin)

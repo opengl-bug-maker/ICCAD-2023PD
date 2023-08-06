@@ -14,81 +14,111 @@
 #include "floorplan_t.h"
 #include "edge_t.h"
 #include "ILP_solver_t.h"
+#include "timer.h"
 using std::vector;
 using std::unordered_map;
 
-class sequence_pair_enumerator_t;
 class sequence_pair_t{
-    static vector<edge_t> connections;
-    static vector<vector<int>> connectivities;
-    static void build_graph();
-    vector<int> h_sequence, v_sequence;
-    vector<edge_t> constraint_graph_h, constraint_graph_v;
-
 public:
+    //static function
     static void init();
-    static vector<bool> seq_is_fix; //if the module is a fixed module
+    static void build_graph();
+    static vector<vec2d_t> find_w_h(uint32_t area); //calculate a legal shapes for a specific area
+
+
+    //static variables
+    static int fix_n;
+    static int soft_n;
+    static int sequence_n; //number of sequences number
+
+    static int fix_start_idx; //the sequence number of the first fix module
+    static vector<edge_t> connections; //all edges (only one direction)
+    static vector<vector<int>> connections_VE; //VE graph
+    static vector<int> deg_w;
+    static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
     static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
-    static vector<vec2d_t> find_w_h(uint32_t area);
     static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
     static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
-    static int sequence_n;
-    static unordered_map<const module_t*, int> soft_module_to_id_m;
-    static unordered_map<const module_t*, int> fix_module_to_id_m;
-    sequence_pair_t();
-    int max_overlap;
-    int max_distance;
-    //floorplan_t fp;
-    vector<vec2d_t> modules_wh;
-    vector<vec2d_t> modules_pos;
-    pair<bool, vector<vec2d_t>> find_position(int,int);
-    void build_constraint_graph();
+    static vector<double> modules_area;
+    static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
+    static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
 
+    //constructor
+    sequence_pair_t();
+
+
+    //initialization
+    void set_only_fix();
+    void init_modules_size();
+    void set_fix_sequence();
+    void set_is_in_seq();
+    void set_add_order();
 
     //essential
-    pair<bool, floorplan_t> get_fp();
-    void seq_randomize();
-    void set_fix_sequence();
-    bool place_8d(floorplan_t&,int i, vec2d_t,vec2d_t);
+    bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
+    bool find_position_with_area(bool,bool,int,int);
     pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
+    void predict_wirelength(bool, bool);
+    floorplan_t to_fp();
+
+
+    //subfunctions
+    bool is_completed();
+    void build_constraint_graph();
+    void change_size(int);
+    void swap_seq_number(int a, int b,bool, bool);
+
 
     //get & set
-    void set_v(std::vector<int>);
-    void set_h(std::vector<int>);
     void swap_v(int,int);
     void swap_h(int,int);
+
+    void set_v(std::vector<int>);
+    void set_h(std::vector<int>);
+    void set_vi(int,int);
+    void set_hi(int,int);
+    void set_module_size(int i, int j);
+
+    int get_vi(int);
+    int get_hi(int);
+    double get_wirelength(bool minimize, bool with_area);
     std::vector<int> get_v();
     std::vector<int> get_h();
+
 
     //debug
     void print();
     void print_inline();
-    void sequence_pair_validation(vector<vec2d_t>);
-    void print_shapes();
+    void print_v();
+    void print_h();
+    void print_logs();
+    void sequence_pair_validation();
+    void print_shapes_i();
+    void print_fix_sequence();
+    void print_connections();
+    void print_result();
+    void write_inline();
+    void print_wirelength(bool,bool);
+
+
+    //properties
+    long long predicted_wirelength = -1;
+    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
+    vector<int> add_soft_order;
+    vector<edge_t> constraint_graph_h, constraint_graph_v;
+    vector<int> is_in_seq;
+    vector<vec2d_t> modules_wh;
+    vector<int> modules_wh_i;
+    vector<vec2d_t> modules_positions;
+
+    //debug properties
+    vector<pair<double, double>> logs;
+
+
 
 };
 
 
-class sequence_pair_enumerator_t{
-    int seed_need_n = 0; //how many seed do we need
 
-public:
-    vector<int> seed; //for permutation
-    sequence_pair_enumerator_t();
-    vector<sequence_pair_t> valid_seq; // (# of seeds)^2
-    vector<vector<int>> seeds; //all seeds
-    sequence_pair_t seq; //pop one sequence
-    void fill_seeds(int n);
-    void set_seed_need_n(int n);
-    void generate_valid_seq(int x);
-    void print_all_valid_seq();
-    void seq_randomize();
-
-    void change_size();
-
-
-    //set get
-    vector<sequence_pair_t> get_all_valid_seq();
-};
 
 #endif //ICCAD2023PD_SEQUENCE_PAIR_T_H

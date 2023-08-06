@@ -18,16 +18,27 @@
 #include <time.h>
 
 class solver_t {
-    floorplan_t best_fp;
+
 public:
-    void generate_seq_rand();
     //essential functions
     solver_t();
-    bool run();
-    void print_info(bool);
-    vector<sequence_pair_t> valid_sequence_pairs;
-    int find_valid_seq_pair(int); //number of valid seq
+
     floorplan_t& get_best_fp();
+
+    void SA_process();
+
+    void run();
+
+    double get_time_left(); //ms
+
+    void set_timer();
+
+    void load_specific_best();
+
+    double runtime = 25*60*1000, SA_runtime = 5*60*1000; // ms
+    bool invalid_input = false;
+    timer runtime_timer = timer("run time");
+    floorplan_t best_fp;
 };
 
 
