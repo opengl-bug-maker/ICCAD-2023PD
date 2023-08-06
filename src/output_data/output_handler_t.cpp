@@ -5,7 +5,7 @@
 #include "output_handler_t.h"
 
 
-uint64_t output_handler_t::hpwl;
+double output_handler_t::hpwl;
 
 std::vector<output_utility_t> output_handler_t::utilities;
 
