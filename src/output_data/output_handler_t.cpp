@@ -155,13 +155,15 @@ void output_handler_t::parse_polygon(polygon_t &polygon) {
 //        }
 //    }
     for(auto map : maps){
+        auto index = chip_t::get_name_to_index_mapping().at(map.second.module_name);
+        if(index >= chip_t::get_soft_modules().size()) continue;
         output_handler_t::utilities.push_back(map.second);
     }
 }
 
 void output_handler_t::set_FP(floorplan_t &floorplanning) {
     polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
-    output_handler_t::hpwl = floorplanning.get_wirelength();//float to int?
+    output_handler_t::hpwl = floorplanning.get_wirelength();
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
     }
@@ -193,7 +195,7 @@ void output_handler_t::set_FP(floorplan_t &floorplanning) {
     for(auto fixed : chip_t::get_fixed_modules()){
         module_position[chip_t::get_name_to_index_mapping().at(fixed->getName())] = fixed->get_left_lower() + (fixed->get_size() / 2);
     }
-    uint64_t wire_length = 0;
+    double wire_length = 0;
     for (int i = 0; i < module_position.size(); ++i) {
         for (int j = 0; j < module_position.size(); ++j) {
             auto dis = module_position[i] - module_position[j];
@@ -202,7 +204,7 @@ void output_handler_t::set_FP(floorplan_t &floorplanning) {
     }
 }
 
-uint64_t output_handler_t::HPWL() {
+double output_handler_t::HPWL() {
     return output_handler_t::hpwl;
 }
 
