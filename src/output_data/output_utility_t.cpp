@@ -2,6 +2,7 @@
 // Created by 林士傑 on 2023/3/27.
 //
 
+#include <algorithm>
 #include "output_utility_t.h"
 
 std::string output_utility_t::to_string() {
@@ -26,6 +27,8 @@ std::string output_utility_t::to_string() {
         this->points.push_back(this->points.front());
         this->points.erase(this->points.begin());
     }
+
+    std::reverse(this->points.begin(), this->points.end());
 
     std::string str = "\n" + this->module_name;
     str += " " + std::to_string(points.size());
