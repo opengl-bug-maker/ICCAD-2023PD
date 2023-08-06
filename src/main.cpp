@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include "static_data/chip_t.h"
 #include "process/solver_t.h"
@@ -25,7 +26,11 @@ int main(/*arg*/){
     std::fstream output_file;
     output_file.open(output_file_name, std::ios::out | std::ios::trunc);
 
-    output_file << "HPWL " << output_handler_t::HPWL();
+    output_file << std::setiosflags(std::ios_base::fixed) << std::setprecision(1);
+
+    output_file << "HPWL " << output_handler_t::HPWL() << std::endl;
+
+    output_file << "SOFTMODULE " << chip_t::get_soft_modules().size();
 
     for (output_utility_t& output_utility : output_handler_t::to_real()) {
         output_file << output_utility.to_string();
