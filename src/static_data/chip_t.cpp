@@ -78,7 +78,7 @@ void chip_t::file_input(std::string fileName) {
     }
 
     for (int i = 0; i < chip_t::softCount + chip_t::fixedCount; ++i) {
-        for (int j = 0; j < chip_t::softCount + chip_t::fixedCount; ++j) {
+        for (int j = i; j < chip_t::softCount + chip_t::fixedCount; ++j) {
             if(chip_t::connectionTable[i][j] != 0){
                 chip_t::modules[i]->connections.emplace_back(chip_t::modules[j], chip_t::connectionTable[i][j]);
                 chip_t::modules[j]->connections.emplace_back(chip_t::modules[i], chip_t::connectionTable[i][j]);
