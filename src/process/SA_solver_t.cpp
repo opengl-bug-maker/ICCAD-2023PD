@@ -13,9 +13,10 @@ using std::cout;
 using std::endl;
 bool SA_solver_t::sample_p(double delta_c) {
     double p = exp(-delta_c/t);
-    p*=100;//to be the percentage that we will take the result
+    const int k = 100000000;
+    p*=k;//to be the percentage that we will take the result
     //cout<<"p: "<<p<<endl;
-    int x = random_helper::get_rand()%100;
+    int x = random_helper::get_rand()%k;
     if(p>=x){
         return true;
     }
@@ -135,7 +136,7 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
 
 void SA_solver_t::parameters_init() {
     this->t = 1;
-    this->r = 0.7;
+    this->r = 0.999;
 }
 
 double SA_solver_t::get_time_left() {
@@ -148,6 +149,6 @@ void SA_solver_t::update_parameters() {
     double time_left = this->get_time_left();
     double it_time = this->it_average_time;
     double it_left = std::max(time_left/it_time, 1.0);
-    double new_r = pow((0.005)/this->t, 1/it_left); //0.005 is changeable
+    double new_r = pow((this->end_t)/this->t, 1/it_left); //0.005 is changeable
     this->r =  new_r;
 }

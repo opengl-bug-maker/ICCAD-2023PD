@@ -54,10 +54,12 @@ void solver_t::run() {
         return;
     }
     sequence_pair_enumerator_t SPEN;
-    double init_timeout = 1740*1000; //29 minutes at most
+    double init_timeout = 1200*1000; //20 minutes at most
     SPEN.init_timeout = init_timeout;
     SPEN.generate_sequence_pairs(1);
-    for(auto& e:SPEN.valid_sequence_pairs){e.find_position(true, true, 0, 0);}
+    for(auto& e:SPEN.valid_sequence_pairs){
+        double useless = e.get_wirelength(true, true);
+    }
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     for(int t = 0; t<this->SA_times; ++t){
@@ -66,6 +68,7 @@ void solver_t::run() {
     cout<<"----------------"<<endl;
     cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();
+    cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::set_timer() {
