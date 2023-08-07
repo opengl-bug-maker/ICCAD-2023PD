@@ -23,7 +23,7 @@ public:
 
     sequence_pair_t find_neighbor(sequence_pair_t);
 
-    double t = 1, r = 0.999, end_t = 0.008;
+    double t = 1, r = 0.999, end_t = 0.01;
     double time_limit = 0, it_average_time = 0;
     int load_back_it = 500;
     bool load_back = false;
