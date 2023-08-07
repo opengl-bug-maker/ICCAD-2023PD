@@ -44,5 +44,4 @@ public:
     floorplan_t best_fp;
 };
 
-
 #endif //INC_2023PD_GENETIC_ALGO_T_H

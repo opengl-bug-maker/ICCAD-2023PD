@@ -39,7 +39,8 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     }
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
-    SA_solver.run(SPEN, time_left);
+    cout<<"---------------Stage 1----------------"<<endl;
+    SA_solver.run(SPEN, this->SA_runtime, 1, 0.01, false);
     SPEN.updated_best_SP();
     this->best_fp = SPEN.best_SP.to_fp();
     SPEN.best_SP.write_inline();
@@ -62,9 +63,7 @@ void solver_t::run() {
     }
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
-    for(int t = 0; t<this->SA_times; ++t){
-        this->SA_process(SPEN);
-    }
+    this->SA_process(SPEN);
     cout<<"----------------"<<endl;
     cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();

@@ -25,10 +25,12 @@ bool SA_solver_t::sample_p(double delta_c) {
     }
 }
 SA_solver_t::SA_solver_t() {
-    this->parameters_init();
+    const int N = sequence_pair_t::sequence_n;
+    this->find_attempt_counter = vector<vector<vector<int>>>(N, vector<vector<int>>(N, vector<int>(3, 0)));
 }
 
-void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
+void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {
+    this->parameters_init(init_t, end_t);
     this->runtime_timer.timer_start();
     this->time_limit = timeout;
 
@@ -61,6 +63,9 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
             if(SP.predicted_wirelength < best_sp.predicted_wirelength){
                 best_sp = SP;
             }
+            else if(it%this->load_back_it==0 && load_back){
+                SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
+            }
         }
         if(it%10==0){
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
@@ -71,9 +76,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout) {
             runtime_timer.timer_end();
             runtime_timer.print_time_elapsed();
         }
-        if(it%this->load_back_it==0 && load_back){
-            SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
-        }
+
 
         this->t*=r;
         this->it_timer.timer_end();
@@ -98,15 +101,16 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
-            if(sequence_pair_t::seq_is_fix[i]||sequence_pair_t::seq_is_fix[j]){continue;}
-            int p = v_map[rand_i[i]], q = h_map[rand_j[j]];
+            int ii = rand_i[i], jj = rand_j[j];
+            if(sequence_pair_t::seq_is_fix[ii]&&sequence_pair_t::seq_is_fix[jj]){continue;}
+            int p = v_map[ii], q = h_map[jj];
             for(int m = 0; m<2; ++m){
                 for(int n = 0; n<2; ++n){
                     if(m==0&&n==0){continue;}
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
 
-                    timer find_position_timer("find position time (in find neighbor)");
+                    timer find_position_timer("find position time (in finding neighbor)");
                     find_position_timer.timer_start();
                     bool success = neighbor.find_position(false, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
                     find_position_timer.timer_end();
@@ -134,9 +138,10 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     return delta*10.0;
 }
 
-void SA_solver_t::parameters_init() {
-    this->t = 1;
+void SA_solver_t::parameters_init(double t, double end_t) {
+    this->t = t;
     this->r = 0.999;
+    this->end_t = end_t;
 }
 
 double SA_solver_t::get_time_left() {
