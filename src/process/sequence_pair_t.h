@@ -103,7 +103,7 @@ public:
 
 
     //properties
-    long long predicted_wirelength = -1;
+    double predicted_wirelength = -1;
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
     vector<int> add_soft_order;
     vector<edge_t> constraint_graph_h, constraint_graph_v;
