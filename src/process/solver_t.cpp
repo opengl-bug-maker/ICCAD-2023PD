@@ -42,9 +42,10 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     cout<<"---------------Stage 1----------------"<<endl;
     SA_solver.run(SPEN, this->SA_runtime, 1, 0.01, false);
     SPEN.updated_best_SP();
-    this->best_fp = SPEN.best_SP.to_fp();
+    SPEN.best_SP.find_position(true, true, 0, 0);
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
+    this->best_fp = SPEN.best_SP.to_fp();
     cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
@@ -67,6 +68,7 @@ void solver_t::run() {
     cout<<"----------------"<<endl;
     cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();
+
     cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
 }
 
@@ -120,5 +122,6 @@ void solver_t::load_specific_without_cmp() {
         //t1.print_time_elapsed();
         floorplan_t loaded_fp = SP.to_fp();
         this->best_fp = loaded_fp;
+        cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
 }
