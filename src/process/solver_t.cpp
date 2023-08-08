@@ -43,6 +43,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver.run(SPEN, this->SA_runtime, 1, 0.01, false);
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0);
+    SPEN.best_SP.find_position_with_area(true, true, 0, 0);
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
     this->best_fp = SPEN.best_SP.to_fp();

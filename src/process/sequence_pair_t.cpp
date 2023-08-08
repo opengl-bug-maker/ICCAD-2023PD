@@ -256,6 +256,11 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
         int b1 = connections[i].from;
         int b2 = connections[i].to;
+
+        double b1_x = this->modules_wh[b1].get_half_x();
+        double b1_y = this->modules_wh[b1].get_half_y();
+        double b2_x = this->modules_wh[b2].get_half_x();
+        double b2_y = this->modules_wh[b2].get_half_y();
         if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
             continue;
         }
@@ -263,26 +268,77 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         string y_l_1_constraint_name = "y_e_1_b_l"+ std::to_string(i);
         string x_l_2_constraint_name = "x_e_2_b_l"+ std::to_string(i);
         string y_l_2_constraint_name = "y_e_2_b_l"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l + i, b1 + x_module_offset}, {1, -1},
-                                      x_l_1_constraint_name, 0.0);
-        constraint_i++;
+        if(seq_is_fix[b1]){
+            ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b1+x_module_offset}, {1, -1}, x_l_1_constraint_name, b1_x);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b1+x_module_offset}, {1, -1}, x_l_1_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2,{y_edge_offset_l+i,b1+y_module_offset},{1, -1}, y_l_1_constraint_name, b1_y);
+            //ILP_solver.set_constraint_upb(constraint_i, 2,{y_edge_offset_l+i,b1+y_module_offset},{1, -1}, y_l_1_constraint_name, 0);
+            constraint_i++;
+        }
+        else{
+            int b1_w1 = sequence_pair_t::soft_area_to_w_h_m[b1][0].get_half_x();
+            int b1_w2 = sequence_pair_t::soft_area_to_w_h_m[b1][1].get_half_x();
+            int b1_w3 = sequence_pair_t::soft_area_to_w_h_m[b1][2].get_half_x();
+            int b1_w4 = sequence_pair_t::soft_area_to_w_h_m[b1][3].get_half_x();
+            int b1_w5 = sequence_pair_t::soft_area_to_w_h_m[b1][4].get_half_x();
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l + i, b2 + x_module_offset}, {1, -1},
-                                      x_l_2_constraint_name, 0.0);
-        constraint_i++;
+            int b1_h1 = sequence_pair_t::soft_area_to_w_h_m[b1][0].get_half_y();
+            int b1_h2 = sequence_pair_t::soft_area_to_w_h_m[b1][1].get_half_y();
+            int b1_h3 = sequence_pair_t::soft_area_to_w_h_m[b1][2].get_half_y();
+            int b1_h4 = sequence_pair_t::soft_area_to_w_h_m[b1][3].get_half_y();
+            int b1_h5 = sequence_pair_t::soft_area_to_w_h_m[b1][4].get_half_y();
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {x_edge_offset_l+i,b1+x_module_offset,b1+shape_type_1_offset, b1+shape_type_2_offset, b1+shape_type_3_offset, b1+shape_type_4_offset, b1+shape_type_5_offset},
+                                          {1, -1,-b1_w1,-b1_w2,-b1_w3,-b1_w4,-b1_w5}, x_l_1_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {y_edge_offset_l+i,b1+y_module_offset,b1+shape_type_1_offset, b1+shape_type_2_offset, b1+shape_type_3_offset, b1+shape_type_4_offset, b1+shape_type_5_offset},
+                                          {1, -1,-b1_h1,-b1_h2,-b1_h3,-b1_h4,-b1_h5}, y_l_1_constraint_name, 0);
+            constraint_i++;
+        }
+        if(seq_is_fix[b2]){
+            ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b2+x_module_offset}, {1, -1}, x_l_2_constraint_name, b2_x);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b2+x_module_offset}, {1, -1}, x_l_2_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b2+y_module_offset}, {1, -1}, y_l_2_constraint_name, b2_y);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b2+y_module_offset}, {1, -1}, y_l_2_constraint_name, 0);
+            constraint_i++;
+        }
+        else{
+            int b2_w1 = sequence_pair_t::soft_area_to_w_h_m[b2][0].get_half_x();
+            int b2_w2 = sequence_pair_t::soft_area_to_w_h_m[b2][1].get_half_x();
+            int b2_w3 = sequence_pair_t::soft_area_to_w_h_m[b2][2].get_half_x();
+            int b2_w4 = sequence_pair_t::soft_area_to_w_h_m[b2][3].get_half_x();
+            int b2_w5 = sequence_pair_t::soft_area_to_w_h_m[b2][4].get_half_x();
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l + i, b1 + y_module_offset}, {1, -1},
-                                      y_l_1_constraint_name, 0.0);
-        constraint_i++;
+            int b2_h1 = sequence_pair_t::soft_area_to_w_h_m[b2][0].get_half_y();
+            int b2_h2 = sequence_pair_t::soft_area_to_w_h_m[b2][1].get_half_y();
+            int b2_h3 = sequence_pair_t::soft_area_to_w_h_m[b2][2].get_half_y();
+            int b2_h4 = sequence_pair_t::soft_area_to_w_h_m[b2][3].get_half_y();
+            int b2_h5 = sequence_pair_t::soft_area_to_w_h_m[b2][4].get_half_y();
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {x_edge_offset_l+i,b2+x_module_offset,b2+shape_type_1_offset, b2+shape_type_2_offset, b2+shape_type_3_offset, b2+shape_type_4_offset, b2+shape_type_5_offset},
+                                          {1, -1,-b2_w1,-b2_w2,-b2_w3,-b2_w4,-b2_w5}, x_l_2_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {y_edge_offset_l+i,b2+y_module_offset,b2+shape_type_1_offset, b2+shape_type_2_offset, b2+shape_type_3_offset, b2+shape_type_4_offset, b2+shape_type_5_offset},
+                                          {1, -1,-b2_h1,-b2_h2,-b2_h3,-b2_h4,-b2_h5}, y_l_2_constraint_name, 0);
+            constraint_i++;
+        }
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l + i, b2 + y_module_offset}, {1, -1},
-                                      y_l_2_constraint_name, 0.0);
-        constraint_i++;
     }
     //set edge and block right(top) constraints
     for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
         int b1 = connections[i].from;
         int b2 = connections[i].to;
+        double b1_x = this->modules_wh[b1].get_half_x();
+        double b1_y = this->modules_wh[b1].get_half_y();
+        double b2_x = this->modules_wh[b2].get_half_x();
+        double b2_y = this->modules_wh[b2].get_half_y();
+
+
+
         if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
             continue;
         }
@@ -291,17 +347,65 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         string x_r_2_constraint_name = "x_e_2_b_r"+ std::to_string(i);
         string y_r_2_constraint_name = "y_e_2_b_r"+ std::to_string(i);
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_1_constraint_name, 0.0);
-        constraint_i++;
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_2_constraint_name, 0.0);
-        constraint_i++;
+        if(seq_is_fix[b1]){
+            ILP_solver.set_constraint_upb(constraint_i, 2,{b1+x_module_offset,x_edge_offset_r+i},{1, -1}, x_r_1_constraint_name, -b1_x);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {b1+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_1_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2,{b1+y_module_offset,y_edge_offset_r+i},{1, -1}, y_r_1_constraint_name, -b1_y);
+            //ILP_solver.set_constraint_upb(constraint_i, 2,{b1+y_module_offset,y_edge_offset_r+i},{1, -1}, y_r_1_constraint_name, 0);
+            constraint_i++;
+        }
+        else{
+            int b1_w1 = sequence_pair_t::soft_area_to_w_h_m[b1][0].get_half_x();
+            int b1_w2 = sequence_pair_t::soft_area_to_w_h_m[b1][1].get_half_x();
+            int b1_w3 = sequence_pair_t::soft_area_to_w_h_m[b1][2].get_half_x();
+            int b1_w4 = sequence_pair_t::soft_area_to_w_h_m[b1][3].get_half_x();
+            int b1_w5 = sequence_pair_t::soft_area_to_w_h_m[b1][4].get_half_x();
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_1_constraint_name, 0.0);
-        constraint_i++;
+            int b1_h1 = sequence_pair_t::soft_area_to_w_h_m[b1][0].get_half_y();
+            int b1_h2 = sequence_pair_t::soft_area_to_w_h_m[b1][1].get_half_y();
+            int b1_h3 = sequence_pair_t::soft_area_to_w_h_m[b1][2].get_half_y();
+            int b1_h4 = sequence_pair_t::soft_area_to_w_h_m[b1][3].get_half_y();
+            int b1_h5 = sequence_pair_t::soft_area_to_w_h_m[b1][4].get_half_y();
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {b1+x_module_offset,x_edge_offset_r+i,b1+shape_type_1_offset, b1+shape_type_2_offset, b1+shape_type_3_offset, b1+shape_type_4_offset, b1+shape_type_5_offset},
+                                          {1, -1,b1_w1,b1_w2,b1_w3,b1_w4,b1_w5}, x_r_1_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {b1+y_module_offset,y_edge_offset_r+i,b1+shape_type_1_offset, b1+shape_type_2_offset, b1+shape_type_3_offset, b1+shape_type_4_offset, b1+shape_type_5_offset},
+                                          {1, -1,b1_h1,b1_h2,b1_h3,b1_h4,b1_h5}, y_r_1_constraint_name, 0);
+            constraint_i++;
+        }
+        if(seq_is_fix[b2]){
+            ILP_solver.set_constraint_upb(constraint_i, 2, {b2+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_2_constraint_name, -b2_x);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {b2+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_2_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2, {b2+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_2_constraint_name, -b2_y);
+            //ILP_solver.set_constraint_upb(constraint_i, 2, {b2+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_2_constraint_name, 0);
+            constraint_i++;
+        }
+        else{
+            int b2_w1 = sequence_pair_t::soft_area_to_w_h_m[b2][0].get_half_x();
+            int b2_w2 = sequence_pair_t::soft_area_to_w_h_m[b2][1].get_half_x();
+            int b2_w3 = sequence_pair_t::soft_area_to_w_h_m[b2][2].get_half_x();
+            int b2_w4 = sequence_pair_t::soft_area_to_w_h_m[b2][3].get_half_x();
+            int b2_w5 = sequence_pair_t::soft_area_to_w_h_m[b2][4].get_half_x();
 
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_2_constraint_name, 0.0);
-        constraint_i++;
+            int b2_h1 = sequence_pair_t::soft_area_to_w_h_m[b2][0].get_half_y();
+            int b2_h2 = sequence_pair_t::soft_area_to_w_h_m[b2][1].get_half_y();
+            int b2_h3 = sequence_pair_t::soft_area_to_w_h_m[b2][2].get_half_y();
+            int b2_h4 = sequence_pair_t::soft_area_to_w_h_m[b2][3].get_half_y();
+            int b2_h5 = sequence_pair_t::soft_area_to_w_h_m[b2][4].get_half_y();
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {b2+x_module_offset,x_edge_offset_r+i,b2+shape_type_1_offset, b2+shape_type_2_offset, b2+shape_type_3_offset, b2+shape_type_4_offset, b2+shape_type_5_offset},
+                                          {1, -1,b2_w1,b2_w2,b2_w3,b2_w4,b2_w5}, x_r_1_constraint_name, 0);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 7,
+                                          {b2+y_module_offset,y_edge_offset_r+i,b2+shape_type_1_offset, b2+shape_type_2_offset, b2+shape_type_3_offset, b2+shape_type_4_offset, b2+shape_type_5_offset},
+                                          {1, -1,b2_h1,b2_h2,b2_h3,b2_h4,b2_h5}, y_r_1_constraint_name, 0);
+            constraint_i++;
+        }
     }
     //set constraints to keep the ratio 0.5 <= wh <=  2
 //    for(int i = 0; i<soft_n; ++i){
