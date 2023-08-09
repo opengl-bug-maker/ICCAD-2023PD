@@ -903,7 +903,7 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         vec2d_t center_to = {pos[to].get_x()+this->modules_wh[to].get_half_x(), pos[to].get_y()+this->modules_wh[to].get_half_y()};
         delta_x = fabs(center_from.get_x()-center_to.get_x());
         delta_y = fabs(center_from.get_y()-center_to.get_y());
-        cout<<"dx = "<<delta_x<<", "<<"dy = "<<delta_y<<endl;
+
         sum+= (delta_x+delta_y)*w;
     }
     this->predicted_wirelength = sum;
