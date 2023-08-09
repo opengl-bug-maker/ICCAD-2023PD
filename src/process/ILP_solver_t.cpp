@@ -39,7 +39,7 @@ void ILP_solver_t::set_min() {
     glp_set_obj_dir(ILP, GLP_MIN);
 }
 
-void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name,double upb) {
+void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<double> values, string name,double upb) {
     for(int i = 0; i<variable_n; ++i){
         set_i.push_back(row_i);
         set_j.push_back(variable_i[i]); //due to sequence# to coefficient#
@@ -52,7 +52,7 @@ void ILP_solver_t::set_constraint_upb(int row_i, int variable_n, vector<int> var
     this->constraint_i++;
 }
 
-void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> variable_i, vector<int> values, string name, double fix) {
+void ILP_solver_t::set_constraint_fx(int row_i, int variable_n, vector<int> variable_i, vector<double> values, string name, double fix) {
     for(int i = 0; i<variable_n; ++i){
         set_i.push_back(row_i);
         set_j.push_back(variable_i[i]); //due to sequence# to coefficient#
@@ -91,7 +91,7 @@ void ILP_solver_t::set_variable_double_range_int(int var_i, int lb, double ub) {
 void ILP_solver_t::set_variable_BV(int var_i){
     glp_set_col_kind(ILP, var_i, GLP_BV);
 }
-void ILP_solver_t::set_obj_coef(vector<int> coef) {
+void ILP_solver_t::set_obj_coef(vector<double> coef) {
     for(int i = 1; i<=this->var_n; ++i){
         glp_set_obj_coef(this->ILP, i, coef[i]);
     }

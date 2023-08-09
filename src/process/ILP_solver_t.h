@@ -26,7 +26,8 @@ class ILP_solver_t {
     bool invalid_input = false;
 public:
     int set_n = 0;
-    vector<int> set_i,set_j,set_val; //due to 1-index
+    vector<int> set_i,set_j;
+    vector<double> set_val; //due to 1-index
     glp_prob *ILP;
     int constraints_n = 0;
     int constraint_i = 1;
@@ -36,10 +37,10 @@ public:
     void set_max();
     void set_min();
 
-    void set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<int> values,string,double);
-    void set_constraint_fx(int row_i, int variable_n, vector<int>variable_i,vector<int> values, string,double);
+    void set_constraint_upb(int row_i, int variable_n, vector<int> variable_i, vector<double> values,string,double);
+    void set_constraint_fx(int row_i, int variable_n, vector<int>variable_i,vector<double> values, string,double);
     void set_variable_double_range(int var_i, int lb, double ub);
-    void set_obj_coef(vector<int>);
+    void set_obj_coef(vector<double>);
     void release_solver();
     ILP_result_t solve(bool);
     void load();
