@@ -15,7 +15,6 @@ bool SA_solver_t::sample_p(double delta_c) {
     double p = exp(-delta_c/t);
     const int k = 100000000;
     p*=k;//to be the percentage that we will take the result
-    //cout<<"p: "<<p<<endl;
     int x = random_helper::get_rand()%k;
     if(p>=x){
         return true;
@@ -26,7 +25,6 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
     const int N = sequence_pair_t::sequence_n;
-    this->find_attempt_counter = vector<vector<vector<int>>>(N, vector<vector<int>>(N, vector<int>(3, 0)));
 }
 
 void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {

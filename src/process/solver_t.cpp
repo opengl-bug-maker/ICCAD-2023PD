@@ -40,7 +40,11 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, this->SA_runtime, 1, 0.01, false);
+    SA_solver.run(SPEN, 0.1*time_left, 1, 0.01, false);
+    cout<<"---------------Stage 2----------------"<<endl;
+    SA_solver.run(SPEN, 0.3*time_left, 0.3, 0.01, false);
+    cout<<"---------------Stage 3----------------"<<endl;
+    SA_solver.run(SPEN, 0.6*time_left, 0.1, 0.005, false);
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
@@ -60,9 +64,7 @@ void solver_t::run() {
     double init_timeout = 1200*1000; //20 minutes at most
     SPEN.init_timeout = init_timeout;
     SPEN.generate_sequence_pairs(1);
-    for(auto& e:SPEN.valid_sequence_pairs){
-        double useless = e.get_wirelength(true, true);
-    }
+    for(auto& e:SPEN.valid_sequence_pairs){double useless = e.get_wirelength(true, true);}
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     this->SA_process(SPEN);

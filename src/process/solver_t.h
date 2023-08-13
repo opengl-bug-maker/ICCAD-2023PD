@@ -37,7 +37,7 @@ public:
 
     void load_specific_without_cmp();
 
-    double runtime = 28*60*1000, SA_runtime = 23*60*1000; // ms
+    double runtime = 28*60*1000, SA_runtime = 1*60*1000; // ms
     int SA_times = 1;
     bool invalid_input = false;
     timer runtime_timer = timer("run time");
