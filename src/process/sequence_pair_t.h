@@ -57,7 +57,6 @@ public:
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
-    pair<bool, floorplan_t> place_all_modules(vector<vec2d_t>);
     void predict_wirelength(bool, bool);
     floorplan_t to_fp();
 

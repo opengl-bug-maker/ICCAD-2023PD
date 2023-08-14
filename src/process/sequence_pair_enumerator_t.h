@@ -21,18 +21,14 @@ public:
     bool add_soft_process_cont(int i,bool with_area, int cutoff, int start_j, int start_k);
 
     void validate_all_SP();
-    void validate_all_SP_print_all();
 
-    bool find_greater(sequence_pair_t&);
+    void validate_all_SP_print_all();
 
     void updated_best_SP();
 
     void load_specific();
 
-    set<int> failed_insertion_id;
-
     vector<sequence_pair_t> valid_sequence_pairs;
-
 
     sequence_pair_t seed_SP, res_SP, best_SP;
     int target_sp_n = 0, current_sp_n = 0;

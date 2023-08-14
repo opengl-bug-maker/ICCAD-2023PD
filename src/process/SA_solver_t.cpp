@@ -61,7 +61,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             if(SP.predicted_wirelength < best_sp.predicted_wirelength){
                 best_sp = SP;
             }
-            else if(it%this->load_back_it==0 && load_back){
+            if(it%this->load_back_it==0 && load_back){
                 SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
             }
         }
@@ -79,7 +79,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         this->t*=r;
         this->it_timer.timer_end();
         this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
-        //this->it_timer.print_time_elapsed();
+        //cout<<"It time : "<<it_average_time<<endl;
 
         update_parameters();
 

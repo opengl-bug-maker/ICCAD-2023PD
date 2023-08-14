@@ -104,7 +104,6 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         this->res_SP = this->seed_SP;
         this->valid_sequence_pairs.push_back(this->seed_SP);
         this->current_sp_n++;
-        cout<< this->current_sp_n<<" generated, wirelength = "<<this->res_SP.predicted_wirelength<<endl;
         //this->seed_SP.print_inline();
         return true;
     }
@@ -194,50 +193,6 @@ void sequence_pair_enumerator_t::validate_all_SP_print_all() {
         this->valid_sequence_pairs[i].print_inline();
     }
 }
-
-bool sequence_pair_enumerator_t::find_greater(sequence_pair_t& sequence_pair) {
-    timer find_greater_timer("find greater");
-    find_greater_timer.timer_start();
-
-    bool fnd = false;
-    timer a1("a1"), a2("a2"),a3("a3");
-    double wirelength = sequence_pair.get_wirelength(true, false);
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        for(int j = i+1; j<sequence_pair_t::sequence_n; ++j){
-            for(int p = 1; p<=1; ++p){
-                for(int q = 1; q<=1; ++q){
-                    if(p==0&&q==0){continue;}
-                    if(sequence_pair_t::seq_is_fix[i]||sequence_pair_t::seq_is_fix[j]){continue;}
-                    a3.timer_start();
-                    sequence_pair.swap_seq_number(i, j,p,q);
-                    a1.timer_start();
-                    bool x = sequence_pair.find_position(false, false, 0, 0);
-                    a1.timer_end();
-                    //a1.print_time_elapsed();
-                    if(x){
-                        a2.timer_start();
-                        double v = sequence_pair.get_wirelength(true, false);
-                        a2.timer_end();
-                        a2.print_time_elapsed();
-                        if(v<wirelength){
-                            fnd |= true;
-                            wirelength = v;
-                            continue;
-                        }
-                    }
-
-                    sequence_pair.swap_seq_number(i, j,p,q);
-                    a3.timer_end();
-                    //a3.print_time_elapsed();
-                }
-            }
-        }
-    }
-    find_greater_timer.timer_end();
-    find_greater_timer.print_time_elapsed();
-    return fnd;
-}
-
 void sequence_pair_enumerator_t::updated_best_SP() {
     if(this->valid_sequence_pairs.size()<1){
         return;
