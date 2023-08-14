@@ -65,7 +65,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
                 SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
             }
         }
-        if(it%10==0){
+        if(it%50==0){
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;

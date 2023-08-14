@@ -31,13 +31,13 @@ public:
 
     double get_time_left(); //ms
 
-    void set_timer();
+    void set_timer_start();
 
     void load_specific_best();
 
     void load_specific_without_cmp();
 
-    double runtime = 28*60*1000, SA_runtime = 20*60*1000; // ms
+    double runtime = 28*60*1000, SA_runtime = 25*60*1000, init_timeout = 20*60*1000; // ms
     int SA_times = 1;
     bool invalid_input = false;
     timer runtime_timer = timer("run time");

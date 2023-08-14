@@ -55,16 +55,18 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
 }
 
 void solver_t::run() {
-    set_timer();
+    set_timer_start();
+
     if(this->invalid_input){
         cout<<"The process was terminated due to invalid inputs"<<endl;
         return;
     }
+
     sequence_pair_enumerator_t SPEN;
-    double init_timeout = 1200*1000; //20 minutes at most
-    SPEN.init_timeout = init_timeout;
+    SPEN.init_timeout = this->init_timeout;
     SPEN.generate_sequence_pairs(1);
     for(auto& e:SPEN.valid_sequence_pairs){double useless = e.get_wirelength(true, true);}
+
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     this->SA_process(SPEN);
@@ -73,9 +75,11 @@ void solver_t::run() {
     this->load_specific_best();
 
     cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
+    this->runtime_timer.timer_end();
+    this->runtime_timer.print_time_elapsed();
 }
 
-void solver_t::set_timer() {
+void solver_t::set_timer_start() {
     this->runtime_timer.timer_start();
 }
 
