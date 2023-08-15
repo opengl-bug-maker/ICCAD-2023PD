@@ -40,7 +40,12 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 1*time_left, 1, 0.01, false);
+    SA_solver.run(SPEN, 0.1*time_left, 1, 0.01, false);
+    cout<<"---------------Stage 2----------------"<<endl;
+    SA_solver.run(SPEN, 0.1*time_left, 0.5, 0.01, false);
+    cout<<"---------------Stage 3----------------"<<endl;
+    SA_solver.run(SPEN, 0.8*time_left, 0.3, 0.005, false);
+
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
