@@ -61,15 +61,14 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             if(SP.predicted_wirelength < best_sp.predicted_wirelength){
                 best_sp = SP;
             }
-            if(it%this->load_back_it==0 && load_back){
+            else if(it%this->load_back_it==0 && load_back){
                 SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
             }
         }
-        if(it%50==0){
+        if(it%10==0){
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
-            runtime_timer.print_time_elapsed();
             cout<<"------------------------------"<<endl;
 
         }
@@ -129,8 +128,8 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.predicted_wirelength;
-    double after_wirelength = after.get_wirelength(true, true);
-    //double after_wirelength = after.get_wirelength(true, false);
+    //double after_wirelength = after.get_wirelength(true, true);
+    double after_wirelength = after.get_wirelength(true, false);
     double delta = (after_wirelength-ori_wirelength)/ori_wirelength;
     return delta*10.0;
 }
