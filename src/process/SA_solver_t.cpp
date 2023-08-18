@@ -73,6 +73,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         }
         runtime_timer.timer_end();
+        if(runtime_timer.get_time_elapsed() >= timeout){break;}
         this->t*=r;
         this->it_timer.timer_end();
         this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;

@@ -48,7 +48,7 @@ vector<int> random_helper::rand_list(int n) {
 }
 
 void random_helper::set_seed() {
-    srand(103);
+    srand(time(NULL));
     rand_table.resize(rand_table_n);
     for(int i = 0; i < rand_table_n; ++i){
         rand_table[i] = rand();
