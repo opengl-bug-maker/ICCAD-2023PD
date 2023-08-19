@@ -27,6 +27,8 @@ public:
     static int rand_table_i;
 
     static vector<int> rand_table;
+
+    static bool sample(double p);
 };
 
 

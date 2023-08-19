@@ -60,3 +60,15 @@ int random_helper::get_rand() {
     random_helper::rand_table_i =  (random_helper::rand_table_i+1)%(random_helper::rand_table_n);
     return ret;
 }
+
+bool random_helper::sample(double p) {
+    const int k = 100000000;
+    p*=k;//to be the percentage that we will take the result
+    int x = random_helper::get_rand()%k;
+    if(p>=x){
+        return true;
+    }
+    else{
+        return false;
+    }
+}

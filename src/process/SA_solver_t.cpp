@@ -13,15 +13,7 @@ using std::cout;
 using std::endl;
 bool SA_solver_t::sample_p(double delta_c) {
     double p = exp(-delta_c/t);
-    const int k = 100000000;
-    p*=k;//to be the percentage that we will take the result
-    int x = random_helper::get_rand()%k;
-    if(p>=x){
-        return true;
-    }
-    else{
-        return false;
-    }
+    return random_helper::sample(p);
 }
 SA_solver_t::SA_solver_t() {
     const int N = sequence_pair_t::sequence_n;
@@ -54,6 +46,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
                 SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
             }
         }
+
         if(it%10==0){
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
@@ -66,7 +59,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         this->t*=r;
         this->it_timer.timer_end();
         this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
-        //cout<<"It time : "<<it_average_time<<endl;
+        //this->it_timer.print_time_elapsed();
 
         update_parameters();
 
@@ -102,7 +95,6 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
                     //find_position_timer.print_time_elapsed();
 
                     if(success){
-                        //bool useless = neighbor.find_position(true, true, 0, 0);  //to modified the shape again (it takes much longer time)
                         double delta = get_delta(SP, neighbor);
                         bool change = sample_p(delta);
                         if(change){
