@@ -42,21 +42,10 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         this->it_timer.timer_start();
         for(auto& SP:SPEN.valid_sequence_pairs){
-            timer find_neighbor_timer("find neighbor"), decision_timer("decide");
-
-            find_neighbor_timer.timer_start();
             sequence_pair_t after = find_neighbor(SP);
-            find_neighbor_timer.timer_end();
-            //find_neighbor_timer.print_time_elapsed();
-
-            decision_timer.timer_start(); //decide
-            double delta = get_delta(SP, after);
-            bool change = sample_p(delta);
-            if(change){
-                SP = after;
-            }
-            decision_timer.timer_end();
-            //decision_timer.print_time_elapsed();
+//            double delta = get_delta(SP, after);
+//            bool change = sample_p(delta);
+            SP = after;
 
             if(SP.predicted_wirelength < best_sp.predicted_wirelength){
                 best_sp = SP;
@@ -114,7 +103,11 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
 
                     if(success){
                         //bool useless = neighbor.find_position(true, true, 0, 0);  //to modified the shape again (it takes much longer time)
-                        return neighbor;
+                        double delta = get_delta(SP, neighbor);
+                        bool change = sample_p(delta);
+                        if(change){
+                            return neighbor;
+                        }
                     }
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
@@ -144,7 +137,7 @@ void SA_solver_t::parameters_init(double t, double end_t) {
 double SA_solver_t::get_time_left() {
     this->runtime_timer.timer_end();
     double current_time = this->runtime_timer.get_time_elapsed();
-    return time_limit - current_time;
+    return std::max(time_limit - current_time, 0.0);
 }
 
 void SA_solver_t::update_parameters() {
