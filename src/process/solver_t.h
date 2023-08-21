@@ -37,7 +37,9 @@ public:
 
     void load_specific_without_cmp();
 
-    double runtime = 28*60*1000, SA_runtime = 20*60*1000, init_timeout = 20*60*1000; // ms
+    void test_parallel();
+
+    double runtime = 28*60*1000, SA_runtime = 25*60*1000, init_timeout = 20*60*1000; // ms
     int SA_times = 1;
     bool invalid_input = false;
     timer runtime_timer = timer("run time");

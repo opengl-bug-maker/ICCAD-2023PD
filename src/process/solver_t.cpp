@@ -5,6 +5,7 @@
 #include "solver_t.h"
 //for debug
 #include "iostream"
+#include <thread>
 #include "genetic_solver_t.h"
 #include <iomanip>
 #include "SA_solver_t.h"
@@ -12,9 +13,11 @@
 #include "LCS_helper_t.h"
 #include "random_helper.h"
 #include "case_table_t.h"
+#include <iomanip>
 using std::cout;
 using std::endl;
 using std::setw;
+
 
 floorplan_t& solver_t::get_best_fp() {
     return best_fp;
@@ -25,6 +28,10 @@ solver_t::solver_t() {
 
     floorplan_t::init();
     sequence_pair_t::init();
+
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
+    cout.tie(0);
 
     if(chip_t::get_total_module_n()<1){
         this->invalid_input = true;
@@ -40,7 +47,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 1*time_left, 0.5, 0.003, false);
+    SA_solver.run(SPEN, 1*time_left, 0.5, 0.008, false);
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
@@ -128,3 +135,24 @@ void solver_t::load_specific_without_cmp() {
         cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
 }
+void f1(){
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+void f2(){
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+void solver_t::test_parallel() {
+    timer test("test");
+    test.timer_start();
+    for(int i = 0; i<5; ++i){
+        for(int j = 0; j<5; ++j){
+            std::thread t1(f1);
+            std::thread t2(f2);
+            t1.join();
+            t2.join();
+        }
+    }
+    test.timer_end();
+    test.print_time_elapsed();
+}
+

@@ -22,7 +22,12 @@ public:
 
     double get_time_left();
 
-    sequence_pair_t find_neighbor(sequence_pair_t);
+    //void find_neighbor_threads_i(int);
+
+
+
+    sequence_pair_t find_neighbor_parallel(sequence_pair_t);
+    sequence_pair_t find_neighbor_sequential(sequence_pair_t);
 
 
     double t = 1, r = 0.999, end_t = 0.005;

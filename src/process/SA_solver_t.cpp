@@ -8,7 +8,11 @@
 #include <iomanip>
 #include <cmath>
 #include "timer.h"
-
+#include <thread>
+#include <stack>
+#include <mutex>
+std::stack<sequence_pair_t> legal_neighbors;
+std::mutex legal_neighbors_mutex;
 using std::cout;
 using std::endl;
 bool SA_solver_t::sample_p(double delta_c) {
@@ -16,7 +20,6 @@ bool SA_solver_t::sample_p(double delta_c) {
     return random_helper::sample(p);
 }
 SA_solver_t::SA_solver_t() {
-    const int N = sequence_pair_t::sequence_n;
 }
 
 void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {
@@ -34,7 +37,13 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         this->it_timer.timer_start();
         for(auto& SP:SPEN.valid_sequence_pairs){
-            sequence_pair_t after = find_neighbor(SP);
+            //sequence_pair_t after = find_neighbor(SP);
+            timer find_time_seq("find time");
+            find_time_seq.timer_start();
+            //sequence_pair_t after = find_neighbor_sequential(SP);
+            sequence_pair_t after = find_neighbor_parallel(SP);
+            find_time_seq.timer_end();
+            //find_time_seq.print_time_elapsed();
 //            double delta = get_delta(SP, after);
 //            bool change = sample_p(delta);
             SP = after;
@@ -47,7 +56,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             }
         }
 
-        if(it%10==0){
+        if(it%1==0){
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
@@ -68,8 +77,8 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
     //SPEN.validate_all_SP_print_all();
     SPEN.valid_sequence_pairs[0] = best_sp; //reload the SP back into sequence pairs
 }
-
-sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
+void find_neighbor_threads_i(int i_start, int i_end, vector<int> rand_i, vector<int> rand_j, vector<int> h_map, vector<int> v_map, SA_solver_t* SA, sequence_pair_t);
+sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         v_map[SP.v_sequence[i]] = h_map[SP.h_sequence[i]] = i;
@@ -111,6 +120,31 @@ sequence_pair_t SA_solver_t::find_neighbor(sequence_pair_t SP) {
     }
     return SP; //can't find any neighbor
 }
+sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
+    vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        v_map[SP.v_sequence[i]] = h_map[SP.h_sequence[i]] = i;
+    }
+    //sequence_pair_t neighbor = SP;
+    vector<int> rand_i = random_helper::rand_list(sequence_pair_t::sequence_n);
+    vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
+    const double thread_n = 4;
+    while(legal_neighbors.size()){legal_neighbors.pop();}
+    vector<std::thread> threads;
+    double x = sequence_pair_t::sequence_n/thread_n;
+    for(int i = 0; i<thread_n; ++i){
+        threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, rand_i, rand_j, h_map, v_map, this, SP));
+    }
+    for(int i = 0; i<thread_n; ++i){
+        threads[i].join();
+    }
+    if(legal_neighbors.empty()){
+        return SP;
+    }
+    else{
+        return legal_neighbors.top();
+    }
+}
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.predicted_wirelength;
@@ -138,4 +172,44 @@ void SA_solver_t::update_parameters() {
     double it_left = std::max(time_left/it_time, 1.0);
     double new_r = pow((this->end_t)/this->t, 1/it_left); //0.005 is changeable
     this->r =  new_r;
+}
+
+void find_neighbor_threads_i(int i_start, int i_end, vector<int> rand_i, vector<int> rand_j, vector<int> h_map, vector<int> v_map, SA_solver_t* SA,sequence_pair_t SP){
+    sequence_pair_t neighbor = SP;
+    for(int i = i_start; i<i_end; ++i){
+        for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
+            int ii = rand_i[i], jj = rand_j[j];
+            if(sequence_pair_t::seq_is_fix[ii]&&sequence_pair_t::seq_is_fix[jj]){continue;}
+            int p = v_map[ii], q = h_map[jj];
+            for(int m = 0; m<2; ++m){
+                for(int n = 0; n<2; ++n){
+                    if(m==0&&n==0){continue;}
+                    if(legal_neighbors.size()){return;}
+                    if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
+                    if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
+
+                    timer find_position_timer("find position time (in finding neighbor)");
+                    find_position_timer.timer_start();
+                    bool success = neighbor.find_position(false, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                    find_position_timer.timer_end();
+                    //find_position_timer.print_time_elapsed();
+
+                    if(success){
+                        double delta = SA->get_delta(SP, neighbor);
+                        bool change = SA->sample_p(delta);
+                        if(change){
+                            legal_neighbors_mutex.lock();
+                            legal_neighbors.push(neighbor);
+                            legal_neighbors_mutex.unlock();
+                            return;
+                        }
+                    }
+                    if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
+                    if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
+
+                }
+            }
+
+        }
+    }
 }
