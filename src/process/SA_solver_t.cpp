@@ -57,6 +57,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         }
 
         if(it%1==0){
+            runtime_timer.print_time_elapsed();
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
@@ -68,7 +69,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         this->t*=r;
         this->it_timer.timer_end();
         this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
-        //this->it_timer.print_time_elapsed();
+        this->it_timer.print_time_elapsed();
 
         update_parameters();
 

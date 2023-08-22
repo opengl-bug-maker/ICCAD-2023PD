@@ -114,6 +114,7 @@ ILP_result_t ILP_solver_t::solve(bool int_needed) {
         glp_init_smcp(&parm);
         parm.presolve = GLP_ON;
         parm.msg_lev = GLP_MSG_OFF;
+        parm.tm_lim = 5*1000;
         glp_simplex(this->ILP, &parm);
         z = glp_get_obj_val(this->ILP);
         feasible = glp_get_status(this->ILP);
