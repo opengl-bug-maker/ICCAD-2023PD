@@ -45,10 +45,10 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             //sequence_pair_t after = find_neighbor_sequential(SP);
             sequence_pair_t after = find_neighbor_parallel(SP);
             find_time.timer_end();
-            find_time.print_time_elapsed();
+            //find_time.print_time_elapsed();
             sum+= find_time.get_time_elapsed();
             nn++;
-            cout<<"Average : "<<sum/nn<<endl;
+            //cout<<"Average : "<<sum/nn<<endl;
 //            double delta = get_delta(SP, after);
 //            bool change = sample_p(delta);
             SP = after;
