@@ -21,7 +21,9 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-
+double sum = 0;
+double average = 0;
+double nn = 0;
 void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {
     this->parameters_init(init_t, end_t);
     this->runtime_timer.timer_start();
@@ -38,12 +40,15 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         this->it_timer.timer_start();
         for(auto& SP:SPEN.valid_sequence_pairs){
             //sequence_pair_t after = find_neighbor(SP);
-            timer find_time_seq("find time");
-            find_time_seq.timer_start();
+            timer find_time("find time");
+            find_time.timer_start();
             //sequence_pair_t after = find_neighbor_sequential(SP);
             sequence_pair_t after = find_neighbor_parallel(SP);
-            find_time_seq.timer_end();
-            //find_time_seq.print_time_elapsed();
+            find_time.timer_end();
+            find_time.print_time_elapsed();
+            sum+= find_time.get_time_elapsed();
+            nn++;
+            cout<<"Average : "<<sum/nn<<endl;
 //            double delta = get_delta(SP, after);
 //            bool change = sample_p(delta);
             SP = after;
@@ -78,7 +83,8 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
     //SPEN.validate_all_SP_print_all();
     SPEN.valid_sequence_pairs[0] = best_sp; //reload the SP back into sequence pairs
 }
-void find_neighbor_threads_i(int i_start, int i_end, vector<int> rand_i, vector<int> rand_j, vector<int> h_map, vector<int> v_map, SA_solver_t* SA, sequence_pair_t);
+
+void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA, sequence_pair_t);
 sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
@@ -87,6 +93,9 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     sequence_pair_t neighbor = SP;
     vector<int> rand_i = random_helper::rand_list(sequence_pair_t::sequence_n);
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
+    timer find_neighbor_time("find time");
+    find_neighbor_time.timer_start();
+    nn++;
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
             int ii = rand_i[i], jj = rand_j[j];
@@ -108,12 +117,16 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
                         double delta = get_delta(SP, neighbor);
                         bool change = sample_p(delta);
                         if(change){
+                            find_neighbor_time.timer_end();
+                            //find_neighbor_time.print_time_elapsed();
+                            sum+=find_neighbor_time.get_time_elapsed();
+                            average = sum/nn;
+                            //cout<<"Average find time: "<<average<<endl;
                             return neighbor;
                         }
                     }
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
-
                 }
             }
 
@@ -129,12 +142,12 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
     //sequence_pair_t neighbor = SP;
     vector<int> rand_i = random_helper::rand_list(sequence_pair_t::sequence_n);
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
-    const double thread_n = 4;
+    const double thread_n = 2;
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
     double x = sequence_pair_t::sequence_n/thread_n;
     for(int i = 0; i<thread_n; ++i){
-        threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, rand_i, rand_j, h_map, v_map, this, SP));
+        threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, &rand_i, &rand_j, &h_map, &v_map, this, SP));
     }
     for(int i = 0; i<thread_n; ++i){
         threads[i].join();
@@ -175,13 +188,13 @@ void SA_solver_t::update_parameters() {
     this->r =  new_r;
 }
 
-void find_neighbor_threads_i(int i_start, int i_end, vector<int> rand_i, vector<int> rand_j, vector<int> h_map, vector<int> v_map, SA_solver_t* SA,sequence_pair_t SP){
+void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA,sequence_pair_t SP){
     sequence_pair_t neighbor = SP;
     for(int i = i_start; i<i_end; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
-            int ii = rand_i[i], jj = rand_j[j];
+            int ii = (*rand_i)[i], jj = (*rand_j)[j];
             if(sequence_pair_t::seq_is_fix[ii]&&sequence_pair_t::seq_is_fix[jj]){continue;}
-            int p = v_map[ii], q = h_map[jj];
+            int p = (*v_map)[ii], q = (*h_map)[jj];
             for(int m = 0; m<2; ++m){
                 for(int n = 0; n<2; ++n){
                     if(m==0&&n==0){continue;}
