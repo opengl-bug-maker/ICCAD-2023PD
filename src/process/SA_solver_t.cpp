@@ -39,25 +39,13 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         this->it_timer.timer_start();
         for(auto& SP:SPEN.valid_sequence_pairs){
-            //sequence_pair_t after = find_neighbor(SP);
-            timer find_time("find time");
-            find_time.timer_start();
-            //sequence_pair_t after = find_neighbor_sequential(SP);
             sequence_pair_t after = find_neighbor_parallel(SP);
-            find_time.timer_end();
-            //find_time.print_time_elapsed();
-            sum+= find_time.get_time_elapsed();
-            nn++;
-            //cout<<"Average : "<<sum/nn<<endl;
-//            double delta = get_delta(SP, after);
-//            bool change = sample_p(delta);
             SP = after;
-
             if(SP.predicted_wirelength < best_sp.predicted_wirelength){
                 best_sp = SP;
             }
             else if(it%this->load_back_it==0 && load_back){
-                SPEN.valid_sequence_pairs[0] = best_sp; //to avoid meaningless searching
+                SP = best_sp; //to avoid meaningless searching
             }
         }
 
@@ -139,13 +127,13 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         v_map[SP.v_sequence[i]] = h_map[SP.h_sequence[i]] = i;
     }
-    //sequence_pair_t neighbor = SP;
     vector<int> rand_i = random_helper::rand_list(sequence_pair_t::sequence_n);
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
     const double thread_n = 2;
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
     double x = sequence_pair_t::sequence_n/thread_n;
+
     for(int i = 0; i<thread_n; ++i){
         threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, &rand_i, &rand_j, &h_map, &v_map, this, SP));
     }
@@ -162,7 +150,6 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.predicted_wirelength;
-    //double after_wirelength = after.get_wirelength(true, true);
     double after_wirelength = after.get_wirelength(true, false);
     double delta = (after_wirelength-ori_wirelength)/ori_wirelength;
     return delta*10.0;
@@ -201,13 +188,7 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                     if(legal_neighbors.size()){return;}
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
-
-                    timer find_position_timer("find position time (in finding neighbor)");
-                    find_position_timer.timer_start();
                     bool success = neighbor.find_position(false, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
-                    find_position_timer.timer_end();
-                    //find_position_timer.print_time_elapsed();
-
                     if(success){
                         double delta = SA->get_delta(SP, neighbor);
                         bool change = SA->sample_p(delta);

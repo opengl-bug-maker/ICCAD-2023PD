@@ -39,8 +39,7 @@ public:
 
     void test_parallel();
 
-    double runtime = 28*60*1000, SA_runtime = 25*60*1000, init_timeout = 20*60*1000; // ms
-    int SA_times = 1;
+    double runtime = 26*60*1000, SA_runtime = 25*60*1000, init_timeout = 20*60*1000; // ms
     bool invalid_input = false;
     timer runtime_timer = timer("run time");
     floorplan_t best_fp;
