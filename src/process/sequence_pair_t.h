@@ -23,7 +23,7 @@ public:
     //static function
     static void init();
     static void build_graph();
-    static vector<vec2d_t> find_w_h(uint32_t area); //calculate a legal shapes for a specific area
+    static vector<vec2d_t> find_w_h(uint32_t area, int); //calculate a legal shapes for a specific area
 
 
     //static variables
@@ -36,7 +36,8 @@ public:
     static vector<vector<int>> connections_VE; //VE graph
     static vector<int> deg_w;
     static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m; //area -> (w, h)
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m_5; //area -> (w, h)
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m_9; //area -> (w, h)
     static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
     static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
     static vector<double> modules_area;
@@ -56,6 +57,7 @@ public:
 
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
+    bool find_position(bool,bool,int,int, int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     void predict_wirelength(bool, bool);
     floorplan_t to_fp();
