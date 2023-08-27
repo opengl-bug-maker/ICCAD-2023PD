@@ -24,12 +24,13 @@ floorplan_t& solver_t::get_best_fp() {
 }
 
 solver_t::solver_t() {
-    random_helper::set_seed();
+    random_helper::set_seed(); //build up random table
 
-    floorplan_t::init();
+    floorplan_t::init(); //class initialization
+
     sequence_pair_t::init();
 
-    std::ios_base::sync_with_stdio(false);
+    std::ios_base::sync_with_stdio(false); //make cout faster
     std::cin.tie(0);
     cout.tie(0);
 
@@ -54,6 +55,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
     this->best_fp = SPEN.best_SP.to_fp();
+    //this->best_fp.GUI_validation();
     cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
@@ -134,25 +136,5 @@ void solver_t::load_specific_without_cmp() {
         this->best_fp = loaded_fp;
         cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
-}
-void f1(){
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-}
-void f2(){
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-}
-void solver_t::test_parallel() {
-    timer test("test");
-    test.timer_start();
-    for(int i = 0; i<5; ++i){
-        for(int j = 0; j<5; ++j){
-            std::thread t1(f1);
-            std::thread t2(f2);
-            t1.join();
-            t2.join();
-        }
-    }
-    test.timer_end();
-    test.print_time_elapsed();
 }
 

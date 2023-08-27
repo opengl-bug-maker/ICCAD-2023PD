@@ -22,11 +22,10 @@ public:
 
     double get_time_left();
 
-    //void find_neighbor_threads_i(int);
-
-
+//    void find_greater(sequence_pair_t&, double timeout);
 
     sequence_pair_t find_neighbor_parallel(sequence_pair_t);
+
     sequence_pair_t find_neighbor_sequential(sequence_pair_t);
 
 

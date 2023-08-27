@@ -99,7 +99,6 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         return false;
     }
     if(i>=this->seed_SP.fix_start_idx){
-        //this->seed_SP.predict_wirelength(true, with_area); //minimize wirelength at last
         this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
         this->res_SP = this->seed_SP;
         this->valid_sequence_pairs.push_back(this->seed_SP);
@@ -108,7 +107,6 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         return true;
     }
     if(this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]]){
-        int a = this->seed_SP.add_soft_order[i];
         return add_soft_process_cont(i+1, with_area, cutoff, start_j, start_k);
     }
 

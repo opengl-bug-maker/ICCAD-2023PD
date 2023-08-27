@@ -21,9 +21,6 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-double sum = 0;
-double average = 0;
-double nn = 0;
 void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {
     this->parameters_init(init_t, end_t);
     this->runtime_timer.timer_start();
@@ -38,31 +35,34 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         if(runtime_timer.get_time_elapsed() >= timeout){break;}
 
         this->it_timer.timer_start();
-        for(auto& SP:SPEN.valid_sequence_pairs){
-            sequence_pair_t after = find_neighbor_parallel(SP);
-            SP = after;
-            if(SP.predicted_wirelength < best_sp.predicted_wirelength){
-                best_sp = SP;
-            }
-            else if(it%this->load_back_it==0 && load_back){
-                SP = best_sp; //to avoid meaningless searching
-            }
+        sequence_pair_t& SP = SPEN.valid_sequence_pairs[0];
+        sequence_pair_t after = find_neighbor_parallel(SP);
+        SP = after;
+        if(SP.predicted_wirelength < best_sp.predicted_wirelength && SP.predicted_wirelength!=-1){
+            best_sp = SP;
         }
-
+        else if(it%this->load_back_it==0 && load_back){
+            SP = best_sp; //to avoid meaningless searching
+        }
+//        if(it%100==0){
+//            double useless1 = best_sp.get_wirelength(true, true);
+//            double useless2 = SPEN.valid_sequence_pairs[0].get_wirelength(true, true);
+//        }
         if(it%1==0){
             runtime_timer.print_time_elapsed();
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
-            cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.get_wirelength(true, true)<<endl;
-            cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].get_wirelength(true, true)<<endl;
+            this->it_timer.timer_end();
+            this->it_timer.print_time_elapsed();
+            cout<<"current best wirlength : "<<std::setprecision(16)<<best_sp.predicted_wirelength<<endl;
+            cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].predicted_wirelength<<endl;
             cout<<"------------------------------"<<endl;
-
         }
         runtime_timer.timer_end();
+
         if(runtime_timer.get_time_elapsed() >= timeout){break;}
         this->t*=r;
         this->it_timer.timer_end();
         this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
-        this->it_timer.print_time_elapsed();
 
         update_parameters();
 
@@ -83,7 +83,6 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
     timer find_neighbor_time("find time");
     find_neighbor_time.timer_start();
-    nn++;
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
             int ii = rand_i[i], jj = rand_j[j];
@@ -106,10 +105,6 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
                         bool change = sample_p(delta);
                         if(change){
                             find_neighbor_time.timer_end();
-                            //find_neighbor_time.print_time_elapsed();
-                            sum+=find_neighbor_time.get_time_elapsed();
-                            average = sum/nn;
-                            //cout<<"Average find time: "<<average<<endl;
                             return neighbor;
                         }
                     }
@@ -129,7 +124,13 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
     }
     vector<int> rand_i = random_helper::rand_list(sequence_pair_t::sequence_n);
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
-    const double thread_n = 2;
+    double thread_n;
+    if(this->t>=0.1){
+        thread_n = 2;
+    }
+    else{
+        thread_n = 4;
+    }
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
     double x = sequence_pair_t::sequence_n/thread_n;
@@ -151,6 +152,9 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.predicted_wirelength;
     double after_wirelength = after.get_wirelength(true, false);
+    if(after_wirelength<=0||ori_wirelength<=0){
+        return 0;
+    }
     double delta = (after_wirelength-ori_wirelength)/ori_wirelength;
     return delta*10.0;
 }
@@ -168,10 +172,11 @@ double SA_solver_t::get_time_left() {
 }
 
 void SA_solver_t::update_parameters() {
+    if(this->t<=0){return;}
     double time_left = this->get_time_left();
-    double it_time = this->it_average_time;
+    double it_time = std::max(this->it_average_time, 0.0000001); //to avoid divide by 0
     double it_left = std::max(time_left/it_time, 1.0);
-    double new_r = pow((this->end_t)/this->t, 1/it_left); //0.005 is changeable
+    double new_r = pow((this->end_t)/this->t, 1/it_left);
     this->r =  new_r;
 }
 
