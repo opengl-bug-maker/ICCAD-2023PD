@@ -3,7 +3,7 @@
 //
 
 #include "output_handler_t.h"
-
+#include "carver.h"
 
 double output_handler_t::hpwl;
 
@@ -163,28 +163,30 @@ void output_handler_t::parse_polygon(polygon_t &polygon) {
 
 void output_handler_t::set_FP(floorplan_t &floorplanning) {
     polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
+    polygon_forest_t polygon_carving_forest = carver().carving(polygonForest);
+    polygonForest = carver().pushing(polygon_carving_forest);
     output_handler_t::hpwl = floorplanning.get_wirelength();
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
     }
-    for(auto utility : output_handler_t::utilities){
-        utility.bounding_rect = rect_t(vec2d_t(1e9, 1e9), vec2d_t(0, 0));
+    for(auto& utility : output_handler_t::utilities){
+        utility.bounding_rect = rect_t(vec2d_t(1e9, 1e9), vec2d_t(-1e9, -1e9));
         for(auto point : utility.points){
             if(point.get_x() < utility.bounding_rect.get_left_lower().get_x()){
                 utility.bounding_rect = rect_t(vec2d_t(point.get_x(), utility.bounding_rect.get_left_lower().get_y()),
-                                               vec2d_t(utility.bounding_rect.get_right_upper().get_x(), utility.bounding_rect.get_right_upper().get_y()));
+                                               vec2d_t(utility.bounding_rect.get_right_upper().get_x() - point.get_x(), utility.bounding_rect.get_size().get_y()));
             }
             if(point.get_x() > utility.bounding_rect.get_right_upper().get_x()){
                 utility.bounding_rect = rect_t(vec2d_t(utility.bounding_rect.get_left_lower().get_x(), utility.bounding_rect.get_left_lower().get_y()),
-                                               vec2d_t(point.get_x(), utility.bounding_rect.get_right_upper().get_y()));
+                                               vec2d_t(point.get_x() - utility.bounding_rect.get_left_lower().get_x(), utility.bounding_rect.get_size().get_y()));
             }
             if(point.get_y() < utility.bounding_rect.get_left_lower().get_y()){
                 utility.bounding_rect = rect_t(vec2d_t(utility.bounding_rect.get_left_lower().get_x(), point.get_y()),
-                                               vec2d_t(utility.bounding_rect.get_right_upper().get_x(), utility.bounding_rect.get_right_upper().get_y()));
+                                               vec2d_t(utility.bounding_rect.get_size().get_x(), utility.bounding_rect.get_right_upper().get_y() - point.get_y()));
             }
             if(point.get_y() > utility.bounding_rect.get_right_upper().get_y()){
                 utility.bounding_rect = rect_t(vec2d_t(utility.bounding_rect.get_left_lower().get_x(), utility.bounding_rect.get_left_lower().get_y()),
-                                               vec2d_t(utility.bounding_rect.get_right_upper().get_x(), point.get_y()));
+                                               vec2d_t(utility.bounding_rect.get_size().get_x(), point.get_y() - utility.bounding_rect.get_left_lower().get_y()));
             }
         }
     }
@@ -197,11 +199,13 @@ void output_handler_t::set_FP(floorplan_t &floorplanning) {
     }
     double wire_length = 0;
     for (int i = 0; i < module_position.size(); ++i) {
-        for (int j = 0; j < module_position.size(); ++j) {
+        for (int j = i; j < module_position.size(); ++j) {
             auto dis = module_position[i] - module_position[j];
-            wire_length += (uint32_t)(chip_t::get_connection_table()[i][j] * std::abs(dis.get_x()) + std::abs(dis.get_y()));
+            wire_length += ((double)chip_t::get_connection_table()[i][j] * (std::fabs(dis.get_x()) + std::fabs(dis.get_y())));
         }
     }
+    output_handler_t::hpwl = wire_length;
+//    std::cout << wire_length << " | output handler\n";
 }
 
 double output_handler_t::HPWL() {
