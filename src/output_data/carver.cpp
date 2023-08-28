@@ -22,11 +22,22 @@ polygon_forest_t carver::carving(polygon_forest_t& polygon_forest) {
     for (int i = 0; i < chip_t::get_soft_modules().size(); ++i) {
         //carving
         auto limit_area = chip_t::get_modules()[i]->get_area();
+        auto minus_rect = this->rects[i];
         auto new_length = 0;
         if(this->rects[i].get_size().get_y() > this->rects[i].get_size().get_x()){
+            minus_rect = rect_t(this->rects[i].get_left_lower(), this->rects[i].get_size() - vec2d_t(1, 0));
+            while(minus_rect.get_size().get_y() < 2 * minus_rect.get_size().get_x() && minus_rect.get_area() >= limit_area){
+                this->rects[i] = minus_rect;
+                minus_rect = rect_t(this->rects[i].get_left_lower(), this->rects[i].get_size() - vec2d_t(1, 0));
+            }
             new_length = (int)(limit_area / this->rects[i].get_size().get_x()) + 1;
             this->rects[i] = rect_t(this->rects[i].get_left_lower(), vec2d_t(this->rects[i].get_size().get_x(), new_length));
         }else{
+            minus_rect = rect_t(this->rects[i].get_left_lower(), this->rects[i].get_size() - vec2d_t(0, 1));
+            while(minus_rect.get_size().get_x() < 2 * minus_rect.get_size().get_y() && minus_rect.get_area() >= limit_area){
+                this->rects[i] = minus_rect;
+                minus_rect = rect_t(this->rects[i].get_left_lower(), this->rects[i].get_size() - vec2d_t(0, 1));
+            }
             new_length = (int)(limit_area / this->rects[i].get_size().get_y()) + 1;
             this->rects[i] = rect_t(this->rects[i].get_left_lower(), vec2d_t(new_length, this->rects[i].get_size().get_y()));
         }
