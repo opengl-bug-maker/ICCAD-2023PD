@@ -129,7 +129,7 @@ void solver_t::load_specific_without_cmp() {
         for(auto& e:SP.is_in_seq){e = 1;}
     }
     if(fnd_cases){
-        SP.find_position(true, true, 0, 0);
+        SP.find_position(true, true, 0, 0, 9);
         SP.find_position_with_area(true, true, 0, 0);
         //t1.print_time_elapsed();
         floorplan_t loaded_fp = SP.to_fp();
