@@ -828,7 +828,7 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         success = this->find_position_with_area(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     }
     else{
-        success = this->find_position(minimize_wirelength,true,0, 0,9); //need result to calculate wirelength
+        success = this->find_position(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     }
     if(success==false){
         this->predicted_wirelength = -1;
