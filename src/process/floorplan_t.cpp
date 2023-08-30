@@ -204,6 +204,7 @@ vector<int> floorplan_t::get_unplaced_id() {
 
 
 vector<vec2d_t> floorplan_t::find_w_h(uint32_t area){
+    if(area<1){return {{0, 0}};}
     if(area==1){return {{1,1}};}
     uint32_t  from = sqrt(area/2);
     vector<vec2d_t> ret;

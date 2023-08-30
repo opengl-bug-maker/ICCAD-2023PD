@@ -27,8 +27,13 @@ bool sequence_pair_enumerator_t::add_soft_process(int i, bool with_area, int cut
     }
     if(i>=this->seed_SP.fix_start_idx){
         this->seed_SP.predict_wirelength(true, with_area); //minimize wirelength at last
-        this->valid_sequence_pairs.push_back(this->seed_SP);
-        return true;
+        if(this->seed_SP.predicted_wirelength!=-1){
+            this->valid_sequence_pairs.push_back(this->seed_SP);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
     bool fnd = false;
     if(seed_SP.v_sequence.size() == 0){ //in case there are no fix module

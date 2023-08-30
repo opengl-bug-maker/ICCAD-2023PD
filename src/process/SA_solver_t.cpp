@@ -28,7 +28,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
     SPEN.updated_best_SP();
     sequence_pair_t best_sp = SPEN.best_SP;
-
+    int load_back_cnt = 0;
     int it = 1;
     while(true){
         runtime_timer.timer_end();
@@ -38,12 +38,20 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         sequence_pair_t& SP = SPEN.valid_sequence_pairs[0];
         //sequence_pair_t after = find_neighbor_parallel(SP);
         sequence_pair_t after = find_neighbor_sequential(SP);
-        SP = after;
+        if(after.predicted_wirelength!=-1){
+            SP = after;
+        }
         if(SP.predicted_wirelength < best_sp.predicted_wirelength && SP.predicted_wirelength!=-1){
             best_sp = SP;
+            load_back_cnt = 0;
         }
-        else if(it%this->load_back_it==0 && load_back){
-            SP = best_sp; //to avoid meaningless searching
+        else{
+            load_back_cnt++;
+            if(load_back && load_back_cnt>=this->load_back_it){
+                cout<<"Load back..."<<endl;
+                SP = best_sp; //to avoid meaningless searching
+                load_back_cnt = 0;
+            }
         }
 //        if(it%100==0){
 //            double useless1 = best_sp.get_wirelength(true, true);
@@ -59,7 +67,6 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             cout<<"------------------------------"<<endl;
         }
         runtime_timer.timer_end();
-
         if(runtime_timer.get_time_elapsed() >= timeout){break;}
         this->t*=r;
         this->it_timer.timer_end();

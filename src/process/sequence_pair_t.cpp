@@ -707,7 +707,7 @@ void sequence_pair_t::set_fix_sequence() {
     //now insert fix module to sequence
     vector<int> upd_v, upd_h, v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
     for(int i = sequence_pair_t::fix_start_idx; i<sequence_pair_t::sequence_n; ++i) {
-        for(int j = 0; j<upd_v.size(); ++j){
+        for(int j = 0; j<std::min(upd_v.size(),upd_h.size()); ++j){
             v_map[upd_v[j]] = h_map[upd_h[j]] = j;
         }
         bool inserted = false;
