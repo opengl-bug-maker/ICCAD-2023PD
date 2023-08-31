@@ -50,11 +50,11 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     cout<<"---------------Stage 1----------------"<<endl;
     SA_solver.run(SPEN, 0.1*time_left, 0.5, 0.01, false);
     cout<<"---------------Stage 2----------------"<<endl;
-    SA_solver.run(SPEN, 0.1*time_left, 0.5, 0.01, false);
+    SA_solver.run(SPEN, 0.1*time_left, 0.05, 0.01, true);
     cout<<"---------------Stage 3----------------"<<endl;
-    SA_solver.run(SPEN, 0.1*time_left, 0.5, 0.01, false);
+    SA_solver.run(SPEN, 0.1*time_left, 0.03, 0.01, true);
     cout<<"---------------Stage 4----------------"<<endl;
-    SA_solver.run(SPEN, 0.7*time_left, 0.5, 0.008, false);
+    SA_solver.run(SPEN, 0.7*time_left, 0.5, 0.008, true);
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0, 9);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);

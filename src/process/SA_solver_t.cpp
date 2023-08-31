@@ -47,7 +47,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         }
         else{
             load_back_cnt++;
-            if(load_back && load_back_cnt>=this->load_back_it){
+            if(load_back && SP.predicted_wirelength>=1.375*best_sp.predicted_wirelength){
                 cout<<"Load back..."<<endl;
                 SP = best_sp; //to avoid meaningless searching
                 load_back_cnt = 0;
@@ -70,7 +70,8 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         if(runtime_timer.get_time_elapsed() >= timeout){break;}
         this->t*=r;
         this->it_timer.timer_end();
-        this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
+        //this->it_average_time =  (this->it_average_time*(it-1)+this->it_timer.get_time_elapsed()) / it;
+        this->it_average_time =  this->it_timer.get_time_elapsed();
 
         update_parameters();
 

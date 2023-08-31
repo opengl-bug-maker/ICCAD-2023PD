@@ -31,7 +31,7 @@ public:
 
     double t = 1, r = 0.999, end_t = 0.005;
     double time_limit = 0, it_average_time = 0;
-    const int load_back_it = 1000;
+    const int load_back_it = 100;
     timer runtime_timer = timer("SA run time");
     timer it_timer = timer("it time");
 };
