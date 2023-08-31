@@ -16,7 +16,9 @@ void sequence_pair_enumerator_t::generate_sequence_pairs(int n) {
     this->init_timer.timer_start();
     this->target_sp_n = n;
     this->current_sp_n = 0;
-    bool result  = this->add_soft_process_cont(0, false, 5, 0, 0);
+    if(sequence_pair_t::soft_n!=0){
+        bool result  = this->add_soft_process_cont(0, false, 5, 0, 0);
+    }
     this->init_timer.timer_end();
     this->init_timer.print_time_elapsed();
 }
