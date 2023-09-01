@@ -48,7 +48,11 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, time_left, 0.1, 0.005, true);
+    SA_solver.run(SPEN, 0.3 * time_left, 0.5, 0.01, false, true);
+    cout<<"---------------Stage 1----------------"<<endl;
+    SA_solver.run(SPEN, 0.7 * time_left, 0.3, 0.01, true, false);
+//    cout<<"---------------Stage 3----------------"<<endl;
+//    SA_solver.run(SPEN, 0.3*time_left, 0.01, 0.008, true, false);
     SPEN.updated_best_SP();
     SPEN.best_SP.find_position(true, true, 0, 0, 9);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
@@ -135,6 +139,12 @@ void solver_t::load_specific_without_cmp() {
         floorplan_t loaded_fp = SP.to_fp();
         this->best_fp = loaded_fp;
         cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    }
+}
+
+void solver_t::test() {
+    for(auto& e:sequence_pair_t::deg_w){
+        cout<<e.first<<" "<<e.second<<endl;
     }
 }
 

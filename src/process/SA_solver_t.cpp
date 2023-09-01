@@ -21,7 +21,13 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back) {
+void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, bool only_greater) {
+    this->swap_enable = vector<int>(sequence_pair_t::sequence_n, 1);
+    if(only_greater){
+        for(int i = sequence_pair_t::sequence_n/2; i<sequence_pair_t::sequence_n; ++i){
+            this->swap_enable[i] = 0;
+        }
+    }
     this->parameters_init(init_t, end_t);
     this->runtime_timer.timer_start();
     this->time_limit = timeout;
@@ -97,6 +103,7 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
             int ii = rand_i[i], jj = rand_j[j];
             if(sequence_pair_t::seq_is_fix[ii]&&sequence_pair_t::seq_is_fix[jj]){continue;}
             int p = v_map[ii], q = h_map[jj];
+            if(swap_enable[ii]==false&&swap_enable[jj]==false){continue;}
             for(int m = 0; m<2; ++m){
                 for(int n = 0; n<2; ++n){
                     if(m==0&&n==0){continue;}

@@ -25,7 +25,7 @@ unordered_map<const module_t*, int> sequence_pair_t::soft_module_to_id_m;
 unordered_map<const module_t*, int> sequence_pair_t::fix_module_to_id_m;
 vector<edge_t> sequence_pair_t::connections;
 vector<vector<int>> sequence_pair_t::connections_VE;
-vector<int> sequence_pair_t::deg_w;
+vector<pair<int,int>> sequence_pair_t::deg_w;
 vector<double> sequence_pair_t::modules_area;
 using std::cout;
 using std::endl;
@@ -46,7 +46,7 @@ void sequence_pair_t::init() {
     sequence_pair_t::modules_area.resize(chip_t::get_total_module_n());
 
     connections_VE.resize(sequence_n);
-    deg_w.resize(sequence_n);
+    deg_w = vector<pair<int,int>>(sequence_n, {0, 0});
     for(int i = 0; i<sequence_n; ++i){connections_VE[i].resize(sequence_n);}
 
 
@@ -543,6 +543,7 @@ void sequence_pair_t::sequence_pair_validation() {
 void sequence_pair_t::build_graph() {
     connections.clear();
     for(int i = 0; i<sequence_n; ++i) {
+        deg_w[i].second = i;
         if(seq_is_fix[i]){
             const vector<std::pair<const module_t* const, const int>> neighbors
                     = (seq_fixed_map[i])->getConnections();
@@ -555,7 +556,7 @@ void sequence_pair_t::build_graph() {
                     neighbor_i = soft_module_to_id_m[neighbor.first];
                 }
                 connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-                deg_w[i]+=neighbor.second;
+                deg_w[i].first+=neighbor.second;
                 if(i>neighbor_i){
                     connections.push_back({i, neighbor_i, neighbor.second});
                 }
@@ -574,13 +575,15 @@ void sequence_pair_t::build_graph() {
                     neighbor_i = soft_module_to_id_m[neighbor.first];
                 }
                 connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-                deg_w[i]+=neighbor.second;
+                deg_w[i].first+=neighbor.second;
                 if(i>neighbor_i){
                     connections.push_back({i, neighbor_i, neighbor.second});
                 }
             }
         }
     }
+    sort(deg_w.begin(), deg_w.end());
+    std::reverse(deg_w.begin(), deg_w.end());
 }
 
 void sequence_pair_t::print() {

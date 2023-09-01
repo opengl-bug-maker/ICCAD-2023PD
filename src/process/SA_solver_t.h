@@ -12,7 +12,7 @@ public:
 
     bool sample_p(double delta_c);
 
-    void run(sequence_pair_enumerator_t&,double, double, double,bool);
+    void run(sequence_pair_enumerator_t&,double, double, double,bool, bool);
 
     double get_delta(sequence_pair_t&, sequence_pair_t&);
 
@@ -29,6 +29,7 @@ public:
     sequence_pair_t find_neighbor_sequential(sequence_pair_t);
 
 
+    vector<int> swap_enable;
     double t = 1, r = 0.999, end_t = 0.005;
     double time_limit = 0, it_average_time = 0;
     const int load_back_it = 100;
