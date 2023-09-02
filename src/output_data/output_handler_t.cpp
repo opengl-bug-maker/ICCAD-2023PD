@@ -3,7 +3,7 @@
 //
 
 #include "output_handler_t.h"
-#include "carver.h"
+#include "carver_t.h"
 
 double output_handler_t::hpwl;
 
@@ -163,9 +163,9 @@ void output_handler_t::parse_polygon(polygon_t &polygon) {
 
 void output_handler_t::set_FP(floorplan_t &floorplanning) {
     polygon_forest_t polygonForest = floorplanning.get_polygon_forest();
-    polygon_forest_t polygon_carving_forest = carver().carving(polygonForest);
-    polygonForest = carver().pushing(polygon_carving_forest);
-    output_handler_t::hpwl = floorplanning.get_wirelength();
+    polygon_forest_t polygon_carving_forest = carver_t().carving(polygonForest);
+    polygon_forest_t polygon_pushing_orest = carver_t().pushing(polygon_carving_forest);
+    polygonForest = carver_t().best_pf(polygonForest, polygon_pushing_orest);
     for(auto poly : polygonForest.get_polygons()){
         output_handler_t::parse_polygon(poly);
     }
@@ -205,7 +205,7 @@ void output_handler_t::set_FP(floorplan_t &floorplanning) {
         }
     }
     output_handler_t::hpwl = wire_length;
-//    std::cout << wire_length << " | output handler\n";
+    std::cout << wire_length << " | output handler\n";
 }
 
 double output_handler_t::HPWL() {
