@@ -21,12 +21,10 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, bool only_greater) {
-    this->swap_enable = vector<int>(sequence_pair_t::sequence_n, 1);
-    if(only_greater){
-        for(int i = sequence_pair_t::sequence_n/2; i<sequence_pair_t::sequence_n; ++i){
-            this->swap_enable[i] = 0;
-        }
+void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, double enable_from, double enable_to) {
+    this->swap_enable = vector<int>(sequence_pair_t::sequence_n, 0);
+    for(int i = static_cast<int>(sequence_pair_t::sequence_n * enable_from); i<static_cast<int>(sequence_pair_t::sequence_n * enable_to); ++i){
+        this->swap_enable[i] = 1;
     }
     this->parameters_init(init_t, end_t);
     this->runtime_timer.timer_start();

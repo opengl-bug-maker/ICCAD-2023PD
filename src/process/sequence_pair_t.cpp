@@ -46,8 +46,10 @@ void sequence_pair_t::init() {
     sequence_pair_t::modules_area.resize(chip_t::get_total_module_n());
 
     connections_VE.resize(sequence_n);
-    deg_w = vector<pair<int,int>>(sequence_n, {0, 0});
     for(int i = 0; i<sequence_n; ++i){connections_VE[i].resize(sequence_n);}
+
+    deg_w = vector<pair<int,int>>(sequence_n, {0, 0});
+
 
 
     //build up the map between module and sequence number
@@ -582,8 +584,9 @@ void sequence_pair_t::build_graph() {
             }
         }
     }
+
     sort(deg_w.begin(), deg_w.end());
-    std::reverse(deg_w.begin(), deg_w.end());
+    std::reverse(deg_w.begin(), deg_w.end()); //incremental
 }
 
 void sequence_pair_t::print() {
@@ -777,8 +780,7 @@ void sequence_pair_t::init_modules_size() {
         }
         else{
             //find all legal shapes and choose one randomly
-            int id = 0;
-            this->modules_wh[i] = soft_area_to_w_h_m_5[i][id];
+            this->modules_wh[i] = soft_area_to_w_h_m_5[i][0];
             this->modules_wh_i[i] =0;
         }
     }
@@ -880,13 +882,8 @@ void sequence_pair_t::set_add_order() {
     for(int i = 0; i<sequence_pair_t::soft_n; ++i){
         this->add_soft_order[i] = i;
     }
-//    for(int i = 0; i<sequence_pair_t::soft_n; ++i){
-//        int x =rand()%soft_n;
-//        std::swap(add_soft_order[i], add_soft_order[x]);
-//    }
     std::sort(this->add_soft_order.begin(), this->add_soft_order.end(), [&](int&a, int& b){
         return this->modules_area[a] > this->modules_area[b];
-        //return this->deg_w[a] > this->deg_w[b];
     });
 }
 
