@@ -51,7 +51,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         }
         else{
             load_back_cnt++;
-            if(load_back && SP.predicted_wirelength>=1.375*best_sp.predicted_wirelength){
+            if(load_back && SP.predicted_wirelength>1.375*best_sp.predicted_wirelength){
                 cout<<"Load back..."<<endl;
                 SP = best_sp; //to avoid meaningless searching
                 load_back_cnt = 0;
@@ -226,4 +226,53 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
 
         }
     }
+}
+
+
+sequence_pair_t SA_solver_t::post_process(sequence_pair_t SP) {
+    std::vector<rect_t> rects;
+    rects = std::vector<rect_t>(chip_t::get_total_module_n(), rect_t(vec2d_t::default_position, vec2d_t::default_position));
+    for(auto poly : SP.to_fp().polygon_forest.get_polygons()){
+        if(poly.get_rects().size() != 1){
+        }
+        for(auto po : poly.get_rects()){
+            rects[chip_t::get_name_to_index_mapping().at(po->module_rect.getLinkModule()->getName())] = po->module_rect.getRect();
+        }
+    }
+    for (int i = 0; i < chip_t::get_soft_modules().size(); ++i) {
+        //carving
+        auto limit_area = chip_t::get_modules()[i]->get_area();
+        auto minus_rect = rects[i];
+        auto new_length = 0;
+        if(rects[i].get_size().get_y() > rects[i].get_size().get_x()){
+            minus_rect = rect_t(rects[i].get_left_lower(), rects[i].get_size() - vec2d_t(1, 0));
+            while(minus_rect.get_size().get_y() < 2 * minus_rect.get_size().get_x() && minus_rect.get_area() >= limit_area){
+                rects[i] = minus_rect;
+                minus_rect = rect_t(rects[i].get_left_lower(), rects[i].get_size() - vec2d_t(1, 0));
+            }
+            new_length = (int)(limit_area / rects[i].get_size().get_x()) + 1;
+            rects[i] = rect_t(rects[i].get_left_lower(), vec2d_t(rects[i].get_size().get_x(), new_length));
+        }else{
+            minus_rect = rect_t(rects[i].get_left_lower(), rects[i].get_size() - vec2d_t(0, 1));
+            while(minus_rect.get_size().get_x() < 2 * minus_rect.get_size().get_y() && minus_rect.get_area() >= limit_area){
+                rects[i] = minus_rect;
+                minus_rect = rect_t(rects[i].get_left_lower(), rects[i].get_size() - vec2d_t(0, 1));
+            }
+            new_length = (int)(limit_area / rects[i].get_size().get_y()) + 1;
+            rects[i] = rect_t(rects[i].get_left_lower(), vec2d_t(new_length, rects[i].get_size().get_y()));
+        }
+    }
+
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        SP.modules_wh[i] = rects[i].get_size();
+    }
+    sequence_pair_t tmp = SP;
+    bool success = tmp.find_position_with_area(true, true, 0, 0);
+    if(success){
+        return tmp;
+    }
+    else{
+        return SP;
+    }
+
 }

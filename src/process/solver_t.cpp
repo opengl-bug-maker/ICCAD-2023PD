@@ -53,11 +53,13 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver.run(SPEN, 0.5 * time_left, 0.1, 0.01, true, 0, 0.66);
     cout<<"---------------Stage 3----------------"<<endl;
     SA_solver.run(SPEN, 0.2 * time_left, 0.03, 0.008, true, 0, 1);
-//    cout<<"---------------Stage 3----------------"<<endl;
-//    SA_solver.run(SPEN, 0.3*time_left, 0.01, 0.008, true, false);
     SPEN.updated_best_SP();
+
     SPEN.best_SP.find_position(true, true, 0, 0, 9);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
+
+    SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
+
     SPEN.best_SP.write_inline();
     SPEN.best_SP.print_inline();
     this->best_fp = SPEN.best_SP.to_fp();
@@ -84,7 +86,6 @@ void solver_t::run() {
     cout<<"----------------"<<endl;
     cout<<"Load specific sequence pair"<<endl;
     this->load_specific_best();
-
     cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
     this->runtime_timer.timer_end();
     this->runtime_timer.print_time_elapsed();
@@ -124,6 +125,7 @@ void solver_t::load_specific_best() {
 }
 
 void solver_t::load_specific_without_cmp() {
+    SA_solver_t SA_solver;
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
@@ -137,6 +139,7 @@ void solver_t::load_specific_without_cmp() {
     if(fnd_cases){
         SP.find_position(true, true, 0, 0, 9);
         SP.find_position_with_area(true, true, 0, 0);
+        SP = SA_solver.post_process(SP);
         SP.print_inline();
         //t1.print_time_elapsed();
         floorplan_t loaded_fp = SP.to_fp();
@@ -150,4 +153,6 @@ void solver_t::test() {
         cout<<e.first<<" "<<e.second<<endl;
     }
 }
+
+
 
