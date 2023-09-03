@@ -102,6 +102,7 @@ double solver_t::get_time_left() {
 }
 
 void solver_t::load_specific_best() {
+    SA_solver_t SA_solver;
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
@@ -113,8 +114,9 @@ void solver_t::load_specific_best() {
         for(auto& e:SP.is_in_seq){e = 1;}
     }
     if(fnd_cases){
-        SP.find_position(true, true, 0, 0);
+        SP.find_position(true, true, 0, 0,9);
         SP.find_position_with_area(true, true, 0, 0);
+        SP = SA_solver.post_process(SP);
         floorplan_t loaded_fp = SP.to_fp();
         if(loaded_fp.get_wirelength()<this->best_fp.get_wirelength()){
             this->best_fp = loaded_fp;
