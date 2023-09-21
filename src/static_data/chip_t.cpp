@@ -59,6 +59,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
                 soft_module->pins.push_back(soft_pin);
             }
             soft_module->rect = rect_t(vec2d_t(0, 0), soft_module->rect.get_size());
+            chip_t::moduleNameToIndex[soft_modules->getName()] = i;
             chip_t::softCount++;
             chip_t::soft_modules.push_back(soft_module);
             chip_t::modules.push_back(soft_module);
@@ -86,6 +87,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
         fix_pin->relative_position = pin.position - fixed_module->get_left_lower();
         fixed_module->pins.push_back(fix_pin);
     }
+    chip_t::moduleNameToIndex[fixed_module->getName()] = yal_reader.modules.size() - 1;
     chip_t::fixed_modules.push_back(fixed_module);
     chip_t::modules.push_back(fixed_module);
 
