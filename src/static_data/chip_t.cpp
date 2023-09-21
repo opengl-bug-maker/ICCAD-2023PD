@@ -49,6 +49,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
             soft_module_t* soft_module = new soft_module_t();
             soft_module->name = yal_reader.modules[i].name;
             soft_module->rect = yal_reader.modules[i].rect;
+            soft_module->minArea = yal_reader.modules[i].rect.get_area();
             for (auto pin : yal_reader.modules[i].signals){
                 pin_t* soft_pin = new pin_t();
                 soft_pin->name = pin.name;
