@@ -88,6 +88,8 @@ void chip_t::mcnc_file_input(std::string fileName) {
     chip_t::fixed_modules.push_back(fixed_module);
     chip_t::modules.push_back(fixed_module);
 
+    chip_t::total_modules_count = chip_t::get_soft_modules().size() + chip_t::get_fixed_modules().size();
+
     //connection
     std::map<std::string, std::set<pin_t*>> all_nets;
     for (int i = 0; i < chip.network.size(); ++i) {
