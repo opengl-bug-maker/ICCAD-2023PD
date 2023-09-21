@@ -4,11 +4,17 @@
 
 #include <iostream>
 #include <sstream>
+#include <exception>
+#include <map>
+#include <set>
+#include <algorithm>
 #include "chip_t.h"
 #include "soft_module_t.h"
 #include "fixed_module_t.h"
+#include "mcnc/yal_reader_t.h"
 
 uint32_t chip_t::width, chip_t::height;
+int chip_t::width_bias, chip_t::height_bias;
 uint32_t chip_t::softCount, chip_t::fixedCount;
 size_t chip_t::total_modules_count = 0;
 std::unordered_map<std::string, size_t> chip_t::moduleNameToIndex;
@@ -16,10 +22,94 @@ std::vector<module_t*> chip_t::modules;
 std::vector<soft_module_t*> chip_t::soft_modules;
 std::vector<fixed_module_t*> chip_t::fixed_modules;
 std::vector<std::vector<uint_fast32_t>> chip_t::connectionTable;
+std::vector<multi_net_t*> chip_t::multi_nets;
 double chip_t::module_minimum_length = 1e100;
 int chip_t::similar_case_num = -1;
 
 void chip_t::file_input(std::string fileName) {
+    mcnc_file_input(fileName);
+}
+
+void chip_t::mcnc_file_input(std::string fileName) {
+    std::fstream file;
+    file.open(fileName);
+
+    if(file.fail()){
+        file.close();
+        std::cout << "failed to open \"" << fileName << "\"" << std::endl;
+        return;
+    }
+
+    yal_reader_t yal_reader;
+    yal_reader.file_input(file);
+
+    //soft_module
+    for (int i = 0; i < yal_reader.modules.size() - 1; ++i) {
+        if(yal_reader.modules[i].module_type == mcnc_module_t::module_type_e::GENERAL){
+            soft_module_t* soft_module = new soft_module_t();
+            soft_module->name = yal_reader.modules[i].name;
+            soft_module->rect = yal_reader.modules[i].rect;
+            for (auto pin : yal_reader.modules[i].signals){
+                pin_t* soft_pin = new pin_t();
+                soft_pin->name = pin.name;
+                soft_pin->module_index = i;
+                soft_pin->belong_module = soft_module;
+                soft_pin->relative_position = pin.position - soft_module->get_left_lower();
+                soft_module->pins.push_back(soft_pin);
+            }
+            soft_module->rect = rect_t(vec2d_t(0, 0), soft_module->rect.get_size());
+            chip_t::softCount++;
+            chip_t::soft_modules.push_back(soft_module);
+            chip_t::modules.push_back(soft_module);
+        }else{
+            std::cout << yal_reader.modules[i].module_type << " : ";
+            std::cout << "ERROROROROROROR" << __FILE__ << " " << __LINE__ << "\n";
+        }
+    }
+
+    //fix_module
+
+    //board
+    auto chip = yal_reader.modules.back();
+    chip_t::width = chip.rect.get_size().get_x();
+    chip_t::height = chip.rect.get_size().get_y();
+    chip_t::width_bias = chip.rect.get_left_lower().get_x();
+    chip_t::height_bias = chip.rect.get_left_lower().get_y();
+    fixed_module_t* fixed_module = new fixed_module_t();
+    fixed_module->rect = new rect_t(vec2d_t(0, 0), vec2d_t(0, 0));
+    for(auto pin : chip.signals){
+        pin_t* fix_pin = new pin_t();
+        fix_pin->name = pin.name;
+        fix_pin->module_index = yal_reader.modules.size() - 1;
+        fix_pin->belong_module = fixed_module;
+        fix_pin->relative_position = pin.position - fixed_module->get_left_lower();
+        fixed_module->pins.push_back(fix_pin);
+    }
+    chip_t::fixed_modules.push_back(fixed_module);
+    chip_t::modules.push_back(fixed_module);
+
+    //connection
+    std::map<std::string, std::set<pin_t*>> all_nets;
+    for (int i = 0; i < chip.network.size(); ++i) {
+        for (int j = 0; j < chip.network[i].signals.size(); ++j) {
+            auto find = std::find_if(fixed_module->pins.begin(), fixed_module->pins.end(), [&chip, &i, &j](const pin_t* sign){return sign->name == chip.network[i].signals[j];});
+            if(find != fixed_module->pins.end()){
+                all_nets[chip.network[i].signals[j]].insert(*find);
+            }
+            all_nets[chip.network[i].signals[j]].insert(chip_t::soft_modules[i]->pins[j]);
+        }
+    }
+    for(auto net : all_nets){
+        multi_net_t* multi_net = new multi_net_t();
+        multi_net->pins = std::vector<pin_t*>(net.second.begin(), net.second.end());
+        for (auto pin : multi_net->pins){
+            pin->connect_net = multi_net;
+        }
+        chip_t::multi_nets.push_back(multi_net);
+    }
+}
+
+void chip_t::pd_file_input(std::string fileName) {
     std::fstream file;
     file.open(fileName);
 
@@ -133,6 +223,10 @@ const std::vector<std::vector<uint_fast32_t>> &chip_t::get_connection_table() {
     return chip_t::connectionTable;
 }
 
+const std::vector<multi_net_t *> &chip_t::get_multi_nets() {
+    return chip_t::multi_nets;
+}
+
 const std::unordered_map<std::string, size_t> &chip_t::get_name_to_index_mapping() {
     return chip_t::moduleNameToIndex;
 }
@@ -206,6 +300,14 @@ void chip_t::decorate_serialize_testcase() {
             << "    if(chip_t::fixed_modules[i]->get_size().get_y() != fix_coord_vec[i][3]) return false;\n"
             << "}\n"
             << "return true;";
+}
+
+double chip_t::calculate_wire_length(const std::vector <vec2d_t> all_module_left_lower_position) {
+    double total = 0;
+    for (multi_net_t* net : chip_t::multi_nets){
+        total += net->calculate_wire_length(all_module_left_lower_position);
+    }
+    return total;
 }
 
 
