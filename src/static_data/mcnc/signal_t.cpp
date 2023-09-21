@@ -30,6 +30,7 @@ signal_t signal_t::file_input(std::string name, std::fstream &file) {
     } else if(str == "GND"){
         signal.terminal_type = signal_t::terminal_type_e::GND;
     } else {
+        std::cout << str << "   ";
         std::cout << "ERROROROROROROR" << __FILE__ << " " << __LINE__ << "\n";
     }
     if(signal.terminal_type == signal_t::terminal_type_e::PWR){
@@ -37,9 +38,18 @@ signal_t signal_t::file_input(std::string name, std::fstream &file) {
         file >> temp_x >> temp_y >> signal.width;
         signal.position = vec2d_t(temp_x, temp_y);
         file >> signal.layer;
-        file >> str;
-        file >> str;
-        signal.current = std::stod(str.substr(0, str.length() - 1));
+        if(signal.layer[signal.layer.length() - 1] != ';'){
+            file >> str;
+            file >> str;
+            if(str[str.length() - 1] == ';'){
+                signal.current = std::stod(str.substr(0, str.length() - 1));
+            }else{
+                signal.current = std::stod(str);
+                file >> str;
+                file >> str;
+                signal.voltage = std::stod(str.substr(0, str.length() - 1));
+            }
+        }
     }else if(signal.terminal_type == signal_t::terminal_type_e::B || signal.terminal_type == signal_t::terminal_type_e::PB){
         double temp_x, temp_y;
         file >> temp_x >> temp_y >> signal.width;
@@ -47,6 +57,7 @@ signal_t signal_t::file_input(std::string name, std::fstream &file) {
         file >> str;
         signal.layer = str.substr(0, str.length() - 1);
     }else{
+        std::cout << signal.terminal_type << "   ";
         std::cout << "ERROROROROROROR" << __FILE__ << " " << __LINE__ << "\n";
     }
     return signal;

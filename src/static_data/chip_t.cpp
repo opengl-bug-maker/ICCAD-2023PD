@@ -59,7 +59,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
                 soft_module->pins.push_back(soft_pin);
             }
             soft_module->rect = rect_t(vec2d_t(0, 0), soft_module->rect.get_size());
-            chip_t::moduleNameToIndex[soft_modules->getName()] = i;
+            chip_t::moduleNameToIndex[soft_module->getName()] = i;
             chip_t::softCount++;
             chip_t::soft_modules.push_back(soft_module);
             chip_t::modules.push_back(soft_module);
@@ -101,7 +101,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
             if(find != fixed_module->pins.end()){
                 all_nets[chip.network[i].signals[j]].insert(*find);
             }
-            all_nets[chip.network[i].signals[j]].insert(chip_t::soft_modules[i]->pins[j]);
+            all_nets[chip.network[i].signals[j]].insert(chip_t::soft_modules[chip_t::moduleNameToIndex.at(chip.network[i].module_name)]->pins[j]);
         }
     }
     for(auto net : all_nets){
