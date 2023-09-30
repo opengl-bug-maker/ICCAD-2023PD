@@ -12,6 +12,7 @@
 #include "timer.h"
 #include <iomanip>
 #include "random_helper.h"
+#include "static_data/fp_rule_t.cpp" //how bad
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -105,20 +106,20 @@ std::vector<int> sequence_pair_t::get_h() {
 vector<vec2d_t> sequence_pair_t::find_w_h(uint32_t area, int resol) {
     //select only 5 shapes
     if(area==1){return {{1,1}};}
-    double p = sqrt(static_cast<double>(area)/1.95);
-    double b = pow(1.95, 1.00/static_cast<double>(resol-1));
+    double p = sqrt(static_cast<double>(area)*fp_rule_t::get_lower_ratio());
+    double b = pow(fp_rule_t::get_upper_ratio(), 1.00/static_cast<double>(resol-1));
     vector<vec2d_t> res;
 
     for(int i = 0; i<=resol-1; ++i){ //i will be the shorter edge
         double x = p*pow(b, i);
         double y = area/x;
 
-        if(ceil(x)*2>=ceil(y)){
+        if(ceil(x)*fp_rule_t::get_upper_ratio()>=ceil(y)){
             double xx = ceil(x), yy = ceil(y);
-            if(xx-1>=yy *0.5&& (xx-1)*yy>=area){
+            if(xx-1>=yy * fp_rule_t::get_lower_ratio()&& (xx-1)*yy>=area){
                 xx-=1;
             }
-            if(yy-1>=0.5*xx && (yy-1)*xx>=area){
+            if(yy-1>=fp_rule_t::get_lower_ratio()*xx && (yy-1)*xx>=area){
                 yy-=1;
             }
             res.push_back({xx+1, yy+1});
