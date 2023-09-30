@@ -26,6 +26,7 @@ target_link_libraries(iccad2023PD
         polygon
         plugin
         static_data
+        mcnc
         utilities
         )
 

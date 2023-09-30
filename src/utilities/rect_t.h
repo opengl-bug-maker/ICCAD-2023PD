@@ -22,6 +22,8 @@ public:
 
     rect_t(const rect_t&);
 
+    rect_t() = default;
+
     const vec2d_t &get_left_lower() const;
 
     const vec2d_t &get_right_upper() const;

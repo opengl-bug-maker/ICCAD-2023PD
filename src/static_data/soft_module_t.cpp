@@ -25,11 +25,11 @@ const uint32_t soft_module_t::get_area() const {
 }
 
 const vec2d_t soft_module_t::get_left_lower() const {
-    return vec2d_t::default_position;
+    return this->rect.get_left_lower();
 }
 
 const vec2d_t soft_module_t::get_size() const {
-    return vec2d_t(std::sqrt(this->minArea) / 2);
+    return this->rect.get_size();
 }
 
 bounding_rectangle_t soft_module_t::make_bd() {

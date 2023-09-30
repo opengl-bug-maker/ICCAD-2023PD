@@ -9,11 +9,12 @@
 #include "utilities/rect_t.h"
 
 class fixed_module_t : public module_t {
+    friend class chip_t;
     int xCoord, yCoord;
     int width, height;
-    rect_t* rect = nullptr;
     fixed_module_t();
 public:
+    rect_t* rect = nullptr;
     const uint32_t get_area() const override;
 
     const vec2d_t get_left_lower() const override;

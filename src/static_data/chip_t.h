@@ -10,6 +10,8 @@
 #include <fstream>
 #include <exception>
 #include <unordered_map>
+#include "utilities/vec2d_t.h"
+#include "static_data/mcnc/multi_net_t.h"
 //#include "static_data/module_t.h"
 //#include "static_data/soft_module_t.h"
 //#include "static_data/fixed_module_t.h"
@@ -31,6 +33,7 @@ public:
 class chip_t {
     friend class similar_chip_t;
     static uint32_t width, height;
+    static int width_bias, height_bias;
     static uint32_t softCount, fixedCount;
     static size_t total_modules_count;
     static std::unordered_map<std::string, size_t> moduleNameToIndex;
@@ -40,9 +43,15 @@ class chip_t {
     static std::vector<fixed_module_t*> fixed_modules;
     static std::vector<std::vector<uint_fast32_t>> connectionTable;
 
+    static std::vector<multi_net_t*> multi_nets;
+
     static double module_minimum_length;
 
     static int similar_case_num;
+
+    static void pd_file_input(std::string fileName);
+
+    static void mcnc_file_input(std::string fileName);
 public:
     static void file_input(std::string fileName);
 
@@ -62,7 +71,11 @@ public:
 
     static const std::vector<std::vector<uint_fast32_t>> &get_connection_table();
 
+    static const std::vector<multi_net_t*> &get_multi_nets();
+
     static const std::unordered_map<std::string, size_t> &get_name_to_index_mapping();
+
+    static double calculate_wire_length(const std::vector<vec2d_t> all_module_left_lower_position);
 
     static const double &get_module_minimum_length();
 
