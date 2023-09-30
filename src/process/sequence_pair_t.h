@@ -15,6 +15,7 @@
 #include "edge_t.h"
 #include "ILP_solver_t.h"
 #include "timer.h"
+#include "net_t.h"
 using std::vector;
 using std::unordered_map;
 
@@ -30,9 +31,10 @@ public:
     static int fix_n;
     static int soft_n;
     static int sequence_n; //number of sequences number
+    static int connection_graph_deg;
 
     static int fix_start_idx; //the sequence number of the first fix module
-    static vector<edge_t> connections; //all edges (only one direction)
+    static vector<net_t> connections; //all edges (only one direction)
     static vector<vector<int>> connections_VE; //VE graph
     static vector<pair<int, int>> deg_w;
     static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
@@ -57,12 +59,26 @@ public:
 
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
-    bool find_position(bool,bool,int,int, int); // verify if the current sequence pair form the legal position
+    //bool find_position(bool,bool,int,int, int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     void predict_wirelength(bool, bool);
     floorplan_t to_fp();
 
 
+    //subfunction for LP
+    void set_constraints_modules_overlap_h();
+    void set_constraints_modules_overlap_v();
+    void set_constraints_modules_fixed();
+    void set_constraints_net_direction();
+    void set_constraints_net();
+    void set_constraints_ratio_equal_1();
+    void set_constraints_boundaries();
+    void set_variables_modules();
+    void set_variables_connections();
+    void set_variables_shapes();
+    void set_coef(vector<double>&);
+    vector<vec2d_t> get_LP_res_pos();
+    pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
     //subfunctions
     bool is_completed();
     void build_constraint_graph();
@@ -103,6 +119,13 @@ public:
     void print_wirelength(bool,bool);
 
 
+
+    //properties for LP
+    int constraint_n, constraint_i, variable_n;
+    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r;
+    vector<int> shape_types;
+    ILP_solver_t ILP_solver;
+    ILP_result_t ILP_result;
     //properties
     double predicted_wirelength = -1;
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;

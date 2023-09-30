@@ -55,7 +55,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver.run(SPEN, 0.2 * time_left, 0.03, 0.008, true, 0, 1);
     SPEN.updated_best_SP();
 
-    SPEN.best_SP.find_position(true, true, 0, 0, 9);
+    SPEN.best_SP.find_position(true, true, 0, 0);
     SPEN.best_SP.find_position_with_area(true, true, 0, 0);
 
     SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
@@ -114,7 +114,7 @@ void solver_t::load_specific_best() {
         for(auto& e:SP.is_in_seq){e = 1;}
     }
     if(fnd_cases){
-        SP.find_position(true, true, 0, 0,9);
+        SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
         SP = SA_solver.post_process(SP);
         floorplan_t loaded_fp = SP.to_fp();
@@ -139,7 +139,7 @@ void solver_t::load_specific_without_cmp() {
         for(auto& e:SP.is_in_seq){e = 1;}
     }
     if(fnd_cases){
-        SP.find_position(true, true, 0, 0, 9);
+        SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
         SP = SA_solver.post_process(SP);
         SP.print_inline();
