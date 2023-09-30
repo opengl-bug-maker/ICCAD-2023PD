@@ -13,7 +13,7 @@ class pin_t;
 class multi_net_t {
 public:
     std::vector<pin_t*> pins;
-
+    int weight = 1;
     double calculate_wire_length(const std::vector<vec2d_t> module_left_lower_position);
 };
 

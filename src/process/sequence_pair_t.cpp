@@ -500,46 +500,59 @@ void sequence_pair_t::sequence_pair_validation() {
 void sequence_pair_t::build_graph() {
     connections.clear();
     sequence_pair_t::connection_graph_deg = 2;
-    for(int i = 0; i<sequence_n; ++i) {
+    const std::vector<multi_net_t*> input_multi_nets = chip_t::get_multi_nets();
+    for(int i = 0; i<sequence_n; ++i){
         deg_w[i].second = i;
-        if(seq_is_fix[i]){
-            const vector<std::pair<const module_t* const, const int>> neighbors
-                    = (seq_fixed_map[i])->getConnections();
-            for(const auto neighbor:neighbors){
-                int neighbor_i = -1;
-                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-                    neighbor_i = fix_module_to_id_m[neighbor.first];
-                }
-                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-                    neighbor_i = soft_module_to_id_m[neighbor.first];
-                }
-                connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-                deg_w[i].first+=neighbor.second;
-                if(i>neighbor_i){
-                    connections.push_back({{i, neighbor_i}, neighbor.second});
-                }
-
-            }
-        }
-        else{
-            const vector<std::pair<const module_t* const, const int>> neighbors
-                    = (seq_soft_map[i])->getConnections();
-            for(const auto neighbor:neighbors){
-                int neighbor_i = -1;
-                if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-                    neighbor_i = fix_module_to_id_m[neighbor.first];
-                }
-                if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-                    neighbor_i = soft_module_to_id_m[neighbor.first];
-                }
-                connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-                deg_w[i].first+=neighbor.second;
-                if(i>neighbor_i){
-                    connections.push_back({{i, neighbor_i}, neighbor.second});
-                }
-            }
-        }
     }
+    for(multi_net_t* input_multi_net:input_multi_nets){
+        vector<int> connected_id;
+        for(pin_t* pin:input_multi_net->pins){
+            connected_id.push_back(pin->module_index);
+            deg_w[pin->module_index].first+=input_multi_net->weight;
+        }
+        sequence_pair_t::connection_graph_deg+=connected_id.size();
+        sequence_pair_t::connections.push_back({connected_id, input_multi_net->weight});
+    }
+    // for(int i = 0; i<sequence_n; ++i) {
+    //     deg_w[i].second = i;
+    //     if(seq_is_fix[i]){
+    //         const vector<std::pair<const module_t* const, const int>> neighbors
+    //                 = (seq_fixed_map[i])->getConnections();
+    //         for(const auto neighbor:neighbors){
+    //             int neighbor_i = -1;
+    //             if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
+    //                 neighbor_i = fix_module_to_id_m[neighbor.first];
+    //             }
+    //             if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
+    //                 neighbor_i = soft_module_to_id_m[neighbor.first];
+    //             }
+    //             connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
+    //             deg_w[i].first+=neighbor.second;
+    //             if(i>neighbor_i){
+    //                 connections.push_back({{i, neighbor_i}, neighbor.second});
+    //             }
+
+    //         }
+    //     }
+    //     else{
+    //         const vector<std::pair<const module_t* const, const int>> neighbors
+    //                 = (seq_soft_map[i])->getConnections();
+    //         for(const auto neighbor:neighbors){
+    //             int neighbor_i = -1;
+    //             if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
+    //                 neighbor_i = fix_module_to_id_m[neighbor.first];
+    //             }
+    //             if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
+    //                 neighbor_i = soft_module_to_id_m[neighbor.first];
+    //             }
+    //             connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
+    //             deg_w[i].first+=neighbor.second;
+    //             if(i>neighbor_i){
+    //                 connections.push_back({{i, neighbor_i}, neighbor.second});
+    //             }
+    //         }
+    //     }
+    // }
 
     sort(deg_w.begin(), deg_w.end());
     std::reverse(deg_w.begin(), deg_w.end()); //incremental
@@ -802,15 +815,19 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
     vector<vec2d_t> pos = this->modules_positions;
     double sum = 0;
     for(int i = 0; i<connections.size();++i){
-        int from = connections[i].nodes[0], to = connections[i].nodes[1];
-        double w = connections[i].w;
-        double delta_x, delta_y;
-        vec2d_t center_from = {pos[from].get_x()+this->modules_wh[from].get_half_x(), pos[from].get_y()+this->modules_wh[from].get_half_y()};
-        vec2d_t center_to = {pos[to].get_x()+this->modules_wh[to].get_half_x(), pos[to].get_y()+this->modules_wh[to].get_half_y()};
-        delta_x = fabs(center_from.get_x()-center_to.get_x());
-        delta_y = fabs(center_from.get_y()-center_to.get_y());
-
-        sum+= (delta_x+delta_y)*w;
+        double x_min = 1e9, y_min = 1e9, x_max = -1, y_max = -1;
+        for(int j = 0; j<connections[i].nodes.size(); ++j){
+            int v = connections[i].nodes[j];
+            vec2d_t center_v = {pos[v].get_x()+this->modules_wh[v].get_half_x(), pos[v].get_y()+this->modules_wh[v].get_half_y()}; 
+            double v_x = center_v.get_x(), v_y = center_v.get_y();
+            x_min = std::min(x_min, v_x);
+            x_max = std::max(x_max, v_x);
+            y_min = std::min(y_min, v_y);
+            y_max = std::max(y_max, v_y);
+        }
+        double delta_x = x_max-x_min;
+        double delta_y = y_max-y_min;
+        sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->predicted_wirelength = sum;
 }
@@ -855,21 +872,21 @@ void sequence_pair_t::print_logs() {
 
 bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
     build_constraint_graph();
-    int constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2;
-    int constraint_i = 1; //constraint_counter
-    int variable_n = 2*sequence_n;
+    constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2;
+    constraint_i = 1; //constraint_counter
+    variable_n = 2*sequence_n;
     if(minimize_wirelength){
         variable_n+=4*sequence_pair_t::connections.size();
-        constraint_n+=10*sequence_pair_t::connections.size();
+        constraint_n+=(2+ 4 * sequence_pair_t::connection_graph_deg)*sequence_pair_t::connections.size();
     }
-    int x_module_offset = 1;
-    int y_module_offset = 1+sequence_n;
-    int x_edge_offset_l = 1+2*sequence_n;
-    int x_edge_offset_r = 1+2*sequence_n+this->connections.size();
-    int y_edge_offset_l = 1+2*sequence_n+2*this->connections.size();
-    int y_edge_offset_r = 1+2*sequence_n+3*this->connections.size();
+    x_module_offset = 1;
+    y_module_offset = 1+sequence_n;
+    x_edge_offset_l = 1+2*sequence_n;
+    x_edge_offset_r = 1+2*sequence_n+this->connections.size();
+    y_edge_offset_l = 1+2*sequence_n+2*this->connections.size();
+    y_edge_offset_r = 1+2*sequence_n+3*this->connections.size();
     //apart from constraint graph, every fix module need 2 additional condition
-    ILP_solver_t ILP_solver;
+    ILP_solver = ILP_solver_t();
     ILP_solver.init("ILP_solver", constraint_n, variable_n);
     if(ILP_solver.get_is_invalid()){return false;}
     ILP_solver.set_min();
@@ -915,57 +932,23 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
     }
     //set edge and block left(bottom) constraints
     for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
-        int b1 = connections[i].nodes[0];
-        double b1_x = this->modules_wh[b1].get_half_x();
-        double b1_y = this->modules_wh[b1].get_half_y();
-        int b2 = connections[i].nodes[1];
-        double b2_x = this->modules_wh[b2].get_half_x();
-        double b2_y = this->modules_wh[b2].get_half_y();
-        if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
-            continue;
+        for(int j = 0; j<connections[i].nodes.size(); ++j){
+            int b = connections[i].nodes[j];
+            double b_x = this->modules_wh[b].get_half_x();
+            double b_y = this->modules_wh[b].get_half_y();    
+            string x_l_constraint_name = "x_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
+            string y_l_constraint_name = "y_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
+            string x_r_constraint_name = "x_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
+            string y_r_constraint_name = "y_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
+            ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b+x_module_offset}, {1, -1}, x_l_constraint_name, b_x);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b+y_module_offset}, {1, -1}, y_l_constraint_name, b_y);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2, {b+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_constraint_name, -b_x);
+            constraint_i++;
+            ILP_solver.set_constraint_upb(constraint_i, 2, {b+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_constraint_name, -b_y);
+            constraint_i++;
         }
-        string x_l_1_constraint_name = "x_e_1_b_l"+ std::to_string(i);
-        string y_l_1_constraint_name = "y_e_1_b_l"+ std::to_string(i);
-        string x_l_2_constraint_name = "x_e_2_b_l"+ std::to_string(i);
-        string y_l_2_constraint_name = "y_e_2_b_l"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b1+x_module_offset}, {1, -1}, x_l_1_constraint_name, b1_x);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b2+x_module_offset}, {1, -1}, x_l_2_constraint_name, b2_x);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b1+y_module_offset}, {1, -1}, y_l_1_constraint_name, b1_y);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b2+y_module_offset}, {1, -1}, y_l_2_constraint_name, b2_y);
-        constraint_i++;
-    }
-    //set edge and block right(top) constraints
-    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
-        int b1 = connections[i].nodes[0];
-        double b1_x = this->modules_wh[b1].get_half_x();
-        double b1_y = this->modules_wh[b1].get_half_y();
-        int b2 = connections[i].nodes[1];
-        double b2_x = this->modules_wh[b2].get_half_x();
-        double b2_y = this->modules_wh[b2].get_half_y();
-        if(this->is_in_seq[b1]==0||this->is_in_seq[b2]==0){
-            continue;
-        }
-        string x_r_1_constraint_name = "x_e_1_b_r"+ std::to_string(i);
-        string y_r_1_constraint_name = "y_e_1_b_r"+ std::to_string(i);
-        string x_r_2_constraint_name = "x_e_2_b_r"+ std::to_string(i);
-        string y_r_2_constraint_name = "y_e_2_b_r"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_1_constraint_name, -b1_x);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_2_constraint_name, -b2_x);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b1+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_1_constraint_name, -b1_y);
-        constraint_i++;
-
-        ILP_solver.set_constraint_upb(constraint_i, 2, {b2+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_2_constraint_name, -b2_y);
-        constraint_i++;
     }
 
     //set variables

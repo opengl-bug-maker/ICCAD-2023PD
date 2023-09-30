@@ -40,8 +40,8 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         this->it_timer.timer_start();
         sequence_pair_t& SP = SPEN.valid_sequence_pairs[0];
-        //sequence_pair_t after = find_neighbor_parallel(SP);
-        sequence_pair_t after = find_neighbor_sequential(SP);
+        sequence_pair_t after = find_neighbor_parallel(SP);
+        //sequence_pair_t after = find_neighbor_sequential(SP);
         if(after.predicted_wirelength!=-1){
             SP = after;
         }
