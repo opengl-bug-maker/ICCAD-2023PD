@@ -7,21 +7,19 @@
 #include "process/floorplan_t.h"
 #include "output_data/output_handler_t.h"
 #include "output_data/output_utility_t.h"
-
+using namespace std;
 
 int main(/*arg*/){
     std::string input_file_name = "";
     std::string output_file_name = "";
-
-    input_file_name = "../../testcase/Case01.txt";
-
-    chip_t::file_input(input_file_name);//fstream
-
+    chip_t::file_input(input_file_name, chip_t::file_type_t::mcnc);//fstream
     solver_t solver;
     solver.run();
 
     floorplan_t fp = solver.get_best_fp();
-    output_handler_t::set_FP(fp);
+    fp.GUI_validation();
+    cout<< "FP wl : "<<fp.get_wirelength()<<endl;
+    //output_handler_t::set_FP(fp);
 
     std::fstream output_file;
     output_file.open(output_file_name, std::ios::out | std::ios::trunc);
