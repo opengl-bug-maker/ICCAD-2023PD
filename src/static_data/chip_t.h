@@ -10,7 +10,7 @@
 #include <fstream>
 #include <exception>
 #include <unordered_map>
-#include "utilities/vec2d_t.h"
+#include "../utilities/vec2d_t.h"
 #include "static_data/mcnc/multi_net_t.h"
 //#include "static_data/module_t.h"
 //#include "static_data/soft_module_t.h"
@@ -37,6 +37,7 @@ class chip_t {
     static uint32_t softCount, fixedCount;
     static size_t total_modules_count;
     static std::unordered_map<std::string, size_t> moduleNameToIndex;
+    static std::unordered_map<module_t*, int> module_to_id_m;
 
     static std::vector<module_t*> modules;
     static std::vector<soft_module_t*> soft_modules;
@@ -53,7 +54,11 @@ class chip_t {
 
     static void mcnc_file_input(std::string fileName);
 public:
-    static void file_input(std::string fileName);
+    enum file_type_t{
+        mcnc,
+        iccad_pd
+    };
+    static void file_input(std::string fileName, file_type_t);
 
     static int get_similar_case_num();
 

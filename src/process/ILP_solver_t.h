@@ -13,7 +13,7 @@ using std::vector;
 class ILP_result_t{
 public:
     bool legal;
-    int z;
+    double z;
     vector<double> var_values;
     ILP_result_t(){
         var_values.resize(1);

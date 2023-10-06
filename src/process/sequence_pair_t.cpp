@@ -13,6 +13,7 @@
 #include <iomanip>
 #include "random_helper.h"
 #include "static_data/fp_rule_t.cpp" //how bad
+#include <algorithm>
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -404,8 +405,8 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     constraint_i = 1; //constraint_counter
     variable_n = 2*sequence_n + 5*soft_n;
     if(minimize_wirelength){
-        variable_n+=4*sequence_pair_t::connections.size();
-        constraint_n+=(2+ 4 * sequence_pair_t::connection_graph_deg)*sequence_pair_t::connections.size();
+        variable_n += 4*sequence_pair_t::connections.size();
+        constraint_n += 2 * sequence_pair_t::connections.size() + 4 * sequence_pair_t::connection_graph_deg;
         //constraint_n+=10*sequence_pair_t::connections.size();
     }
     x_module_offset = 1;
@@ -500,7 +501,7 @@ void sequence_pair_t::sequence_pair_validation() {
 
 void sequence_pair_t::build_graph() {
     connections.clear();
-    sequence_pair_t::connection_graph_deg = 2;
+    sequence_pair_t::connection_graph_deg = 0;
     const std::vector<multi_net_t*> input_multi_nets = chip_t::get_multi_nets();
     for(int i = 0; i<sequence_n; ++i){
         deg_w[i].second = i;
@@ -554,7 +555,6 @@ void sequence_pair_t::build_graph() {
     //         }
     //     }
     // }
-
     sort(deg_w.begin(), deg_w.end());
     std::reverse(deg_w.begin(), deg_w.end()); //incremental
 }
@@ -831,6 +831,8 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->predicted_wirelength = sum;
+    // cout<< "actual : "<<this->predicted_wirelength<<endl;
+    // cout<< "LP result : "<<this->ILP_result.z<<endl;
 }
 
 floorplan_t sequence_pair_t::to_fp() {

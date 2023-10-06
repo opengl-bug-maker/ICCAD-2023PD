@@ -25,10 +25,15 @@ std::vector<std::vector<uint_fast32_t>> chip_t::connectionTable;
 std::vector<multi_net_t*> chip_t::multi_nets;
 double chip_t::module_minimum_length = 1e100;
 int chip_t::similar_case_num = -1;
+std::unordered_map<module_t*, int> module_to_id_m;
 
-void chip_t::file_input(std::string fileName) {
-    mcnc_file_input(fileName);
-    //pd_file_input(fileName);
+void chip_t::file_input(std::string fileName, file_type_t file_type) {
+    if(file_type==chip_t::file_type_t::iccad_pd){
+        pd_file_input(fileName);
+    }
+    else if(file_type==chip_t::file_type_t::mcnc){
+        mcnc_file_input(fileName);
+    }
 }
 
 void chip_t::mcnc_file_input(std::string fileName) {
@@ -100,13 +105,14 @@ void chip_t::mcnc_file_input(std::string fileName) {
         for (int j = 0; j < chip.network[i].signals.size(); ++j) {
             auto find = std::find_if(fixed_module->pins.begin(), fixed_module->pins.end(), [&chip, &i, &j](const pin_t* sign){return sign->name == chip.network[i].signals[j];});
             if(find != fixed_module->pins.end()){
-                all_nets[chip.network[i].signals[j]].insert(*find);
+                //all_nets[chip.network[i].signals[j]].insert(*find);
             }
             all_nets[chip.network[i].signals[j]].insert(chip_t::soft_modules[chip_t::moduleNameToIndex.at(chip.network[i].module_name)]->pins[j]);
         }
     }
     for(auto net : all_nets){
         multi_net_t* multi_net = new multi_net_t();
+        multi_net->name = net.first;
         multi_net->pins = std::vector<pin_t*>(net.second.begin(), net.second.end());
         for (auto pin : multi_net->pins){
             pin->connect_net = multi_net;
@@ -124,7 +130,6 @@ void chip_t::pd_file_input(std::string fileName) {
         std::cout << "failed to open \"" << fileName << "\"" << std::endl;
         return;
     }
-
     int iTemp;
     std::string temp;
 
