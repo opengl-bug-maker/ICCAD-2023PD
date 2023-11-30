@@ -17,6 +17,10 @@
 #include <random>
 #include <time.h>
 #include "process/sequence_pair_enumerator_t.h"
+
+
+class quad_sequence_t;
+
 class solver_t {
 
 public:
@@ -41,6 +45,7 @@ public:
 
     void test();
 
+    void test_qs();
     double runtime = 26*60*1000, SA_runtime = 0.1*60*1000, init_timeout = 20*60*1000; // ms
     bool invalid_input = false;
     timer runtime_timer = timer("run time");

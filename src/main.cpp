@@ -9,17 +9,24 @@
 #include "output_data/output_utility_t.h"
 #include "process/quad_sequence/quad_sequence_t.h"
 #include "plugin/visualizer_t.h"
+#include "process/case_table_t.h"
 using namespace std;
 
 int main(/*arg*/){
-    quad_sequence_t qs;
-    qs.to_polygon();
-    visualizer_t::draw_bounding_line(qs.modules_res);
-    // std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/Case06.txt";
-    // std::string output_file_name = "output.txt";
-    // chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
-    // solver_t solver;
-    // solver.run();
+    
+
+    // quad_sequence_t qs;
+    // qs.to_polygon();
+    // visualizer_t::draw_bounding_line(qs.modules_res);
+
+    
+    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/Case02_test_qs.txt";
+    std::string output_file_name = "output.txt";
+    chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
+    solver_t solver;
+    //solver.run();
+    //solver.load_specific_without_cmp();
+    solver.test_qs();
 
     // floorplan_t fp = solver.get_best_fp();
     // fp.GUI_validation();
@@ -40,5 +47,5 @@ int main(/*arg*/){
     // output_file.close();
 
     fgetc(stdin);
-    std::cout << "press any key to end the program" << std::endl;
+     std::cout << "press any key to end the program" << std::endl;
 }

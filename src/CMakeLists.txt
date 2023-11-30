@@ -21,8 +21,9 @@ add_executable(iccad2023PD main.cpp)
 
 target_link_libraries(iccad2023PD
         output_data
-        quad_sequence
         process
+        quad_sequence
+        
         
         quadratic
         polygon

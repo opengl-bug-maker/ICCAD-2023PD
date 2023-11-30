@@ -86,8 +86,8 @@ void visualizer_t::draw_bounding_line(const std::vector<std::pair<std::vector<ve
     // visualizer_t::max_x = chip_t::get_width();
     // visualizer_t::max_y = chip_t::get_height();
 
-    visualizer_t::max_x = 40;
-    visualizer_t::max_y = 40;
+    visualizer_t::max_x = 11267;
+    visualizer_t::max_y =  10450;
     join(bounding_lines, visualizer_t::name);
     visualizer_t::set_window_name("Gnuplot window");
     return ;
