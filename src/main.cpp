@@ -14,12 +14,6 @@ using namespace std;
 
 int main(/*arg*/){
     
-
-    // quad_sequence_t qs;
-    // qs.to_polygon();
-    // visualizer_t::draw_bounding_line(qs.modules_res);
-
-    
     std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/Case01.txt";
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
