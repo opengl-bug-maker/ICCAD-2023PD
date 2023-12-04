@@ -1,7 +1,6 @@
 #include "quad_sequence_t.h"
 #include <iostream>
-#include "process/sequence_pair_t.h"
-#include "process/ILP_solver_t.h"
+#include "process/functional/ILP_solver_t.h"
 #include "extended_module_t.h"
 #include "utilities/vec2d_t.h"
 const double quad_sequence_t::inf = 10;

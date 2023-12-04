@@ -1,8 +1,8 @@
 #pragma once
 #include<vector>
-#include "process/sequence_pair_t.h"
+#include "process/sequence_pair/sequence_pair_t.h"
 #include "static_data/chip_t.h"
-#include "process/ILP_solver_t.h"
+#include "process/functional/ILP_solver_t.h"
 using namespace std;
 class quad_sequence_t{
 public:

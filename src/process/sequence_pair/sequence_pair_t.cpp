@@ -9,9 +9,9 @@
 #include <chrono>
 #include <stack>
 #include <queue>
-#include "timer.h"
 #include <iomanip>
-#include "random_helper.h"
+#include "process/components/timer.h"
+#include "process/functional/random_helper.h"
 #include "static_data/fp_rule_t.cpp" //how bad
 #include <algorithm>
 int sequence_pair_t::sequence_n;

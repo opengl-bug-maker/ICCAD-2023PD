@@ -4,8 +4,8 @@
 
 #ifndef ICCAD2023PD_SA_SOLVER_T_H
 #define ICCAD2023PD_SA_SOLVER_T_H
-#include "sequence_pair_t.h"
-#include "sequence_pair_enumerator_t.h"
+#include "sequence_pair/sequence_pair_t.h"
+#include "sequence_pair/sequence_pair_enumerator_t.h"
 class SA_solver_t {
 public:
     SA_solver_t();

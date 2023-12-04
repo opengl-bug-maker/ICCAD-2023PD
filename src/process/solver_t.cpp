@@ -6,12 +6,10 @@
 //for debug
 #include "iostream"
 #include <thread>
-#include "genetic_solver_t.h"
 #include <iomanip>
 #include "SA_solver_t.h"
-#include "sequence_pair_enumerator_t.h"
-#include "LCS_helper_t.h"
-#include "random_helper.h"
+#include "sequence_pair/sequence_pair_enumerator_t.h"
+#include "process/functional/random_helper.h"
 #include "case_table_t.h"
 #include <iomanip>
 

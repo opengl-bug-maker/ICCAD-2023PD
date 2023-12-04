@@ -2,10 +2,10 @@
 // Created by RayChang on 2023/6/26.
 //
 
-#include "sequence_pair_enumerator_t.h"
+#include "process/sequence_pair/sequence_pair_enumerator_t.h"
 #include <iostream>
 #include <iomanip>
-#include "random_helper.h"
+#include "process/functional/random_helper.h"
 using std::cout;
 using std::endl;
 sequence_pair_enumerator_t::sequence_pair_enumerator_t(){

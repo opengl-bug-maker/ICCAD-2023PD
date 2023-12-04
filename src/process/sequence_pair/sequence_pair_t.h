@@ -11,11 +11,11 @@
 #include "utilities/vec2d_t.h"
 #include"static_data/soft_module_t.h"
 #include"static_data/fixed_module_t.h"
-#include "floorplan_t.h"
-#include "edge_t.h"
-#include "ILP_solver_t.h"
-#include "timer.h"
-#include "net_t.h"
+#include "process/floorplan/floorplan_t.h"
+#include "process/components/edge_t.h"
+#include "process/functional/ILP_solver_t.h"
+#include "process/components/timer.h"
+#include "process/components/net_t.h"
 
 
 using std::vector;

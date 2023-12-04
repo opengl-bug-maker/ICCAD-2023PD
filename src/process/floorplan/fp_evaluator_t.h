@@ -5,7 +5,10 @@
 #ifndef ICCAD2023PD_FP_EVALUATOR_T_H
 #define ICCAD2023PD_FP_EVALUATOR_T_H
 
-#include "floorplan_t.h"
+
+#include <stdint.h>
+#include "process/floorplan/floorplan_t.h"
+
 class fp_evaluator_t{
 public:
     static uint32_t get_score(floorplan_t&);

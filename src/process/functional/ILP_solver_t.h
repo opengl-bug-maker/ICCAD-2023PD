@@ -7,7 +7,7 @@
 #include <glpk.h>
 #include <string>
 #include <vector>
-#include "edge_t.h"
+#include "process/components/edge_t.h"
 using std::string;
 using std::vector;
 class ILP_result_t{

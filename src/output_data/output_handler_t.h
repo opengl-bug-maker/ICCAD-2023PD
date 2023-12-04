@@ -9,7 +9,7 @@
 #include <string>
 #include "polygon/polygon_forest_t.h"
 #include "polygon/polygon_t.h"
-#include "process/floorplan_t.h"
+#include "process/floorplan/floorplan_t.h"
 #include "output_data/output_utility_t.h"
 
 class output_handler_t {

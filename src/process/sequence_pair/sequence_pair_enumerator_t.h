@@ -6,7 +6,7 @@
 #define ICCAD2023PD_SEQUENCE_PAIR_ENUMERATOR_T_H
 
 #include "sequence_pair_t.h"
-#include "timer.h"
+#include "process/components/timer.h"
 #include <set>
 using std::set;
 class sequence_pair_enumerator_t{

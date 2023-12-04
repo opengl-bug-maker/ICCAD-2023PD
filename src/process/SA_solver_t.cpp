@@ -2,12 +2,12 @@
 // Created by RayChang on 2023/7/14.
 //
 
-#include "SA_solver_t.h"
-#include "random_helper.h"
+#include "process/SA_solver_t.h"
+#include "process/functional/random_helper.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include "timer.h"
+#include "process/components/timer.h"
 #include <thread>
 #include <stack>
 #include <mutex>

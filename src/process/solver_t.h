@@ -6,17 +6,17 @@
 #define INC_2023PD_GENETIC_ALGO_T_H
 
 #include "polygon/polygon_forest_t.h"
-#include "process/floorplan_t.h"
+#include "process/floorplan/floorplan_t.h"
 #include "static_data/chip_t.h"
 #include "quadratic/quadratic_t.h"
-#include "sequence_pair_t.h"
+#include "process/sequence_pair/sequence_pair_t.h"
 #include <map>
 #include <set>
 #include <algorithm>
 #include <iterator>
 #include <random>
 #include <time.h>
-#include "process/sequence_pair_enumerator_t.h"
+#include "process/sequence_pair/sequence_pair_enumerator_t.h"
 
 
 class quad_sequence_t;
