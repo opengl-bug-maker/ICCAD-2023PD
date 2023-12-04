@@ -18,9 +18,9 @@ int main(/*arg*/){
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
     solver_t solver;
-    solver.run();
+    //solver.run();
     // solver.load_specific_without_cmp();
-    // solver.test_sp();
+    solver.test_sp();
 
     floorplan_t fp = solver.get_best_fp();
     fp.GUI_validation();
