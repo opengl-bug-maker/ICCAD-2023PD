@@ -86,7 +86,7 @@ void solver_t::run() {
     this->SA_process(SPEN);
     cout<<"----------------"<<endl;
     cout<<"Load specific sequence pair"<<endl;
-    //this->load_specific_best();
+    this->load_specific_best();
     cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
     this->runtime_timer.timer_end();
     this->runtime_timer.print_time_elapsed();
@@ -132,25 +132,40 @@ void solver_t::load_specific_without_cmp() {
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
-    bool fnd_cases = false;
     if(case_id!=-1){
-        fnd_cases = true;
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
-    }
-    if(fnd_cases){
         SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
         SP = SA_solver.post_process(SP);
         SP.print_inline();
         //t1.print_time_elapsed();
+        SP.sequence_pair_validation();
         floorplan_t loaded_fp = SP.to_fp();
         this->best_fp = loaded_fp;
         cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
 }
 
+void solver_t::test_sp(){
+    SA_solver_t SA_solver;
+    case_table_t case_table;
+    int case_id = chip_t::get_similar_case_num();
+    sequence_pair_t SP;
+    if(case_id!=-1){
+        SP.v_sequence = case_table.cases[case_id][0];
+        SP.h_sequence = case_table.cases[case_id][1];
+        for(auto& e:SP.is_in_seq){e = 1;}
+        SP.find_position(true, true, 0, 0);
+        SP.find_position_with_area(true, true, 0, 0);
+        SP.print_inline();
+        SP.sequence_pair_validation();
+        floorplan_t loaded_fp = SP.to_fp();
+        this->best_fp = loaded_fp;
+        cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    }
+}
 void solver_t::test() {
     for(auto& e:sequence_pair_t::deg_w){
         cout<<e.first<<" "<<e.second<<endl;
