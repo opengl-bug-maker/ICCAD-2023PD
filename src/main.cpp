@@ -20,7 +20,8 @@ int main(/*arg*/){
     solver_t solver;
     //solver.run();
     // solver.load_specific_without_cmp();
-    solver.test_sp();
+    //solver.test_sp();
+    solver.test_qs();
 
     floorplan_t fp = solver.get_best_fp();
     fp.GUI_validation();
