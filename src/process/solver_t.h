@@ -43,11 +43,8 @@ public:
 
     void test_parallel();
 
-    void test();
 
-    void test_qs();
-
-    void test_sp();
+    
     
     double runtime = 26*60*1000, SA_runtime = 0.1*60*1000, init_timeout = 20*60*1000; // ms
     bool invalid_input = false;
