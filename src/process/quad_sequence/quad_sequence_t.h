@@ -10,9 +10,11 @@ public:
     quad_sequence_t();
     //quad_sequence_t(sequence_pair_t);
     void to_polygon();
+    void to_polygon(sequence_pair_t);
     void build_constraint_graph();
-    void build_constraint_graph_from_SP();
+    void build_constraint_graph_from_SP(sequence_pair_t);
     void set_constraints_modules_overlap();
+    void set_constraints_modules_fixed();
     void set_constraints_extended_modules();
     void set_constraints_nets();
     void set_constraints_avoid_zero_ex_w_h();
@@ -30,8 +32,8 @@ public:
     
     int sequence_n, connections_n;
     int constraint_n, constraint_i, variable_n;
-    int board_width = 11267;
-    int board_height = 10450;
+    int board_width = chip_t::get_width()*2;
+    int board_height = chip_t::get_height()*2;
     //int module_w = 10, module_h = 10, exm_w = 1, exm_h = 1;
     vector<vec2d_t> modules_wh;
     vector<vec2d_t> modules_ex_wh;
@@ -43,5 +45,4 @@ public:
     vector<int> x_b_modules_offsets, y_r_modules_offsets;
     
     vector<int> x_l_nets_offsets, x_r_nets_offsets, y_t_nets_offsets, y_b_nets_offsets;
-    sequence_pair_t modules_relations_SP;
 };
