@@ -9,6 +9,7 @@ public:
     vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
     quad_sequence_t();
     //quad_sequence_t(sequence_pair_t);
+    void find_QS(sequence_pair_t);
     void to_polygon();
     void to_polygon(sequence_pair_t);
     void build_constraint_graph();
@@ -22,11 +23,14 @@ public:
     void set_variables_nets();
     void set_coef();
     void set_sequences(sequence_pair_t);
-
+    
+    void G_VV_to_G();
+    void G_to_G_VV();
 
     vector<vector<int>> QS;
     vector<std::pair<std::vector<vec2d_t>,std::string>> modules_res;
     vector<vector<vector<int>>> G;
+    vector<vector<vector<int>>> G_VV;
     vector<vector<int>> connections;
     vector<double> coef;
     
@@ -43,6 +47,5 @@ public:
     vector<int> x_modules_offsets, y_modules_offsets;
     vector<int> x_t_modules_offsets, y_l_modules_offsets;
     vector<int> x_b_modules_offsets, y_r_modules_offsets;
-    
     vector<int> x_l_nets_offsets, x_r_nets_offsets, y_t_nets_offsets, y_b_nets_offsets;
 };

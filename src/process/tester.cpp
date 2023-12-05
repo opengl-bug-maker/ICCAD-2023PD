@@ -41,7 +41,7 @@ void tester_t::test_qs()
     SP.sequence_pair_validation();
     quad_sequence_t qs;
     qs.set_sequences(SP);
-    qs.build_constraint_graph_from_SP(SP);
+    //qs.build_constraint_graph_from_SP(SP);
     qs.to_polygon(SP);
     visualizer_t::draw_bounding_line(qs.modules_res);
 }

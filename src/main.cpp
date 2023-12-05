@@ -10,18 +10,19 @@
 #include "process/quad_sequence/quad_sequence_t.h"
 #include "plugin/visualizer_t.h"
 #include "process/case_table_t.h"
+#include "process/tester.h"
 using namespace std;
 
 int main(/*arg*/){
     
-    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/Case01_test_qs.txt";
+    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/Case01.txt";
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
-    solver_t solver;
+    tester_t tester;
+    tester.test_qs();
     //solver.run();
     // solver.load_specific_without_cmp();
     //solver.test_sp();
-    solver.test_qs();
 
     // floorplan_t fp = solver.get_best_fp();
     // fp.GUI_validation();

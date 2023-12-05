@@ -84,7 +84,95 @@ quad_sequence_t::quad_sequence_t(){
 //     }
 // }
 
-void quad_sequence_t::to_polygon(){
+void quad_sequence_t::find_QS(sequence_pair_t SP){
+    vector<vector<vector<int>>> relations(sequence_n, vector<vector<int>>(sequence_n));
+    for(int i = 0; i<this->sequence_n; ++i) {
+        for (int j = 0; j < this->sequence_n; ++j) {
+            if (i == j) { continue; }
+            int ix = SP.modules_positions[i].get_x();
+            int iy = SP.modules_positions[i].get_y();
+            int jx = SP.modules_positions[j].get_x();
+            int jy = SP.modules_positions[j].get_y();
+            int iw = SP.modules_wh[i].get_x();
+            int ih = SP.modules_wh[i].get_y();
+            if (ix + iw <= jx) {
+                if(iy<=jy){
+                    relations[i][j].push_back(0);
+                    relations[j][i].push_back(15);
+                }
+                else{
+                    relations[i][j].push_back(7);
+                    relations[j][i].push_back(8);
+                }
+            }
+            if (iy + ih <= jy) {
+                if(ix<=jx){
+                    relations[i][j].push_back(3);
+                    relations[j][i].push_back(12);
+                }
+                else{
+                    relations[i][j].push_back(4);
+                    relations[j][i].push_back(11);
+                }
+            }
+        }
+    }
+    for(auto& e:relations[2][0]){cout<<e<<" ";}cout<<endl;
+    for(auto& e:relations[2][1]){cout<<e<<" ";}cout<<endl;
+    //for(auto& ee:relations){for(auto& e:ee){cout<<e<<" ";}cout<<endl;}
+    //now insert fix module to sequence
+    vector<vector<int>> upds(4);
+    vector<vector<int>> maps(4, vector<int>(sequence_pair_t::sequence_n));
+    for(int i = 0; i<sequence_n; ++i) {
+        for(int j = 0; j<upds[0].size(); ++j){
+            maps[0][upds[0][j]] = maps[1][upds[1][j]] = maps[2][upds[2][j]] = maps[3][upds[3][j]] = j;
+        }
+        bool inserted = false;
+        for(int j = 0; j<=upds[0].size()&&!inserted; ++j){
+            for(int k = 0; k<=upds[1].size()&&!inserted; ++k){
+                for(int m = 0; m<=upds[2].size()&&!inserted; ++m){
+                    for(int n = 0; n<=upds[3].size()&&!inserted; ++n){
+                        bool ok = true;
+                        for(int p = 0; p<i; ++p){ // check all elements in squence
+                            int p_id_0 = maps[0][p], p_id_1 = maps[1][p], p_id_2 = maps[2][p], p_id_3 = maps[3][p];
+                            bool a, b, c, d;
+                            a = j<=p_id_0, b = k<=p_id_1, c = m<=p_id_2, d = n<=p_id_3;
+                            //case 0 0 0 0
+                            int xx = 1*a+2*b+4*c+8*d; //relations between i and p
+                            bool fnd = false;
+                            for(auto& e:relations[i][p]){
+                                if(xx==e){
+                                    fnd = true;
+                                }
+                            }
+                            if(fnd ==false){
+                                ok = false;
+                            }
+                        }
+                        if(ok){
+                            upds[0].insert(upds[0].begin()+j, i);
+                            upds[1].insert(upds[1].begin()+k, i);
+                            upds[2].insert(upds[2].begin()+m, i);
+                            upds[3].insert(upds[3].begin()+n, i);
+                            inserted = true;                            
+                        }
+                    }
+                }
+            }
+        }
+        if(inserted==false){
+            cout<<"BAD"<<endl;
+        }
+    }
+    QS = upds;
+    for(int i = 0; i<4; ++i){
+        cout<<i<<": ";
+        for(auto& e:QS[i]){cout<<e<<" ";}cout<<endl;
+    }
+}
+
+void quad_sequence_t::to_polygon()
+{
     build_constraint_graph();
 
     for(auto& net:sequence_pair_t::connections){
@@ -164,8 +252,6 @@ void quad_sequence_t::to_polygon(){
     this->modules_res = result;
 }
 
-
-
 void quad_sequence_t::to_polygon(sequence_pair_t SP){
     //build_constraint_graph();
 
@@ -210,38 +296,41 @@ void quad_sequence_t::to_polygon(sequence_pair_t SP){
     set_variables_modules();
     set_variables_nets();
     set_coef();
+
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
     ILP_result = ILP_solver.solve(true);
     //ILP_result = ILP_solver.solve(false);
+
     cout<< "Is feasible: "<<ILP_result.legal<<endl;
-    cout<< "ZZ: "<<ILP_result.z<<endl;
+    cout<< "Z: "<<ILP_result.z<<endl;
 
     vector<double> ILP_result_var = ILP_result.var_values;
     for(int i = 0; i<connections.size(); ++i){
         cout<< ILP_result_var[x_l_nets_offsets[i]]<<" "<<ILP_result_var[x_r_nets_offsets[i]]<<" "<<ILP_result_var[y_b_nets_offsets[i]]<<" "<<ILP_result_var[y_t_nets_offsets[i]]<<" "<<endl;
     }
-    // for(int i = 0; i<this->sequence_n; ++i){
-    //     cout<<"i "<<i<<":"<<endl;
-    //     cout<<"x: ";
-    //     for(int j = 0; j<4; ++j){
-    //         cout<< ILP_result_var[x_modules_offsets[i]+j]<<" ";
-    //     }
-    //     cout<<endl;
-    //     cout<<"y: ";
-    //     for(int j = 0; j<4; ++j){
-    //         cout<< ILP_result_var[y_modules_offsets[i]+j]<<" ";
-    //     }
-    //     cout<<endl;
-    //     cout<<"x_t : "<< ILP_result_var[x_t_modules_offsets[i]]<<" "<<ILP_result_var[x_t_modules_offsets[i]+1]<<endl;
-    //     cout<<"x_b : "<< ILP_result_var[x_b_modules_offsets[i]]<<" "<<ILP_result_var[x_b_modules_offsets[i]+1]<<endl;
-    //     cout<<"y_l : "<< ILP_result_var[y_l_modules_offsets[i]]<<" "<<ILP_result_var[y_l_modules_offsets[i]+1]<<endl;
-    //     cout<<"y_r : "<< ILP_result_var[y_r_modules_offsets[i]]<<" "<<ILP_result_var[y_r_modules_offsets[i]+1]<<endl;
-    // }
+    for(int i = 0; i<this->sequence_n; ++i){
+        cout<<"i "<<i<<":"<<endl;
+        cout<<"x: ";
+        for(int j = 0; j<4; ++j){
+            cout<< ILP_result_var[x_modules_offsets[i]+j]<<" ";
+        }
+        cout<<endl;
+        cout<<"y: ";
+        for(int j = 0; j<4; ++j){
+            cout<< ILP_result_var[y_modules_offsets[i]+j]<<" ";
+        }
+        cout<<endl;
+        cout<<"x_t : "<< ILP_result_var[x_t_modules_offsets[i]]<<" "<<ILP_result_var[x_t_modules_offsets[i]+1]<<endl;
+        cout<<"x_b : "<< ILP_result_var[x_b_modules_offsets[i]]<<" "<<ILP_result_var[x_b_modules_offsets[i]+1]<<endl;
+        cout<<"y_l : "<< ILP_result_var[y_l_modules_offsets[i]]<<" "<<ILP_result_var[y_l_modules_offsets[i]+1]<<endl;
+        cout<<"y_r : "<< ILP_result_var[y_r_modules_offsets[i]]<<" "<<ILP_result_var[y_r_modules_offsets[i]+1]<<endl;
+    }
     vector<pair<vector<vec2d_t>, string>> result;
     for(int i = 0; i<sequence_n; ++i){
         extended_module_t exm(&ILP_result_var[1+i*16]);
-        result.push_back({exm.to_vec2d(), "module_"+to_string(i)});
+        //result.push_back({exm.to_vec2d(), "m"+to_string(i)});
+        result.push_back({exm.to_vec2d(), ""});
     }
     this->modules_res = result;
 }
@@ -253,6 +342,7 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
         G[i].resize(sequence_n);
     }
 
+    G_VV = vector<vector<vector<int>>>(8, vector<vector<int>>(sequence_n, vector<int>(sequence_n, 0)));
 
     // vector<vector<int>> map = vector<vector<int>>(4, vector<int>(sequence_n)); // map[i][j] -> index of sequence numeber j  in sequence i 
 
@@ -279,9 +369,9 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
     // for(int i = 0; i< this->sequence_n; ++i){
     //     cout<< this->modules_wh[i]<<" "<<this->modules_ex_wh[i]<<endl;
     // }
-    for(int i = 0; i<sequence_n; ++i){
-        cout<< SP.modules_positions[i]<<endl;
-    }
+    // for(int i = 0; i<sequence_n; ++i){
+    //     cout<< SP.modules_positions[i]<<endl;
+    // }
     for(int i = 0; i<sequence_n; ++i){
         for(int j = 0; j<sequence_n; ++j){
             if(i==j){continue;}
@@ -303,21 +393,23 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
             if(is_7_or_0){
                 if(pos_j.get_y()<pos_i.get_y()){
                     G[7][j].push_back(i);
-                    
+                    G_VV[7][j][i] = 1;
                 }
                 else{
                     G[0][j].push_back(i); //wtf
+                    G_VV[0][j][i] = 1;
                     //G[1][j].push_back(i); //wtf
                 }
             }
             if(is_4_or_3){
                 if(pos_j.get_x()<pos_i.get_x()){
-                    
                     G[3][j].push_back(i);
+                    G_VV[3][j][i] = 1;
                 }
                 else{
                     
                     G[4][j].push_back(i);
+                    G_VV[4][j][i] = 1;
                 }
             }
                 
@@ -348,6 +440,18 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
 
     //     }
     // }
+
+
+    //hot fix
+    G_VV[4][2][5] = 0;
+    G_VV[5][2][5] = 1;
+
+    G_VV[4][3][12] = 0;
+    G_VV[5][3][12] = 1;
+    G_VV[0][11][10] = 0;
+    G_VV[1][10][11] = 1;
+
+    G_VV_to_G();
 
     for(int i = 0; i<8; ++i){
         cout<<"i : "<<i<<endl;
@@ -823,44 +927,61 @@ void quad_sequence_t::set_coef(){
         coef[y_b_nets_offsets[i]] = -connections[i][2];
     }
 
-    // for(int i = 0; i<sequence_n; ++i){
-    //     coef[x_t_modules_offsets[i]+1] = -0.01;
-    //     coef[x_t_modules_offsets[i]+0] = 0.01;
+    for(int i = 0; i<sequence_n; ++i){
+        coef[x_t_modules_offsets[i]+1] = -0.00001;
+        coef[x_t_modules_offsets[i]+0] = 0.00001;
 
-    //     coef[x_b_modules_offsets[i]+1] = -0.001;
-    //     coef[x_b_modules_offsets[i]+0] = 0.001;
+        coef[x_b_modules_offsets[i]+1] = -0.00001;
+        coef[x_b_modules_offsets[i]+0] = 0.00001;
 
-    //     coef[y_r_modules_offsets[i]+1] = -0.01;
-    //     coef[y_r_modules_offsets[i]+0] = 0.01;
+        coef[y_r_modules_offsets[i]+1] = -0.00001;
+        coef[y_r_modules_offsets[i]+0] = 0.00001;
 
-    //     coef[y_l_modules_offsets[i]+1] = -0.01;
-    //     coef[y_l_modules_offsets[i]+0] = 0.01;
-    // }
+        coef[y_l_modules_offsets[i]+1] = -0.00001;
+        coef[y_l_modules_offsets[i]+0] = 0.00001;
+    }
 }
 
 void quad_sequence_t::set_sequences(sequence_pair_t SP){
-    vector<int> rv_h = SP.h_sequence;
-    vector<int> h = SP.h_sequence;
-    vector<int> rv_v = SP.v_sequence;
-    vector<int> v = SP.v_sequence;
-    std::reverse(rv_h.begin(), rv_h.end());
-    std::reverse(rv_v.begin(), rv_v.end());
-    this->QS[0] = rv_v;
-    this->QS[1] = rv_v;
-    this->QS[2] = rv_h;
-    this->QS[3] = h;
 
     this->sequence_n = sequence_pair_t::sequence_n;
     this->seq_is_fix = SP.seq_is_fix;
     this->modules_wh.resize(this->sequence_n);
     this->modules_ex_wh.resize(this->sequence_n);
+
+
     for(int i = 0; i<  this->sequence_n; ++i){
         this->modules_wh[i] = SP.modules_wh[i];
         this->modules_ex_wh[i] = SP.modules_wh[i]*0.1;
     }
-    for(int i = 0; i<this->seq_is_fix.size(); ++i){
-        cout<< this->seq_is_fix[i]<<" ";
-    }
-    cout<<endl;
+    // vector<int> rv_h = SP.h_sequence;
+    // vector<int> h = SP.h_sequence;
+    // vector<int> rv_v = SP.v_sequence;
+    // vector<int> v = SP.v_sequence;
+    // std::reverse(rv_h.begin(), rv_h.end());
+    // std::reverse(rv_v.begin(), rv_v.end());
+    // this->QS[0] = rv_v;
+    // this->QS[1] = rv_v;
+    // this->QS[2] = rv_h;
+    // this->QS[3] = h;
+}
 
+void quad_sequence_t::G_VV_to_G(){
+    this->G.clear();
+    this->G.resize(8);
+    for(int i = 0; i<8; ++i){
+        G[i].resize(sequence_n);
+    }
+
+
+    for(int k = 0; k<8; ++k){
+        for(int i = 0; i<sequence_n; ++i){
+            for(int j = 0; j<sequence_n; ++j){
+                if(G_VV[k][i][j]){
+                    G[k][i].push_back(j);
+                }
+            }
+        }   
+    }
+    
 }
