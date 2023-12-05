@@ -31,22 +31,19 @@ void tester_t::test_qs()
     bool fnd_cases = false;
     
 
-    // SP.v_sequence = {6, 5, 14, 12, 13, 9, 11, 10, 8, 7, 4, 0, 3, 1, 2};
-    // SP.h_sequence = {0, 4, 6, 5, 3, 8, 14, 7, 12, 1, 13, 9, 11, 10, 2};
-
-    SP.v_sequence = {6, 5, 4, 0, 3, 1, 2};
-    SP.h_sequence = {0, 4, 6, 5, 3, 1, 2};
-    fnd_cases = true;
-    for(auto& e:SP.is_in_seq){e = 1;}
-    if(fnd_cases){
-        SP.find_position(true, true, 0, 0);
-        SP.print_inline();
-        //SP.sequence_pair_validation();
-        quad_sequence_t qs;
-        qs.set_sequences(SP);
-        qs.to_polygon();
-        visualizer_t::draw_bounding_line(qs.modules_res);
+    if(case_id!=-1){
+        SP.v_sequence = case_table.cases[case_id][0];
+        SP.h_sequence = case_table.cases[case_id][1];
     }
+    for(auto& e:SP.is_in_seq){e = 1;}
+    SP.find_position(true, true, 0, 0);
+    SP.print_inline();
+    SP.sequence_pair_validation();
+    quad_sequence_t qs;
+    qs.set_sequences(SP);
+    qs.build_constraint_graph_from_SP(SP);
+    qs.to_polygon(SP);
+    visualizer_t::draw_bounding_line(qs.modules_res);
 }
 
 void tester_t::test_sp(){

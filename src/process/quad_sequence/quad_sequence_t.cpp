@@ -121,7 +121,7 @@ void quad_sequence_t::to_polygon(){
 
 
     set_constraints_modules_overlap();
-    //set_constraints_modules_fixed();
+    set_constraints_modules_fixed();
     set_constraints_extended_modules();
     set_constraints_avoid_zero_ex_w_h();
     set_constraints_nets();
@@ -203,7 +203,7 @@ void quad_sequence_t::to_polygon(sequence_pair_t SP){
 
 
     set_constraints_modules_overlap();
-    //set_constraints_modules_fixed();
+    set_constraints_modules_fixed();
     set_constraints_extended_modules();
     set_constraints_avoid_zero_ex_w_h();
     set_constraints_nets();
@@ -306,7 +306,8 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
                     
                 }
                 else{
-                    G[0][i].push_back(j);
+                    G[0][j].push_back(i); //wtf
+                    //G[1][j].push_back(i); //wtf
                 }
             }
             if(is_4_or_3){
@@ -418,7 +419,7 @@ void quad_sequence_t::build_constraint_graph(){
 void quad_sequence_t::set_constraints_modules_overlap(){
     for(int i = 0; i<this->G[0].size(); ++i){
         for(int j = 0; j<this->G[0][i].size(); ++j){
-            int u = i, v = G[0][i][j];
+            int v = i, u = G[0][i][j]; //wtf
             ILP_solver.set_constraint_upb(constraint_i, 2, {x_modules_offsets[u]+2, x_modules_offsets[v]+0}, {1, -1}, "ux2 - vx0", 0);
             constraint_i++;
             ILP_solver.set_constraint_upb(constraint_i, 2, {x_modules_offsets[u]+3, x_modules_offsets[v]+1}, {1, -1}, "ux3 - vx1", 0);
@@ -518,9 +519,14 @@ void quad_sequence_t::set_constraints_modules_fixed(){
         if(this->seq_is_fix[i]){
             vec2d_t pos = chip_t::get_modules()[i]->get_left_lower();
             vec2d_t wh = chip_t::get_modules()[i]->get_size();
-            ILP_solver.set_constraint_fx(constraint_i, 1, {1+x_modules_offsets[i]}, {1}, "x1 = x_pos", pos.get_x());
+            ILP_solver.set_constraint_fx(constraint_i, 1, {1+x_modules_offsets[i]}, {1}, "x1 = x_pos", (int)pos.get_x());
             constraint_i++;
-            ILP_solver.set_constraint_fx(constraint_i, 1, {1+x_modules_offsets[i]}, {1}, "x2 = x_pos+w", pos.get_x()+wh.get_x());
+            ILP_solver.set_constraint_fx(constraint_i, 1, {2+x_modules_offsets[i]}, {1}, "x2 = x_pos+w", (int)(pos.get_x()+wh.get_x()));
+            constraint_i++;
+
+            ILP_solver.set_constraint_fx(constraint_i, 1, {1+y_modules_offsets[i]}, {1}, "y1 = y_pos", (int)pos.get_y());
+            constraint_i++;
+            ILP_solver.set_constraint_fx(constraint_i, 1, {2+y_modules_offsets[i]}, {1}, "y2 = y_pos+h", (int)(pos.get_y()+wh.get_y()));
             constraint_i++;
 
 
@@ -852,6 +858,9 @@ void quad_sequence_t::set_sequences(sequence_pair_t SP){
         this->modules_wh[i] = SP.modules_wh[i];
         this->modules_ex_wh[i] = SP.modules_wh[i]*0.1;
     }
-    for(auto & e:this->modules_wh){cout<<e<<" ";}cout<<endl;
+    for(int i = 0; i<this->seq_is_fix.size(); ++i){
+        cout<< this->seq_is_fix[i]<<" ";
+    }
+    cout<<endl;
 
 }
