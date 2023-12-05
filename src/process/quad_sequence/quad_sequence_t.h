@@ -6,6 +6,7 @@
 using namespace std;
 class quad_sequence_t{
 public:
+    vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
     quad_sequence_t();
     //quad_sequence_t(sequence_pair_t);
     void to_polygon();
@@ -18,6 +19,7 @@ public:
     void set_variables_modules();
     void set_variables_nets();
     void set_coef();
+    void set_sequences(sequence_pair_t);
 
 
     vector<vector<int>> QS;

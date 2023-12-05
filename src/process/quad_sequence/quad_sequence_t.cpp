@@ -85,13 +85,13 @@ quad_sequence_t::quad_sequence_t(){
 // }
 
 void quad_sequence_t::to_polygon(){
-    //build_constraint_graph();
+    build_constraint_graph();
 
     for(auto& net:sequence_pair_t::connections){
         connections.push_back({net.nodes[0], net.nodes[1], net.w});
     }
     connections_n = this->connections.size();
-    build_constraint_graph_from_SP();
+    //build_constraint_graph_from_SP();
     
     constraint_n = 5000;
     constraint_i = 1; //constraint_counter
@@ -166,19 +166,11 @@ void quad_sequence_t::to_polygon(){
 
 void quad_sequence_t::build_constraint_graph_from_SP(){
     this->G.resize(8);
-    this->sequence_n = sequence_pair_t::sequence_n;
-
-
     for(int i = 0; i<8; ++i){
         G[i].resize(sequence_n);
     }
 
-    this->modules_wh.resize(this->sequence_n);
-    this->modules_ex_wh.resize(this->sequence_n);
-    for(int i = 0; i<  this->sequence_n; ++i){
-        this->modules_wh[i] = this->modules_relations_SP.modules_wh[i];
-        this->modules_ex_wh[i] = this->modules_relations_SP.modules_wh[i]*0.1;
-    }
+
     // vector<vector<int>> map = vector<vector<int>>(4, vector<int>(sequence_n)); // map[i][j] -> index of sequence numeber j  in sequence i 
 
     // for(int i = 0; i<4; ++i){
@@ -312,17 +304,17 @@ void quad_sequence_t::build_constraint_graph(){
         }
     }
 
-    // for(int i = 0; i<8; ++i){
-    //     cout<<"i : "<<i<<endl;
-    //     for(int j = 0; j<sequence_n; ++j){
-    //         cout<<j<<": ";
-    //         for(auto& k:G[i][j]){
-    //             cout<<k<<" ";
-    //         }
-    //         cout<<endl;
-    //     }
-    //     cout<<endl;
-    // }
+    for(int i = 0; i<8; ++i){
+        cout<<"i : "<<i<<endl;
+        for(int j = 0; j<sequence_n; ++j){
+            cout<<j<<": ";
+            for(auto& k:G[i][j]){
+                cout<<k<<" ";
+            }
+            cout<<endl;
+        }
+        cout<<endl;
+    }
     
 }
 
@@ -703,4 +695,27 @@ void quad_sequence_t::set_coef(){
     //     coef[y_l_modules_offsets[i]+1] = -0.01;
     //     coef[y_l_modules_offsets[i]+0] = 0.01;
     // }
+}
+
+void quad_sequence_t::set_sequences(sequence_pair_t SP){
+    vector<int> rv_h = SP.h_sequence;
+    vector<int> h = SP.h_sequence;
+    vector<int> rv_v = SP.v_sequence;
+    vector<int> v = SP.v_sequence;
+    std::reverse(rv_h.begin(), rv_h.end());
+    std::reverse(rv_v.begin(), rv_v.end());
+    this->QS[0] = rv_v;
+    this->QS[1] = rv_v;
+    this->QS[2] = rv_h;
+    this->QS[3] = h;
+
+    this->sequence_n = sequence_pair_t::sequence_n;
+    this->seq_is_fix = SP.seq_is_fix;
+    this->modules_wh.resize(this->sequence_n);
+    this->modules_ex_wh.resize(this->sequence_n);
+    for(int i = 0; i<  this->sequence_n; ++i){
+        this->modules_wh[i] = SP.modules_wh[i];
+        this->modules_ex_wh[i] = SP.modules_wh[i]*0.1;
+    }
+
 }
