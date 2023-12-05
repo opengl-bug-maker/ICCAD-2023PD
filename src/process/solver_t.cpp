@@ -181,11 +181,11 @@ void solver_t::test_qs(){
     bool fnd_cases = false;
     
 
-    // SP.v_sequence = {6, 5, 14, 12, 13, 9, 11, 10, 8, 7, 4, 0, 3, 1, 2};
-    // SP.h_sequence = {0, 4, 6, 5, 3, 8, 14, 7, 12, 1, 13, 9, 11, 10, 2};
+    SP.v_sequence = {6, 5, 14, 12, 13, 9, 11, 10, 8, 7, 4, 0, 3, 1, 2};
+    SP.h_sequence = {0, 4, 6, 5, 3, 8, 14, 7, 12, 1, 13, 9, 11, 10, 2};
 
-    SP.v_sequence = {6, 5, 4, 0, 3, 1, 2};
-    SP.h_sequence = {0, 4, 6, 5, 3, 1, 2};
+    // SP.v_sequence = {6, 5, 4, 0, 3, 1, 2};
+    // SP.h_sequence = {0, 4, 6, 5, 3, 1, 2};
     fnd_cases = true;
     for(auto& e:SP.is_in_seq){e = 1;}
     if(fnd_cases){
