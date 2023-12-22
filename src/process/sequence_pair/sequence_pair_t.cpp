@@ -311,7 +311,7 @@ void sequence_pair_t::set_constraints_boundaries(){
     }
 }
 void sequence_pair_t::set_variables_modules(){
-    for(int i = 1;i<=sequence_n; ++i){
+    for(int i = 1;i<=sequence_n; ++i){ //x
         string var_name = "x"+ std::to_string(i);
         glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
         ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width());
@@ -357,6 +357,45 @@ void sequence_pair_t::set_coef(vector<double>& coef){
         coef[i+x_edge_offset_l] = -connections[i].w;
         coef[i+y_edge_offset_r] = connections[i].w;
         coef[i+y_edge_offset_l] = -connections[i].w;
+    }
+}
+
+void sequence_pair_t::set_constraints_opt_nets(){
+    for(int i = 0; i<this->connections.size(); ++i){
+        int u = this->connections[i].nodes[0], v = this->connections[i].nodes[1];
+        string x_l_constraint_name = "x_e_b_l"+ std::to_string(i)+"_"+std::to_string(i);
+        string y_l_constraint_name = "y_e_b_l"+ std::to_string(i)+"_"+std::to_string(i);
+        string x_r_constraint_name = "x_e_b_r"+ std::to_string(i)+"_"+std::to_string(i);
+        string y_r_constraint_name = "y_e_b_r"+ std::to_string(i)+"_"+std::to_string(i);
+        double center_u_x = modules_positions[u].get_x()+modules_wh[u].get_half_x();
+        double center_u_y = modules_positions[u].get_y()+modules_wh[u].get_half_y();
+        double center_v_x = modules_positions[v].get_x()+modules_wh[v].get_half_x();
+        double center_v_y = modules_positions[v].get_y()+modules_wh[v].get_half_y();
+        ILP_solver.set_constraint_fx(constraint_i, 1,{x_edge_offset_l+i},{1, -1}, x_l_constraint_name, std::min(center_u_x, center_v_x));
+        constraint_i++;
+        ILP_solver.set_constraint_fx(constraint_i, 1,{x_edge_offset_r+i},{1, 1}, x_r_constraint_name, std::max(center_u_x, center_v_x));
+        constraint_i++;
+        ILP_solver.set_constraint_fx(constraint_i, 1,{y_edge_offset_l+i},{1, 1}, y_l_constraint_name, std::min(center_u_y, center_v_y));
+        constraint_i++;
+        ILP_solver.set_constraint_fx(constraint_i, 1,{y_edge_offset_r+i},{1, 1}, y_r_constraint_name, std::max(center_u_y, center_v_y));
+        constraint_i++;
+    }
+}
+
+void sequence_pair_t::set_constraints_opt_modules(){
+}
+
+void sequence_pair_t::set_variables_hands(){
+    for(int i = 0; i<this->near_x.size(); ++i){
+        string var_name = "x_hand" + std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, this->x_hand_offset + i, var_name.c_str());
+        ILP_solver.set_variable_double_range(this->x_hand_offset + i, 0, 1);
+    }
+
+    for(int i = 0; i<this->near_x.size(); ++i){
+        string var_name = "y_hand" + std::to_string(i);
+        glp_set_col_name(ILP_solver.ILP, this->y_hand_offset + i, var_name.c_str());
+        ILP_solver.set_variable_double_range(this->y_hand_offset + i, 0, 1);
     }
 }
 
@@ -1029,6 +1068,95 @@ void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {
     if(h){
         std::swap(this->h_sequence[h_map[a]], this->h_sequence[h_map[b]]);
     }
+
+}
+
+void sequence_pair_t::fill_near(){
+    this->near_x.clear(); this->near_y.clear();
+    cout<<"Near x"<<endl;
+    for(int i = 0; i< this->sequence_n; ++i){
+        for(int j = 0; j< this->sequence_n; ++j){
+            if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
+            if( (modules_positions[i]+modules_wh[i]).get_x() == modules_positions[j].get_x()){
+                int lower_y_i = modules_positions[i].get_y();
+                int upper_y_i = modules_positions[i].get_y()+modules_wh[i].get_y();
+                int lower_y_j = modules_positions[j].get_y();
+                int upper_y_j = modules_positions[j].get_y()+modules_wh[j].get_y();
+                int lower = std::min(lower_y_i, lower_y_j);
+                int upper = std::max(upper_y_i, upper_y_j);
+                if((lower_y_i<=upper_y_j&&lower_y_i>=lower_y_j)||(upper_y_i<=upper_y_j&&upper_y_i>=lower_y_j)){
+                    // i -> j 
+                
+                    int ih = std::min(modules_wh[i].get_x()/4, 2*modules_wh[i].get_y()-modules_wh[i].get_x());
+                    int jh = std::min(modules_wh[j].get_x()/4, 2*modules_wh[j].get_y()-modules_wh[j].get_x());
+                    int h = std::min(ih, jh);
+                    cout<< i<<" "<<j<<" "<<h<<endl;
+
+                    near_x.push_back({i, j, h});
+                    
+                }
+                
+            }
+        }
+    }
+
+    cout<<"Near y"<<endl;
+    for(int i = 0; i< this->sequence_n; ++i){
+        for(int j = 0; j< this->sequence_n; ++j){
+            if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
+            if( (modules_positions[i]+modules_wh[i]).get_y() == modules_positions[j].get_y()){
+                int lower_x_i = modules_positions[i].get_x();
+                int upper_x_i = modules_positions[i].get_x()+modules_wh[i].get_x();
+                int lower_x_j = modules_positions[j].get_x();
+                int upper_x_j = modules_positions[j].get_x()+modules_wh[j].get_x();
+                int lower = std::min(lower_x_i, lower_x_j);
+                int upper = std::max(upper_x_i, upper_x_j);
+                if((lower_x_i<=upper_x_j && lower_x_i>=lower_x_j)||(upper_x_i<=upper_x_j && upper_x_i>=lower_x_j)){
+                    // i -> j 
+                    
+                    int ih = std::min(modules_wh[i].get_y()/4, 2*modules_wh[i].get_x()-modules_wh[i].get_y());
+                    int jh = std::min(modules_wh[j].get_y()/4, 2*modules_wh[j].get_x()-modules_wh[j].get_y());
+                    int h = std::min(ih, jh);
+
+                    cout<< i<<" "<<j<<" "<<h<<endl;
+                    near_y.push_back({i, j, h});
+                }
+                
+            }
+        }
+    }
+}
+
+void sequence_pair_t::overlap_optimization(){
+    constraint_n = 6*sequence_pair_t::connections.size();
+    variable_n = 2*sequence_n+ 4*connections.size() + this->near_x.size() + this->near_y.size();
+    constraint_i = 1; //constraint_counter
+
+    x_module_offset = 1;
+    y_module_offset = 1+sequence_n;
+    x_edge_offset_l = 1+2*sequence_n;
+    x_edge_offset_r = 1+2*sequence_n+this->connections.size(); //e_x_r
+    y_edge_offset_l = 1+2*sequence_n+2*this->connections.size(); //e_x_l
+    y_edge_offset_r = 1+2*sequence_n+3*this->connections.size();  //e_x_r
+    x_hand_offset = 1+2*sequence_n+4*this->connections.size();
+    y_hand_offset = 1+2*sequence_n+4*this->connections.size()+this->near_x.size();
+    ILP_solver = ILP_solver_t();
+    ILP_solver.init("ILP_solver", constraint_n, variable_n);
+
+    set_constraints_net_direction();
+    set_constraints_opt_nets();
+    set_variables_connections();
+    set_variables_hands();
+    set_variables_modules();
+    
+    vector<double> coef(variable_n);
+    this->set_coef(coef);
+    ILP_solver.set_obj_coef(coef);
+    ILP_solver.load();
+    ILP_result = ILP_solver.solve(true);
+    cout<<"------------------"<<endl;
+    cout<< ILP_result.legal<<" "<<ILP_result.z<<endl;
+    for(auto& e:ILP_result.var_values){cout<<e<<endl;}
 
 }
 

@@ -56,7 +56,11 @@ void tester_t::test_sp(){
         for(auto& e:SP.is_in_seq){e = 1;}
         SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
+        SP.fill_near();
+        SP.overlap_optimization();
+        
         SP.print_inline();
         SP.sequence_pair_validation();
+        SP.to_fp().GUI_validation();
     }
 }

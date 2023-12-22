@@ -78,7 +78,12 @@ public:
     void set_variables_modules();
     void set_variables_connections();
     void set_variables_shapes();
+    void set_variables_hands();
     void set_coef(vector<double>&);
+    void set_constraints_opt_nets();
+    void set_constraints_opt_modules();
+    
+
     vector<vec2d_t> get_LP_res_pos();
     pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
     //subfunctions
@@ -87,6 +92,8 @@ public:
     void simplify_constraint_graph();
     void change_size(int);
     void swap_seq_number(int a, int b,bool, bool);
+    void fill_near();
+    void overlap_optimization();
 
 
     //get & set
@@ -124,8 +131,9 @@ public:
 
     //properties for LP
     int constraint_n, constraint_i, variable_n;
-    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r;
+    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r, x_hand_offset, y_hand_offset;
     vector<int> shape_types;
+    vector<vector<int>> near_x, near_y;
     ILP_solver_t ILP_solver;
     ILP_result_t ILP_result;
     //properties
