@@ -22,78 +22,15 @@ using std::vector;
 using std::unordered_map;
 
 class sequence_pair_t{
-public:
-    //static function
-    static void init();
-    static void build_graph();
-    static vector<vec2d_t> find_w_h(uint32_t area, int); //calculate a legal shapes for a specific area
-
-
-    //static variables
-    static int fix_n;
-    static int soft_n;
-    static int sequence_n; //number of sequences number
-    static int connection_graph_deg;
-
-    static int fix_start_idx; //the sequence number of the first fix module
-    static vector<net_t> connections; //all edges (only one direction)
-    static vector<vector<int>> connections_VE; //VE graph
-    static vector<pair<int, int>> deg_w;
-    static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m_5; //area -> (w, h)
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m_9; //area -> (w, h)
-    static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
-    static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
-    static vector<double> modules_area;
-    static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
-    static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
-
+    friend class sp_ilp_settings_t;
+public: 
     //constructor
     sequence_pair_t();
-
-
-    //initialization
-    void set_only_fix();
-    void init_modules_size();
-    void set_fix_sequence();
-    void set_is_in_seq();
-    void set_add_order();
-
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
-    //bool find_position(bool,bool,int,int, int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     void predict_wirelength(bool, bool);
     floorplan_t to_fp();
-
-
-    //subfunction for LP
-    void set_constraints_modules_overlap_h();
-    void set_constraints_modules_overlap_v();
-    void set_constraints_modules_fixed();
-    void set_constraints_net_direction();
-    void set_constraints_net();
-    void set_constraints_ratio_equal_1();
-    void set_constraints_boundaries();
-    void set_variables_modules();
-    void set_variables_connections();
-    void set_variables_shapes();
-    void set_variables_hands();
-    void set_coef(vector<double>&);
-    void set_constraints_opt_nets();
-    void set_constraints_opt_modules();
-    
-
-    vector<vec2d_t> get_LP_res_pos();
-    pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
-    //subfunctions
-    bool is_completed();
-    void build_constraint_graph();
-    void simplify_constraint_graph();
-    void change_size(int);
-    void swap_seq_number(int a, int b,bool, bool);
-    void fill_near();
-    void overlap_optimization();
 
 
     //get & set
@@ -113,18 +50,80 @@ public:
     std::vector<int> get_h();
 
 
+    vector<vec2d_t> modules_wh;
+    vector<int> modules_wh_i;
+    vector<vec2d_t> modules_positions;
+    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
+    
+    static int sequence_n; //number of sequences number
+        //static function
+    static void init();
+    static void build_graph();
+    static vector<vec2d_t> find_w_h(uint32_t area, int); //calculate a legal shapes for a specific area
+
+
+    //static variables
+    static int fix_n;
+    static int soft_n;
+    
+    static int connection_graph_deg;
+
+    static int fix_start_idx; //the sequence number of the first fix module
+    static vector<net_t> connections; //all edges (only one direction)
+    static vector<vector<int>> connections_VE; //VE graph
+    static vector<pair<int, int>> deg_w;
+    static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m_5; //area -> (w, h)
+    static vector<vector<vec2d_t>> soft_area_to_w_h_m_9; //area -> (w, h)
+    static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
+    static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
+    static vector<double> modules_area;
+    static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
+    static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
+    double predicted_wirelength = -1;
+    vector<int> add_soft_order;
+    vector<int> is_in_seq;
+
+    void fill_near();
+    void overlap_optimization();
+    void change_size(int);
+    void print_inline();
+    void write_inline();
+    void sequence_pair_validation();
+private:
+
+    
+
+
+    //initialization
+    void set_only_fix();
+    void init_modules_size();
+    void set_fix_sequence();
+    void set_is_in_seq();
+    void set_add_order();
+
+    vector<vec2d_t> get_LP_res_pos();
+    pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
+
+    //subfunctions
+    bool is_completed();
+    void build_constraint_graph();
+    void simplify_constraint_graph();
+    
+    void swap_seq_number(int a, int b,bool, bool);
+
     //debug
     void print();
-    void print_inline();
+    
     void print_v();
     void print_h();
     void print_logs();
-    void sequence_pair_validation();
+    
     void print_shapes_i();
     void print_fix_sequence();
     void print_connections();
     void print_result();
-    void write_inline();
+    
     void print_wirelength(bool,bool);
 
 
@@ -137,18 +136,12 @@ public:
     ILP_solver_t ILP_solver;
     ILP_result_t ILP_result;
     //properties
-    double predicted_wirelength = -1;
-    vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
-    vector<int> add_soft_order;
+    
+    
+    
     vector<edge_t> constraint_graph_h, constraint_graph_v;
-    vector<int> is_in_seq;
-    vector<vec2d_t> modules_wh;
-    vector<int> modules_wh_i;
-    vector<vec2d_t> modules_positions;
     //debug properties
     vector<pair<double, double>> logs;
-
-
 
 };
 
