@@ -58,7 +58,9 @@ void tester_t::test_sp(){
         SP.find_position_with_area(true, true, 0, 0);
         SP.fill_near();
         SP.overlap_optimization();
-        
+        SP.carve();
+        SP.set_bounding_lines();
+        visualizer_t::draw_bounding_line(SP.bouding_lines);
         SP.print_inline();
         SP.sequence_pair_validation();
         SP.to_fp().GUI_validation();

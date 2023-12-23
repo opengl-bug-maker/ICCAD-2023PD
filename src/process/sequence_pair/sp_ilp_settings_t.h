@@ -20,5 +20,6 @@ public:
     void set_coef(std::vector<double>&);
     void set_constraints_opt_nets();
     void set_constraints_opt_modules();
+    void set_constraints_only_one_hand();
     
 };

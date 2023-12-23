@@ -83,13 +83,18 @@ public:
     double predicted_wirelength = -1;
     vector<int> add_soft_order;
     vector<int> is_in_seq;
+    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bouding_lines;
+    vector<int> carved;
+    vector<vec2d_t> get_4_points(vec2d_t, vec2d_t);
 
     void fill_near();
     void overlap_optimization();
+    void carve();
     void change_size(int);
     void print_inline();
     void write_inline();
     void sequence_pair_validation();
+    void set_bounding_lines();
 private:
 
     
@@ -109,8 +114,8 @@ private:
     bool is_completed();
     void build_constraint_graph();
     void simplify_constraint_graph();
-    
     void swap_seq_number(int a, int b,bool, bool);
+    
 
     //debug
     void print();
@@ -130,15 +135,17 @@ private:
 
     //properties for LP
     int constraint_n, constraint_i, variable_n;
-    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r, x_hand_offset, y_hand_offset;
+    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r;
+    int near_x_offset, near_y_offset;
+    vector<vector<int>> near_x_map,near_y_map;
+    vector<vector<int>> near_x_id, near_y_id;
     vector<int> shape_types;
     vector<vector<int>> near_x, near_y;
     ILP_solver_t ILP_solver;
     ILP_result_t ILP_result;
+    vector<vector<int>> result_carving_x, result_carving_y;
+    
     //properties
-    
-    
-    
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     //debug properties
     vector<pair<double, double>> logs;
