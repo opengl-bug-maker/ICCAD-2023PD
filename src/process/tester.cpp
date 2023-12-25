@@ -3,6 +3,7 @@
 #include "process/sequence_pair/sequence_pair_t.h"
 #include "process/quad_sequence/quad_sequence_t.h"
 #include "process/functional/random_helper.h"
+#include <iomanip>
 tester_t::tester_t(){
     random_helper::set_seed(); //build up random table
 
@@ -62,7 +63,10 @@ void tester_t::test_sp(){
         SP.set_bounding_lines();
         visualizer_t::draw_bounding_line(SP.bouding_lines);
         SP.print_inline();
+        cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
+        cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
+        cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
         SP.sequence_pair_validation();
-        SP.to_fp().GUI_validation();
+        //SP.to_fp().GUI_validation();
     }
 }

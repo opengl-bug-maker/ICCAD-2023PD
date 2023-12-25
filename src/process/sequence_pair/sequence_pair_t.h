@@ -95,6 +95,8 @@ public:
     void write_inline();
     void sequence_pair_validation();
     void set_bounding_lines();
+
+    double rectilinear_wirelength = 0;
 private:
 
     

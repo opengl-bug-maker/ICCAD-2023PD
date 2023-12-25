@@ -854,7 +854,7 @@ void sequence_pair_t::fill_near()
     near_y_id = near_x_id = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_n, -1));
     int ix,iy;
     ix = iy = 0;
-    cout<<"Near x"<<endl;
+    //cout<<"Near x"<<endl;
     for(int i = 0; i< this->sequence_n; ++i){
         for(int j = 0; j< this->sequence_n; ++j){
             if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
@@ -871,7 +871,7 @@ void sequence_pair_t::fill_near()
                     int ih = std::min(modules_wh[i].get_x()/4, 2*modules_wh[i].get_y()-modules_wh[i].get_x());
                     int jh = std::min(modules_wh[j].get_x()/4, 2*modules_wh[j].get_y()-modules_wh[j].get_x());
                     int h = std::min(ih, jh);
-                    cout<< i<<" "<<j<<" "<<h<<endl;
+                    //cout<< i<<" "<<j<<" "<<h<<endl;
                     near_x.push_back({i, j, h});
                     near_x_id[j][i] = near_x_id[i][j] = ix++;
                     near_x_map[i].push_back(j);
@@ -882,7 +882,7 @@ void sequence_pair_t::fill_near()
         }
     }
 
-    cout<<"Near y"<<endl;
+    //cout<<"Near y"<<endl;
     for(int i = 0; i< this->sequence_n; ++i){
         for(int j = 0; j< this->sequence_n; ++j){
             if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
@@ -900,7 +900,7 @@ void sequence_pair_t::fill_near()
                     int jh = std::min(modules_wh[j].get_y()/4, 2*modules_wh[j].get_x()-modules_wh[j].get_y());
                     int h = std::min(ih, jh);
 
-                    cout<< i<<" "<<j<<" "<<h<<endl;
+                    //cout<< i<<" "<<j<<" "<<h<<endl;
                     near_y_id[j][i] = near_y_id[i][j] = iy++;
                     near_y.push_back({i, j, h});
                     near_y_map[i].push_back(j);
@@ -946,19 +946,23 @@ void sequence_pair_t::overlap_optimization(){
     ILP_result = ILP_solver.solve(true);
     cout<<"------------------"<<endl;
     cout<< "Legal: "<< ILP_result.legal<<endl;
-    cout<<"Z : "<<std::setprecision(16)<<ILP_result.z<<endl;
+    cout<<"Z after rectilinear optimization: "<<std::setprecision(16)<<ILP_result.z<<endl;
     //for(auto& e:ILP_result.var_values){cout<<e<<endl;}
     for(int i = 0; i<near_x.size(); ++i){
         if(ILP_result.var_values[this->near_x_offset+i]){
-            for(auto& e:near_x[i]){cout<<e<<" ";}cout<<endl;
+            //for(auto& e:near_x[i]){cout<<e<<" ";}cout<<endl;
             this->result_carving_x.push_back({near_x[i]});
         }
     }
     for(int i = 0; i<near_y.size(); ++i){
         if(ILP_result.var_values[this->near_y_offset+i]){
-            for(auto& e:near_y[i]){cout<<e<<" ";}cout<<endl;
+            //for(auto& e:near_y[i]){cout<<e<<" ";}cout<<endl;
             this->result_carving_y.push_back({near_y[i]});
         }
+    }
+
+    if(ILP_result.legal){
+        this->rectilinear_wirelength = ILP_result.z;
     }
 }
 
