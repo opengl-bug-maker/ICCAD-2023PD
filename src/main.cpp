@@ -19,7 +19,7 @@ int main(/*arg*/){
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
     tester_t tester;
-    tester.test_qs();
+    tester.test_sp();
     //solver.run();
     // solver.load_specific_without_cmp();
     //solver.test_sp();
