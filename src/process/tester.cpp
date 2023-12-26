@@ -4,6 +4,7 @@
 #include "process/quad_sequence/quad_sequence_t.h"
 #include "process/functional/random_helper.h"
 #include <iomanip>
+#include "SA_solver_t.h"
 tester_t::tester_t(){
     random_helper::set_seed(); //build up random table
 
@@ -51,12 +52,14 @@ void tester_t::test_sp(){
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
+    SA_solver_t SA_solver;
     if(case_id!=-1){
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
         SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
+        SP = SA_solver.post_process(SP);
         SP.fill_near();
         SP.overlap_optimization();
         SP.carve();
