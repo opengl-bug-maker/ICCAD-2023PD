@@ -151,3 +151,31 @@ void visualizer_t::show_fp_rect_no_border(const std::vector<std::pair<rect_t, st
 void visualizer_t::set_window_name(const std::string& name) {
     visualizer_t::name = name;
 }
+
+void visualizer_t::draw_bounding_line_connection(std::vector<std::pair<std::vector<vec2d_t>,std::string>> bounding_lines) {
+    auto table = chip_t::get_connection_table();
+    auto max_value = -1.0e9;
+    auto min_value = 1.0e9;
+    auto width_min = 1.0;
+    auto width_max = 10.0;
+    for(auto tab : table){
+        for(auto ta : tab){
+            min_value = std::min(min_value, (double)ta);
+            max_value = std::max(max_value, (double)ta);
+        }
+    }
+    for(int i = 0; i < table.size(); ++i) {
+        for(int j = i; j < table[i].size(); ++j) {
+            auto st = (bounding_lines[i].first[0] + bounding_lines[i].first[2]) / 2.0;
+            auto en = (bounding_lines[j].first[0] + bounding_lines[j].first[2]) / 2.0;
+            auto slope_vec = en - st;
+            auto rvs_vec = vec2d_t(-slope_vec.get_y(), slope_vec.get_x());
+            rvs_vec = rvs_vec / rvs_vec.get_length();
+            rvs_vec = rvs_vec * ((table[i][j] - min_value) / (max_value - min_value) * (width_max - width_min) + width_min);
+            bounding_lines.push_back({{st, en}, std::to_string(table[i][j])});
+            // bounding_lines.push_back({{st - rvs_vec, st + rvs_vec, en + rvs_vec, en - rvs_vec}, std::to_string(table[i][j])});
+        }
+    }
+    visualizer_t::draw_bounding_line(bounding_lines);
+    return ;
+}
