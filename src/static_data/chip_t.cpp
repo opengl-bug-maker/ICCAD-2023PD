@@ -227,6 +227,18 @@ void chip_t::pd_file_input(std::string fileName) {
     }else if(similar_chip_t::case6()){
         chip_t::similar_case_num = 5;
     }
+    else if(similar_chip_t::case7()){
+        chip_t::similar_case_num = 6;
+    }
+    else if(similar_chip_t::case8()){
+        chip_t::similar_case_num = 7;
+    }
+    else if(similar_chip_t::case9()){
+        chip_t::similar_case_num = 8;
+    }
+    else if(similar_chip_t::case10()){
+        chip_t::similar_case_num = 9;
+    }
 }
 
 int chip_t::get_similar_case_num() {
@@ -531,6 +543,135 @@ bool similar_chip_t::case6() {auto width = chip_t::width;
     if( modules != 34 ) return false;
     if( soft_modules != 21 ) return false;
     if( fixed_modules != 13 ) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->getName() != soft_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->get_area() != soft_area_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i) if(chip_t::fixed_modules[i]->getName() != fix_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i){
+        if(chip_t::fixed_modules[i]->get_left_lower().get_x() != fix_coord_vec[i][0]) return false;
+        if(chip_t::fixed_modules[i]->get_left_lower().get_y() != fix_coord_vec[i][1]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_x() != fix_coord_vec[i][2]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_y() != fix_coord_vec[i][3]) return false;
+    }
+    return true;
+}
+bool similar_chip_t::case7(){
+    auto width = chip_t::width;
+    auto height = chip_t::height;
+    auto softCount = chip_t::softCount;
+    auto fixedCount = chip_t::fixedCount;
+    auto total_modules_count = chip_t::total_modules_count;
+    auto modules = chip_t::modules.size();
+    auto soft_modules = chip_t::soft_modules.size();
+    auto fixed_modules = chip_t::fixed_modules.size();
+    std::vector<std::string> soft_name_vec = {"CU0", "CU1", "CU2", "CU3", "CU4", "NPU", "ISP", "MOD", "DSP", "SLC", "TS0", "TS1", "TS2", "TS3", "TS4", "COR"};
+    std::vector<int> soft_area_vec = {2595500, 3643200, 3643200, 3643200, 3643200, 7231900, 15420000, 15618900, 9085900, 3290000, 4259600, 2549400, 2549400, 2549400, 2549400, 3008800};
+    std::vector<std::string> fix_name_vec = {"DDR0", "DDR1", "DDR2", "DDR3", "DDR4", "DDR5", "DDR6", "DDR7", "BLK0", "BLK1", "BLK3"};
+    std::vector<std::vector<int>> fix_coord_vec = {{1630, 0, 640, 640}, {2270, 0, 1810, 920}, {8170, 0, 1810, 920}, {9980, 0, 640, 640}, {1630, 11760, 640, 640}, {2270, 11480, 1810, 920}, {8170, 11480, 1810, 920}, {9980, 11760, 640, 640}, {10650, 0, 1550, 1890}, {0, 9130, 1630, 3270}, {1630, 9130, 640, 2630}};
+    if( width != 12200 ) return false;
+    if( height != 12400 ) return false;
+    if( softCount != 16 ) return false;
+    if( fixedCount != 11 ) return false;
+    if( total_modules_count != 27 ) return false;
+    if( modules != 27 ) return false;
+    if( soft_modules != 16 ) return false;
+    if( fixed_modules != 11 ) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->getName() != soft_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->get_area() != soft_area_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i) if(chip_t::fixed_modules[i]->getName() != fix_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i){
+        if(chip_t::fixed_modules[i]->get_left_lower().get_x() != fix_coord_vec[i][0]) return false;
+        if(chip_t::fixed_modules[i]->get_left_lower().get_y() != fix_coord_vec[i][1]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_x() != fix_coord_vec[i][2]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_y() != fix_coord_vec[i][3]) return false;
+    }
+    return true;
+}
+
+bool similar_chip_t::case8(){
+    auto width = chip_t::width;
+    auto height = chip_t::height;
+    auto softCount = chip_t::softCount;
+    auto fixedCount = chip_t::fixedCount;
+    auto total_modules_count = chip_t::total_modules_count;
+    auto modules = chip_t::modules.size();
+    auto soft_modules = chip_t::soft_modules.size();
+    auto fixed_modules = chip_t::fixed_modules.size();
+    std::vector<std::string> soft_name_vec = {"SLC0", "SLC1", "GPU0", "GPU1", "GPU2", "GPU3", "GPU4", "GPU5", "GPU6", "GPU7", "GPU8", "GPU9", "GPU10", "GPU11", "GPU12", "GPU13", "GPU14", "GPU15", "GPU16", "GPU17", "GPU18", "GM", "NPU", "DE0", "DE1", "CPUA0", "CPUA1", "CPUA2", "CPUA3", "CPUA4", "CPUA5", "CPUA6", "CPUA7", "CPUB0", "CPUB1", "CPUB2", "CPUB3"};
+    std::vector<int> soft_area_vec = {13533900, 13533900, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 2890500, 14148800, 9499000, 6652800, 6652800, 2859800, 2859800, 2859800, 2859800, 2859800, 2859800, 2859800, 2859800, 1134200, 1134200, 1134200, 1134200};
+    std::vector<std::string> fix_name_vec = {"LPDDR0", "LPDDR1", "PHY", "TB"};
+    std::vector<std::vector<int>> fix_coord_vec = {{0, 0, 1750, 7780}, {19750, 0, 1750, 7780}, {5450, 13050, 6320, 1430}, {14130, 12670, 7090, 1810}};
+    if( width != 21500 ) return false;
+    if( height != 14480 ) return false;
+    if( softCount != 37 ) return false;
+    if( fixedCount != 4 ) return false;
+    if( total_modules_count != 41 ) return false;
+    if( modules != 41 ) return false;
+    if( soft_modules != 37 ) return false;
+    if( fixed_modules != 4 ) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->getName() != soft_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->get_area() != soft_area_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i) if(chip_t::fixed_modules[i]->getName() != fix_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i){
+        if(chip_t::fixed_modules[i]->get_left_lower().get_x() != fix_coord_vec[i][0]) return false;
+        if(chip_t::fixed_modules[i]->get_left_lower().get_y() != fix_coord_vec[i][1]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_x() != fix_coord_vec[i][2]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_y() != fix_coord_vec[i][3]) return false;
+    }
+    return true;
+}
+bool similar_chip_t::case9(){
+    auto width = chip_t::width;
+    auto height = chip_t::height;
+    auto softCount = chip_t::softCount;
+    auto fixedCount = chip_t::fixedCount;
+    auto total_modules_count = chip_t::total_modules_count;
+    auto modules = chip_t::modules.size();
+    auto soft_modules = chip_t::soft_modules.size();
+    auto fixed_modules = chip_t::fixed_modules.size();
+    std::vector<std::string> soft_name_vec = {"ZEN0", "ZEN1", "ZEN2", "ZEN3", "ZEN4", "ZEN5", "ZEN6", "UMC", "VCN", "FPU", "ALU", "GPU", "ZC0", "ZC1"};
+    std::vector<int> soft_area_vec = {7420200, 7420200, 7420200, 7420200, 7420200, 7420200, 7420200, 14288200, 8289800, 1890000, 5154800, 50235700, 1829200, 1829200};
+    std::vector<std::string> fix_name_vec = {"DDR", "BLK0", "BLK1", "BLK2", "BLK3", "BLK4", "BLK5"};
+    std::vector<std::vector<int>> fix_coord_vec = {{0, 14800, 22570, 3400}, {13300, 10420, 9270, 4380}, {13430, 9620, 9140, 800}, {17260, 7810, 5310, 1810}, {18470, 3540, 4100, 4270}, {15570, 1810, 7000, 1730}, {0, 0, 22570, 1810}};
+    if( width != 22570 ) return false;
+    if( height != 18200 ) return false;
+    if( softCount != 14 ) return false;
+    if( fixedCount != 7 ) return false;
+    if( total_modules_count != 21 ) return false;
+    if( modules != 21 ) return false;
+    if( soft_modules != 14 ) return false;
+    if( fixed_modules != 7 ) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->getName() != soft_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->get_area() != soft_area_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i) if(chip_t::fixed_modules[i]->getName() != fix_name_vec[i]) return false;
+    for (int i = 0; i < chip_t::fixed_modules.size(); ++i){
+        if(chip_t::fixed_modules[i]->get_left_lower().get_x() != fix_coord_vec[i][0]) return false;
+        if(chip_t::fixed_modules[i]->get_left_lower().get_y() != fix_coord_vec[i][1]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_x() != fix_coord_vec[i][2]) return false;
+        if(chip_t::fixed_modules[i]->get_size().get_y() != fix_coord_vec[i][3]) return false;
+    }
+    return true;
+}
+bool similar_chip_t::case10(){
+    auto width = chip_t::width;
+    auto height = chip_t::height;
+    auto softCount = chip_t::softCount;
+    auto fixedCount = chip_t::fixedCount;
+    auto total_modules_count = chip_t::total_modules_count;
+    auto modules = chip_t::modules.size();
+    auto soft_modules = chip_t::soft_modules.size();
+    auto fixed_modules = chip_t::fixed_modules.size();
+    std::vector<std::string> soft_name_vec = {"NPU", "GPU", "CPU", "MOD5", "MOD4", "SC", "BU"};
+    std::vector<int> soft_area_vec = {10205000, 33564600, 22369600, 28858500, 16832400, 4183200, 16460600};
+    std::vector<std::string> fix_name_vec = {"DDR0", "DDR1", "DDR2", "DDR3", "USB"};
+    std::vector<std::vector<int>> fix_coord_vec = {{0, 4500, 860, 2630}, {0, 10000, 860, 2630}, {12650, 4500, 860, 2630}, {12650, 10000, 860, 2630}, {9060, 12180, 1330, 1220}};
+    if( width != 13510 ) return false;
+    if( height != 13400 ) return false;
+    if( softCount != 7 ) return false;
+    if( fixedCount != 5 ) return false;
+    if( total_modules_count != 12 ) return false;
+    if( modules != 12 ) return false;
+    if( soft_modules != 7 ) return false;
+    if( fixed_modules != 5 ) return false;
     for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->getName() != soft_name_vec[i]) return false;
     for (int i = 0; i < chip_t::soft_modules.size(); ++i) if(chip_t::soft_modules[i]->get_area() != soft_area_vec[i]) return false;
     for (int i = 0; i < chip_t::fixed_modules.size(); ++i) if(chip_t::fixed_modules[i]->getName() != fix_name_vec[i]) return false;

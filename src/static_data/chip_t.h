@@ -28,6 +28,10 @@ public:
     static bool case4();
     static bool case5();
     static bool case6();
+    static bool case7();
+    static bool case8();
+    static bool case9();
+    static bool case10();
 };
 
 class chip_t {
