@@ -850,6 +850,7 @@ vector<vec2d_t> sequence_pair_t::get_4_points(vec2d_t ll, vec2d_t wh){
 void sequence_pair_t::fill_near()
 {
     this->near_x.clear(); this->near_y.clear();
+    near_x_map.clear(); near_y_map.clear(); 
     near_x_map.resize(this->sequence_n); near_y_map.resize(this->sequence_n);
     near_y_id = near_x_id = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_n, -1));
     int ix,iy;
