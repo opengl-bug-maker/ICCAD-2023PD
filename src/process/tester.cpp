@@ -64,12 +64,14 @@ void tester_t::test_sp(){
         SP.overlap_optimization();
         SP.carve();
         SP.set_bounding_lines();
-        visualizer_t::draw_bounding_line(SP.bouding_lines);
+        //visualizer_t::draw_bounding_line(SP.bouding_lines);
+        visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
         SP.print_inline();
+        SP.print_result();
         cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
         cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
         cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
-        SP.sequence_pair_validation();
+        //SP.sequence_pair_validation();
         //SP.to_fp().GUI_validation();
     }
 }

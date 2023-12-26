@@ -152,28 +152,43 @@ void visualizer_t::set_window_name(const std::string& name) {
     visualizer_t::name = name;
 }
 
+vec2d_t get_center(std::vector<vec2d_t> points) {
+    vec2d_t ll(1e9, 1e9), ru(-1e9, -1e9);
+    for(auto point : points){
+        ll.set_x(std::min(ll.get_x(), point.get_x()));
+        ll.set_y(std::min(ll.get_y(), point.get_y()));
+        ru.set_x(std::max(ru.get_x(), point.get_x()));
+        ru.set_y(std::max(ru.get_y(), point.get_y()));
+    }
+    return (ll + ru) / 2;
+}
+
 void visualizer_t::draw_bounding_line_connection(std::vector<std::pair<std::vector<vec2d_t>,std::string>> bounding_lines) {
     auto table = chip_t::get_connection_table();
     auto max_value = -1.0e9;
     auto min_value = 1.0e9;
     auto width_min = 1.0;
-    auto width_max = 10.0;
+    auto width_max = 100.0;
     for(auto tab : table){
         for(auto ta : tab){
             min_value = std::min(min_value, (double)ta);
             max_value = std::max(max_value, (double)ta);
         }
     }
+
     for(int i = 0; i < table.size(); ++i) {
         for(int j = i; j < table[i].size(); ++j) {
-            auto st = (bounding_lines[i].first[0] + bounding_lines[i].first[2]) / 2.0;
-            auto en = (bounding_lines[j].first[0] + bounding_lines[j].first[2]) / 2.0;
-            auto slope_vec = en - st;
+            if(table[i][j] == 0) continue;
+            vec2d_t all_point_st = get_center(bounding_lines[i].first);
+            vec2d_t all_point_en = get_center(bounding_lines[j].first);
+
+            auto slope_vec = all_point_en - all_point_st;
             auto rvs_vec = vec2d_t(-slope_vec.get_y(), slope_vec.get_x());
             rvs_vec = rvs_vec / rvs_vec.get_length();
             rvs_vec = rvs_vec * ((table[i][j] - min_value) / (max_value - min_value) * (width_max - width_min) + width_min);
-            bounding_lines.push_back({{st, en}, std::to_string(table[i][j])});
-            // bounding_lines.push_back({{st - rvs_vec, st + rvs_vec, en + rvs_vec, en - rvs_vec}, std::to_string(table[i][j])});
+            // bounding_lines.push_back({{st, en}, std::to_string(table[i][j])});
+            // bounding_lines.push_back({{all_point_st - rvs_vec, all_point_st + rvs_vec, all_point_en + rvs_vec, all_point_en - rvs_vec}, std::to_string(table[i][j])});
+            bounding_lines.push_back({{all_point_st - rvs_vec, all_point_st + rvs_vec, all_point_en + rvs_vec, all_point_en - rvs_vec}, ""});
         }
     }
     visualizer_t::draw_bounding_line(bounding_lines);

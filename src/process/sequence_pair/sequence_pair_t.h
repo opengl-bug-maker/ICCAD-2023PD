@@ -94,6 +94,7 @@ public:
     void print_inline();
     void write_inline();
     void sequence_pair_validation();
+    void print_result();
     void set_bounding_lines();
 
     double rectilinear_wirelength = 0;
@@ -129,7 +130,7 @@ private:
     void print_shapes_i();
     void print_fix_sequence();
     void print_connections();
-    void print_result();
+    
     
     void print_wirelength(bool,bool);
 

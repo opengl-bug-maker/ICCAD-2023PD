@@ -597,6 +597,19 @@ void sequence_pair_t::print_connections() {
     }
 }
 
+void sequence_pair_t::print_result(){
+    cout<<"Positions: "<<endl;
+    int i = 0;
+    for(auto& e:this->modules_positions){
+        cout<<"i: "<<i++<<e<<endl;
+    }
+    i = 0;
+    cout<<"widths, heights: "<<endl;
+    for(auto& e:this->modules_wh){
+        cout<<"i: "<<i++<<e<<endl;
+    }
+}
+
 bool sequence_pair_t::is_completed() {
     //first, check all soft modules are in the sequence
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
