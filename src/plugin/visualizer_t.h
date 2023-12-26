@@ -16,6 +16,7 @@ public:
     static void show_fp_no_border(const std::vector<bounding_rectangle_t>&, const std::string&);
     static void show_fp_rect_no_border(const std::vector<std::pair<rect_t, std::string>> &, const std::string&);
     static void set_window_name(const std::string&);
+    static void draw_bounding_line_connection(std::vector<std::pair<std::vector<vec2d_t>,std::string>> bounding_lines);
 private:
     static int max_x;
     static int max_y;
