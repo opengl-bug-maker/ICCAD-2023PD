@@ -54,23 +54,26 @@ void tester_t::test_sp(){
     sequence_pair_t SP;
     SA_solver_t SA_solver;
     if(case_id!=-1){
+        
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
-        SP.find_position(true, true, 0, 0);
-        SP.find_position_with_area(true, true, 0, 0);
-        SP = SA_solver.post_process(SP);
-        SP.fill_near();
-        SP.overlap_optimization();
-        SP.carve();
-        SP.set_bounding_lines();
-        //visualizer_t::draw_bounding_line(SP.bouding_lines);
-        visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
-        SP.print_inline();
-        SP.print_result();
-        cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
-        cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
-        cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
+
+        // SP.find_position(true, true, 0, 0);
+        // SP.find_position_with_area(true, true, 0, 0);
+        // SP = SA_solver.post_process(SP);
+        // SP.fill_near();
+        // SP.overlap_optimization();
+        // SP.carve();
+        // SP.set_bounding_lines();
+        // //visualizer_t::draw_bounding_line(SP.bouding_lines);
+        // visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
+        // SP.print_inline();
+        // SP.print_result();
+        // cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
+        // cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
+        // cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
+        SP.to_rectilinear_and_plot();
         //SP.sequence_pair_validation();
         //SP.to_fp().GUI_validation();
     }

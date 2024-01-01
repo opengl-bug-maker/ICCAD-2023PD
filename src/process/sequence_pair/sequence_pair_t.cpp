@@ -14,6 +14,7 @@
 #include "process/functional/random_helper.h"
 #include "static_data/fp_rule_t.cpp" //how bad
 #include <algorithm>
+#include <limits.h>
 #include "sp_ilp_settings_t.h"
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
@@ -656,6 +657,43 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
     // cout<< "LP result : "<<this->ILP_result.z<<endl;
 }
 
+void sequence_pair_t::to_rectilinear(){
+    this->find_position(true, true, 0, 0);
+    this->find_position_with_area(true, true, 0, 0);
+    this->fill_near();
+    this->overlap_optimization();
+    //this->carve();
+    //this->set_bounding_lines();
+    //visualizer_t::draw_bounding_line(SP.bouding_lines);
+    //visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
+    // SP.print_inline();
+    // SP.print_result();
+    // cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
+    //cout<<"Rectilinear wirelength: "<<this->rectilinear_wirelength<<endl;
+    //cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
+    //SP.sequence_pair_validation();
+    //SP.to_fp().GUI_validation();
+}
+
+void sequence_pair_t::to_rectilinear_and_plot(){
+    bool a = this->find_position(true, true, 0, 0);
+    bool b = this->find_position_with_area(true, true, 0, 0);
+    for(auto& e:this->is_in_seq){e = 1;}
+    this->fill_near();
+    this->overlap_optimization();
+    this->carve();
+    this->set_bounding_lines();
+    visualizer_t::draw_bounding_line(this->bouding_lines);
+    //visualizer_t::draw_bounding_line_connection(this->bouding_lines);
+    this->print_inline();
+    //this->print_result();
+    cout<<"Rectangle wirelength: "<<this->predicted_wirelength<<endl;
+    cout<<"Rectilinear wirelength: "<<this->rectilinear_wirelength<<endl;
+    cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
+    this->sequence_pair_validation();
+    //this->to_fp().GUI_validation();
+}
+
 floorplan_t sequence_pair_t::to_fp() {
     floorplan_t ret;
     int placed_n = 0;
@@ -863,8 +901,11 @@ vector<vec2d_t> sequence_pair_t::get_4_points(vec2d_t ll, vec2d_t wh){
 void sequence_pair_t::fill_near()
 {
     this->near_x.clear(); this->near_y.clear();
-    near_x_map.clear(); near_y_map.clear(); 
-    near_x_map.resize(this->sequence_n); near_y_map.resize(this->sequence_n);
+    this->near_x_map.clear(); this->near_y_map.clear(); 
+    this->near_y_id.clear();this->near_x_id.clear();
+
+    this->near_x_map.resize(this->sequence_n); this->near_y_map.resize(this->sequence_n);
+    
     near_y_id = near_x_id = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_n, -1));
     int ix,iy;
     ix = iy = 0;
@@ -958,9 +999,9 @@ void sequence_pair_t::overlap_optimization(){
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
     ILP_result = ILP_solver.solve(true);
-    cout<<"------------------"<<endl;
-    cout<< "Legal: "<< ILP_result.legal<<endl;
-    cout<<"Z after rectilinear optimization: "<<std::setprecision(16)<<ILP_result.z<<endl;
+    // cout<<"------------------"<<endl;
+    // cout<< "Legal: "<< ILP_result.legal<<endl;
+    // cout<<"Z after rectilinear optimization: "<<std::setprecision(16)<<ILP_result.z<<endl;
     //for(auto& e:ILP_result.var_values){cout<<e<<endl;}
     for(int i = 0; i<near_x.size(); ++i){
         if(ILP_result.var_values[this->near_x_offset+i]){
@@ -978,9 +1019,16 @@ void sequence_pair_t::overlap_optimization(){
     if(ILP_result.legal){
         this->rectilinear_wirelength = ILP_result.z;
     }
+    else{
+        this->rectilinear_wirelength = this->predicted_wirelength;
+    }
+    if(this->rectilinear_wirelength<0){ //glpk so bad==
+        this->rectilinear_wirelength = 1e300+1;
+    }
 }
 
 void sequence_pair_t::carve(){
+    this->bouding_lines.clear();
     this->bouding_lines.resize(sequence_n);
     this->carved = vector<int>(sequence_n, false);
 

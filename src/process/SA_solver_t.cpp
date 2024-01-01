@@ -21,7 +21,7 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, double enable_from, double enable_to) {
+void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, double enable_from, double enable_to, bool rectilinear) {
     this->swap_enable = vector<int>(sequence_pair_t::sequence_n, 0);
     for(int i = static_cast<int>(sequence_pair_t::sequence_n * enable_from); i<static_cast<int>(sequence_pair_t::sequence_n * enable_to); ++i){
         this->swap_enable[i] = 1;
@@ -32,6 +32,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
     SPEN.updated_best_SP();
     sequence_pair_t best_sp = SPEN.best_SP;
+    double best_wirelength = best_sp.predicted_wirelength;
     int load_back_cnt = 0;
     int it = 1;
     while(true){
@@ -42,16 +43,24 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         sequence_pair_t& SP = SPEN.valid_sequence_pairs[0];
         sequence_pair_t after = find_neighbor_parallel(SP);
         //sequence_pair_t after = find_neighbor_sequential(SP);
-        if(after.predicted_wirelength!=-1){
+        
+        double SP_wirelength = SP.predicted_wirelength;
+        double after_wirelength = after.predicted_wirelength;
+        if(after_wirelength!=-1){
+            if(rectilinear){
+                after.to_rectilinear();
+                after.predicted_wirelength = after.rectilinear_wirelength;
+            }
             SP = after;
         }
-        if(SP.predicted_wirelength < best_sp.predicted_wirelength && SP.predicted_wirelength!=-1){
+        if(SP_wirelength < best_wirelength && SP_wirelength!=-1){
             best_sp = SP;
+            best_wirelength = SP_wirelength;
             load_back_cnt = 0;
         }
         else{
             load_back_cnt++;
-            if(load_back && SP.predicted_wirelength>1.375*best_sp.predicted_wirelength){
+            if(load_back && SP_wirelength>1.375*best_wirelength){
                 cout<<"Load back..."<<endl;
                 SP = best_sp; //to avoid meaningless searching
                 load_back_cnt = 0;
@@ -66,8 +75,8 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             this->it_timer.timer_end();
             this->it_timer.print_time_elapsed();
-            cout<<"current best wirelength : "<<std::setprecision(16)<<best_sp.predicted_wirelength<<endl;
-            cout<<"current wirelength : "<<std::setprecision(16)<<SPEN.valid_sequence_pairs[0].predicted_wirelength<<endl;
+            cout<<"current best wirelength : "<<std::setprecision(16)<<best_wirelength<<endl;
+            cout<<"current wirelength : "<<std::setprecision(16)<<SP_wirelength<<endl;
             cout<<"------------------------------"<<endl;
         }
         runtime_timer.timer_end();

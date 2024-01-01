@@ -12,7 +12,7 @@ public:
 
     bool sample_p(double delta_c);
 
-    void run(sequence_pair_enumerator_t&,double, double, double,bool, double, double);
+    void run(sequence_pair_enumerator_t&,double, double, double,bool, double, double, bool rectilinear);
 
     double get_delta(sequence_pair_t&, sequence_pair_t&);
 

@@ -49,23 +49,29 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 0.3 * time_left, 0.5, 0.01, false, 0, 0.33);
-    cout<<"---------------Stage 2----------------"<<endl;
-    SA_solver.run(SPEN, 0.5 * time_left, 0.1, 0.01, true, 0, 0.66);
-    cout<<"---------------Stage 3----------------"<<endl;
-    SA_solver.run(SPEN, 0.2 * time_left, 0.03, 0.008, true, 0, 1);
+    SA_solver.run(SPEN, 0.1 * time_left, 0.5, 0.01, false, 0, 0.33, false);
+    // cout<<"---------------Stage 2----------------"<<endl;
+    SA_solver.run(SPEN, 0.6 * time_left, 0.03, 0.008, true, 0, 1, false);
+    //  cout<<"---------------Stage 3----------------"<<endl;
+    SA_solver.run(SPEN, 0.3 * time_left, 0.1, 0.008, true, 0, 1, true);
     SPEN.updated_best_SP();
 
-    SPEN.best_SP.find_position(true, true, 0, 0);
-    SPEN.best_SP.find_position_with_area(true, true, 0, 0);
 
-    SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
+    sequence_pair_t best_sp;
+    best_sp.v_sequence = SPEN.valid_sequence_pairs[0].v_sequence;
+    best_sp.h_sequence = SPEN.valid_sequence_pairs[0].h_sequence;
+    for(auto& e:best_sp.is_in_seq){e = 1;}
+    best_sp.print_inline();
+    best_sp.to_rectilinear();
+    best_sp.to_rectilinear_and_plot();
+    //SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
 
-    SPEN.best_SP.write_inline();
-    SPEN.best_SP.print_inline();
-    this->best_fp = SPEN.best_SP.to_fp();
+    // SPEN.best_SP.write_inline();
+    // SPEN.best_SP.print_inline();
+    //this->best_fp = SPEN.best_SP.to_fp();
+    //SPEN.best_SP.to_rectilinear_and_plot();
     //this->best_fp.GUI_validation();
-    cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    //cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {

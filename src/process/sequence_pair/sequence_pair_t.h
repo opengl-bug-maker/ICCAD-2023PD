@@ -30,6 +30,8 @@ public:
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     void predict_wirelength(bool, bool);
+    void to_rectilinear();
+    void to_rectilinear_and_plot();
     floorplan_t to_fp();
 
 
