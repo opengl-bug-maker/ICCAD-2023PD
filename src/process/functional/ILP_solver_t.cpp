@@ -99,7 +99,8 @@ void ILP_solver_t::set_obj_coef(vector<double> coef) {
 }
 
 ILP_result_t ILP_solver_t::solve(bool int_needed) {
-    int feasible,z;
+    int feasible;
+    double z;
     if(int_needed){
         glp_iocp parm;
         glp_init_iocp(&parm);
