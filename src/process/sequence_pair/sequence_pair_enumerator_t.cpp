@@ -179,7 +179,7 @@ void sequence_pair_enumerator_t::validate_all_SP() {
             cout<<"invalid SP"<<endl;
         }
         else{
-            double wirelength = this->valid_sequence_pairs[i].get_wirelength(true, true);
+            double wirelength = this->valid_sequence_pairs[i].update_wirelength(true, true);
             cout<<"valid SP : "<<std::setprecision(16)<<wirelength<<endl;
 
         }
@@ -204,10 +204,10 @@ void sequence_pair_enumerator_t::updated_best_SP() {
     if(this->valid_sequence_pairs.size()<1){
         return;
     }
-    double current_best_wirelength = this->valid_sequence_pairs[0].get_wirelength(true, true);
+    double current_best_wirelength = this->valid_sequence_pairs[0].update_wirelength(true, true);
     this->best_SP = this->valid_sequence_pairs[0];
     for(auto SP:this->valid_sequence_pairs){
-        double v = SP.get_wirelength(true, true);
+        double v = SP.update_wirelength(true, true);
         if(v < current_best_wirelength){
             this->best_SP = SP;
             current_best_wirelength = v;

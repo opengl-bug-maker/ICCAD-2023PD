@@ -225,7 +225,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
 
     //set constraints to place modules
     //if horizontal constraint graph got i->j them x_j - x_i >= w
-    sp_ilp_settings_t sp_ilp_settings(this);
+    sp_ilp_settings_find_position_t sp_ilp_settings(this);
     
     sp_ilp_settings.set_constraints_modules_overlap_h();
     //if vertical constraint graph got i->j them y_j - y_i >= h
@@ -420,7 +420,7 @@ void sequence_pair_t::print_inline() {
 //            cout<<"{"<<shape.get_x()<<","<<shape.get_y()<<"} ";
 //        }
 //    }
-    cout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
+    cout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, true)<<endl;
 }
 void sequence_pair_t::print_shapes_i() {
     cout<<"shapes of the SP : {";
@@ -755,102 +755,27 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
 
 
     vector<double> coef(variable_n+1, 0);
-
+    sp_ilp_settings_find_position_with_area_t sp_ilp_settings(this);
     //set constraints to place modules
     //if horizontal constraint graph got i->j them x_j - x_i >= w
-    for(int i = 0; i<this->constraint_graph_h.size(); ++i){
-        int from = constraint_graph_h[i].from, to = constraint_graph_h[i].to, w = constraint_graph_h[i].w;
-        string constraint_name = "h_c"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w+overlap_h);
-        constraint_i++;
-    }
+    sp_ilp_settings.set_constraints_modules_overlap_h();
     //if vertical constraint graph got i->j them y_j - y_i >= h
-    for(int i = 0; i<this->constraint_graph_v.size(); ++i){
-        int from = constraint_graph_v[i].from, to = constraint_graph_v[i].to, w = constraint_graph_v[i].w;
-        string constraint_name = "v_c"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {from+1+sequence_n, to+1+sequence_n}, {1, -1}, constraint_name, -w+overlap_v);
-        constraint_i++;
-    }
+    sp_ilp_settings.set_constraints_modules_overlap_v();
     //set constraints to fix module
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        if(sequence_pair_t::seq_is_fix[i]){
-            string x_constraint_name = "fix_x_c"+ std::to_string(i);
-            string y_constraint_name = "fix_y_c"+ std::to_string(i);
-            vec2d_t ll_pos = sequence_pair_t::seq_fixed_map[i]->get_left_lower();
-            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1}, {1}, x_constraint_name, static_cast<int>(ll_pos.get_x()));
-            constraint_i++;
-            ILP_solver.set_constraint_fx(constraint_i, 1, {i+1+sequence_n}, {1}, y_constraint_name, static_cast<int>(ll_pos.get_y()));
-            constraint_i++;
-        }
+    sp_ilp_settings.set_constraints_modules_fixed();
+    if(minimize_wirelength){
+        //set constraints to give the direction to the edges
+        sp_ilp_settings.set_constraints_net_direction();
+        //set edge and block left(bottom) constraints
+        sp_ilp_settings.set_constraints_net();
+        //set variables for connections
+        sp_ilp_settings.set_variables_connections();
     }
-    //set constraints to give the direction to the edges
-    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
-        string x_constraint_name = "x_r_e"+ std::to_string(i);
-        string y_constraint_name = "y_r_e"+ std::to_string(i);
-        ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i, x_edge_offset_r+i}, {1, -1}, x_constraint_name, 0.0);
-        constraint_i++;
-        ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i, y_edge_offset_r+i}, {1, -1}, y_constraint_name, 0.0);
-        constraint_i++;
-    }
-    //set edge and block left(bottom) constraints
-    for(int i = 0; i<this->connections.size()&&minimize_wirelength; ++i){
-        for(int j = 0; j<connections[i].nodes.size(); ++j){
-            int b = connections[i].nodes[j];
-            double b_x = this->modules_wh[b].get_half_x();
-            double b_y = this->modules_wh[b].get_half_y();    
-            string x_l_constraint_name = "x_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
-            string y_l_constraint_name = "y_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
-            string x_r_constraint_name = "x_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
-            string y_r_constraint_name = "y_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
-            ILP_solver.set_constraint_upb(constraint_i, 2, {x_edge_offset_l+i,b+x_module_offset}, {1, -1}, x_l_constraint_name, b_x);
-            constraint_i++;
-            ILP_solver.set_constraint_upb(constraint_i, 2, {y_edge_offset_l+i,b+y_module_offset}, {1, -1}, y_l_constraint_name, b_y);
-            constraint_i++;
-            ILP_solver.set_constraint_upb(constraint_i, 2, {b+x_module_offset,x_edge_offset_r+i}, {1, -1}, x_r_constraint_name, -b_x);
-            constraint_i++;
-            ILP_solver.set_constraint_upb(constraint_i, 2, {b+y_module_offset,y_edge_offset_r+i}, {1, -1}, y_r_constraint_name, -b_y);
-            constraint_i++;
-        }
-    }
+    
+    //set variables for modules
+    sp_ilp_settings.set_variables_modules();
 
-    //set variables
-    for(int i = 1;i<=sequence_n; ++i){
-        string var_name = "x"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
-        //ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
-        ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
-
-    }
-    for(int i = sequence_pair_t::sequence_n+1;i<=2*sequence_n; ++i){
-        string var_name = "x"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, i, var_name.c_str());
-        //ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
-        ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
-    }
-    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
-        string var_name1 = "x_e_l"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, x_edge_offset_l+i, var_name1.c_str());
-        ILP_solver.set_variable_double_range(x_edge_offset_l+i, 0.0, chip_t::get_width());
-
-        string var_name2 = "x_e_r"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, x_edge_offset_r+i, var_name2.c_str());
-        ILP_solver.set_variable_double_range(x_edge_offset_r+i, 0.0, chip_t::get_width());
-
-        string var_name3 = "y_e_l"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, y_edge_offset_l+i, var_name3.c_str());
-        ILP_solver.set_variable_double_range(y_edge_offset_l+i, 0.0, chip_t::get_height());
-
-        string var_name4 = "y_e_r"+ std::to_string(i);
-        glp_set_col_name(ILP_solver.ILP, y_edge_offset_r+i, var_name4.c_str());
-        ILP_solver.set_variable_double_range(y_edge_offset_r+i, 0.0, chip_t::get_height());
-    }
-    //set coefficient of the objective function
-    for(int i = 0; i<connections.size()&&minimize_wirelength; ++i){
-        coef[i+x_edge_offset_r] = connections[i].w;
-        coef[i+x_edge_offset_l] = -connections[i].w;
-        coef[i+y_edge_offset_r] = connections[i].w;
-        coef[i+y_edge_offset_l] = -connections[i].w;
-    }
+    sp_ilp_settings.set_coef(coef);
     //solve
     ILP_solver.set_obj_coef(coef);
     ILP_solver.load();
@@ -873,8 +798,6 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
         return true;
     }
     else{return false;}
-
-
 }
 
 void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {
@@ -984,7 +907,7 @@ void sequence_pair_t::overlap_optimization(){
     ILP_solver = ILP_solver_t();
     ILP_solver.init("ILP_solver", constraint_n, variable_n);
 
-    sp_ilp_settings_t sp_ilp_settings(this);
+    sp_ilp_settings_find_position_t sp_ilp_settings(this);
     sp_ilp_settings.set_constraints_net_direction();
     sp_ilp_settings.set_constraints_opt_nets();
     sp_ilp_settings.set_constraints_opt_modules();
@@ -1078,13 +1001,13 @@ void sequence_pair_t::carve(){
     }
 }
 
-double sequence_pair_t::get_wirelength(bool minimize, bool with_area) {
+double sequence_pair_t::update_wirelength(bool minimize, bool with_area) {
     this->predict_wirelength(minimize, with_area);
     return this->predicted_wirelength;
 }
 
 void sequence_pair_t::print_wirelength(bool minimize, bool with_area) {
-    cout<<std::setprecision(16)<<this->get_wirelength(minimize,with_area)<<endl;
+    cout<<std::setprecision(16)<<this->update_wirelength(minimize,with_area)<<endl;
 }
 
 void sequence_pair_t::print_v() {
@@ -1120,7 +1043,7 @@ void sequence_pair_t::write_inline() {
     }
     fout<<"}"<<endl;
     //this->print_shapes_i();
-    fout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength(true, true)<<endl;
+    fout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, true)<<endl;
     fout.close();
 }
 

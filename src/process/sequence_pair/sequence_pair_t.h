@@ -22,7 +22,8 @@ using std::vector;
 using std::unordered_map;
 
 class sequence_pair_t{
-    friend class sp_ilp_settings_t;
+    friend class sp_ilp_settings_find_position_t;
+    friend class sp_ilp_settings_find_position_with_area_t;
 public: 
     //constructor
     sequence_pair_t();
@@ -47,7 +48,7 @@ public:
 
     int get_vi(int);
     int get_hi(int);
-    double get_wirelength(bool minimize, bool with_area);
+    double update_wirelength(bool minimize, bool with_area);
     std::vector<int> get_v();
     std::vector<int> get_h();
 

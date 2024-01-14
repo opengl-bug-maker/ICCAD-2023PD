@@ -3,11 +3,11 @@
 
 
 using namespace std;
-sp_ilp_settings_t::sp_ilp_settings_t(sequence_pair_t * sp){
+sp_ilp_settings_find_position_t::sp_ilp_settings_find_position_t(sequence_pair_t * sp){
     this->sp = sp;
 }
 
-void sp_ilp_settings_t::set_constraints_modules_overlap_h()
+void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_h()
 {
     for(int i = 0; i<this->sp->constraint_graph_h.size(); ++i){
         int from = this->sp->constraint_graph_h[i].from, to = this->sp->constraint_graph_h[i].to,w = this->sp->constraint_graph_h[i].w;
@@ -34,7 +34,7 @@ void sp_ilp_settings_t::set_constraints_modules_overlap_h()
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_t::set_constraints_modules_overlap_v(){
+void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_v(){
     for(int i = 0; i<this->sp->constraint_graph_v.size(); ++i){
         int from = this->sp->constraint_graph_v[i].from, to = this->sp->constraint_graph_v[i].to, w = this->sp->constraint_graph_v[i].w;
         string constraint_name = "v_c"+ std::to_string(i);
@@ -60,7 +60,7 @@ void sp_ilp_settings_t::set_constraints_modules_overlap_v(){
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_t::set_constraints_modules_fixed(){
+void sp_ilp_settings_find_position_t::set_constraints_modules_fixed(){
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(sequence_pair_t::seq_is_fix[i]){
             string x_constraint_name = "fix_x_c"+ std::to_string(i);
@@ -73,7 +73,7 @@ void sp_ilp_settings_t::set_constraints_modules_fixed(){
         }
     }
 }
-void sp_ilp_settings_t::set_constraints_net_direction(){
+void sp_ilp_settings_find_position_t::set_constraints_net_direction(){
     //2 * this->sp->connections
     for(int i = 0; i<this->sp->connections.size(); ++i){
         string x_constraint_name = "x_r_e"+ std::to_string(i);
@@ -84,7 +84,7 @@ void sp_ilp_settings_t::set_constraints_net_direction(){
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_t::set_constraints_net(){
+void sp_ilp_settings_find_position_t::set_constraints_net(){
     //nodes* 4
     for(int i = 0; i<this->sp->connections.size(); ++i){
         for(int j = 0; j<this->sp->connections[i].nodes.size(); ++j){
@@ -136,7 +136,7 @@ void sp_ilp_settings_t::set_constraints_net(){
         }
     }
 }
-void sp_ilp_settings_t::set_constraints_ratio_equal_1(){
+void sp_ilp_settings_find_position_t::set_constraints_ratio_equal_1(){
     for(int i = 0; i<sequence_pair_t::soft_n; ++i){
         string constraint_name1 = "w_h_1"+ std::to_string(i);
         this->sp->ILP_solver.set_constraint_fx(this->sp->constraint_i, 5,
@@ -144,7 +144,7 @@ void sp_ilp_settings_t::set_constraints_ratio_equal_1(){
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_t::set_constraints_boundaries(){
+void sp_ilp_settings_find_position_t::set_constraints_boundaries(){
     for(int i = 0; i<sequence_pair_t::soft_n; ++i){
         string  constraint_name1 = "x_bound"+ std::to_string(i);
         string  constraint_name2 = "y_bound"+ std::to_string(i);
@@ -167,7 +167,7 @@ void sp_ilp_settings_t::set_constraints_boundaries(){
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_t::set_variables_modules(){
+void sp_ilp_settings_find_position_t::set_variables_modules(){
     for(int i = 0;i<sequence_pair_t::sequence_n; ++i){ //x
         string var_name = "x"+ std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, i+this->sp->x_module_offset, var_name.c_str());
@@ -177,7 +177,7 @@ void sp_ilp_settings_t::set_variables_modules(){
 
     }
 }
-void sp_ilp_settings_t::set_variables_connections(){
+void sp_ilp_settings_find_position_t::set_variables_connections(){
     for(int i = 0; i<this->sp->connections.size(); ++i){
         string var_name1 = "x_e_l"+ std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->x_edge_offset_l+i, var_name1.c_str());
@@ -196,7 +196,7 @@ void sp_ilp_settings_t::set_variables_connections(){
         this->sp->ILP_solver.set_variable_double_range(this->sp->y_edge_offset_r+i, 0.0, chip_t::get_height());
     }
 }
-void sp_ilp_settings_t::set_variables_shapes(){
+void sp_ilp_settings_find_position_t::set_variables_shapes(){
     for(int i = 0; i<sequence_pair_t::soft_n; ++i){
         for(int j = 0; j<5; ++j){
             string var_name = "shape"+std::to_string(j)+ std::to_string(i);
@@ -205,7 +205,7 @@ void sp_ilp_settings_t::set_variables_shapes(){
         }
     }
 }
-void sp_ilp_settings_t::set_coef(vector<double>& coef){
+void sp_ilp_settings_find_position_t::set_coef(vector<double>& coef){
     for(int i = 0; i<this->sp->connections.size(); ++i){
         coef[i+this->sp->x_edge_offset_r] = this->sp->connections[i].w;
         coef[i+this->sp->x_edge_offset_l] = -this->sp->connections[i].w;
@@ -214,7 +214,7 @@ void sp_ilp_settings_t::set_coef(vector<double>& coef){
     }
 }
 
-void sp_ilp_settings_t::set_constraints_opt_nets(){
+void sp_ilp_settings_find_position_t::set_constraints_opt_nets(){
     for(int i = 0; i<this->sp->connections.size(); ++i){
         int u = this->sp->connections[i].nodes[0], v = this->sp->connections[i].nodes[1];
         string x_l_constraint_name = "x_e_b_l"+ std::to_string(i)+"_"+std::to_string(i);
@@ -247,7 +247,7 @@ void sp_ilp_settings_t::set_constraints_opt_nets(){
     }
 }
 
-void sp_ilp_settings_t::set_constraints_opt_modules(){
+void sp_ilp_settings_find_position_t::set_constraints_opt_modules(){
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         string x_c_name = "x_c"+ std::to_string(i);
         string y_c_name = "y_c"+ std::to_string(i);
@@ -294,7 +294,7 @@ void sp_ilp_settings_t::set_constraints_opt_modules(){
     }
 }
 
-void sp_ilp_settings_t::set_constraints_only_one_hand(){
+void sp_ilp_settings_find_position_t::set_constraints_only_one_hand(){
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(sequence_pair_t::seq_is_fix[i]){continue;}
         vector<int> ids;
@@ -315,7 +315,7 @@ void sp_ilp_settings_t::set_constraints_only_one_hand(){
     }
 }
 
-void sp_ilp_settings_t::set_variables_hands(){
+void sp_ilp_settings_find_position_t::set_variables_hands(){
     for(int i = 0; i<this->sp->near_x.size(); ++i){
         string var_name = "x_hand" + std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->near_x_offset+i, var_name.c_str());
@@ -325,5 +325,120 @@ void sp_ilp_settings_t::set_variables_hands(){
         string var_name = "y_hand" + std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->near_y_offset + i, var_name.c_str());
         this->sp->ILP_solver.set_variable_double_range(this->sp->near_y_offset + i, 0, 1);
+    }
+}
+
+
+
+sp_ilp_settings_find_position_with_area_t::sp_ilp_settings_find_position_with_area_t(sequence_pair_t * sp){
+    this->sp = sp;
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_constraints_modules_overlap_h(){
+    for(int i = 0; i<this->sp->constraint_graph_h.size(); ++i){
+        int from = this->sp->constraint_graph_h[i].from, to = this->sp->constraint_graph_h[i].to, w = this->sp->constraint_graph_h[i].w;
+        string constraint_name = "h_c"+ std::to_string(i);
+        this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {from+1, to+1}, {1, -1}, constraint_name, -w);
+        this->sp->constraint_i++;
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_constraints_modules_overlap_v(){
+    for(int i = 0; i<this->sp->constraint_graph_v.size(); ++i){
+        int from = this->sp->constraint_graph_v[i].from, to = this->sp->constraint_graph_v[i].to, w = this->sp->constraint_graph_v[i].w;
+        string constraint_name = "v_c"+ std::to_string(i);
+        this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {from+1+sequence_pair_t::sequence_n, to+1+sequence_pair_t::sequence_n}, {1, -1}, constraint_name, -w);
+        this->sp->constraint_i++;
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_constraints_modules_fixed(){
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        if(sequence_pair_t::seq_is_fix[i]){
+            string x_constraint_name = "fix_x_c"+ std::to_string(i);
+            string y_constraint_name = "fix_y_c"+ std::to_string(i);
+            vec2d_t ll_pos = sequence_pair_t::seq_fixed_map[i]->get_left_lower();
+            this->sp->ILP_solver.set_constraint_fx(this->sp->constraint_i, 1, {i+1}, {1}, x_constraint_name, static_cast<int>(ll_pos.get_x()));
+            this->sp->constraint_i++;
+            this->sp->ILP_solver.set_constraint_fx(this->sp->constraint_i, 1, {i+1+sequence_pair_t::sequence_n}, {1}, y_constraint_name, static_cast<int>(ll_pos.get_y()));
+            this->sp->constraint_i++;
+        }
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_constraints_net_direction(){
+    for(int i = 0; i<this->sp->connections.size(); ++i){
+        string x_constraint_name = "x_r_e"+ std::to_string(i);
+        string y_constraint_name = "y_r_e"+ std::to_string(i);
+        this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {this->sp->x_edge_offset_l+i, this->sp->x_edge_offset_r+i}, {1, -1}, x_constraint_name, 0.0);
+        this->sp->constraint_i++;
+        this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {this->sp->y_edge_offset_l+i, this->sp->y_edge_offset_r+i}, {1, -1}, y_constraint_name, 0.0);
+        this->sp->constraint_i++;
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_constraints_net(){
+    for(int i = 0; i<this->sp->connections.size(); ++i){
+        for(int j = 0; j<this->sp->connections[i].nodes.size(); ++j){
+            int b = this->sp->connections[i].nodes[j];
+            double b_x = this->sp->modules_wh[b].get_half_x();
+            double b_y = this->sp->modules_wh[b].get_half_y();    
+            string x_l_constraint_name = "x_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
+            string y_l_constraint_name = "y_e_b_l"+ std::to_string(i)+"_"+std::to_string(j);
+            string x_r_constraint_name = "x_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
+            string y_r_constraint_name = "y_e_b_r"+ std::to_string(i)+"_"+std::to_string(j);
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {this->sp->x_edge_offset_l+i,b+this->sp->x_module_offset}, {1, -1}, x_l_constraint_name, b_x);
+            this->sp->constraint_i++;
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {this->sp->y_edge_offset_l+i,b+this->sp->y_module_offset}, {1, -1}, y_l_constraint_name, b_y);
+            this->sp->constraint_i++;
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {b+this->sp->x_module_offset,this->sp->x_edge_offset_r+i}, {1, -1}, x_r_constraint_name, -b_x);
+            this->sp->constraint_i++;
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2, {b+this->sp->y_module_offset,this->sp->y_edge_offset_r+i}, {1, -1}, y_r_constraint_name, -b_y);
+            this->sp->constraint_i++;
+        }
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_variables_modules(){
+    for(int i = 1;i<=this->sp->sequence_n; ++i){
+        string var_name = "x"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->modules_wh[i-1].get_x());
+        this->sp->ILP_solver.set_variable_double_range(i, 0.0,chip_t::get_width()-this->sp->modules_wh[i-1].get_x());
+    }
+    for(int i = sequence_pair_t::sequence_n+1;i<=2*sequence_pair_t::sequence_n; ++i){
+        string var_name = "x"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, i, var_name.c_str());
+        //ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->modules_wh[ i-1-sequence_n].get_y());
+        this->sp->ILP_solver.set_variable_double_range(i, 0.0, chip_t::get_height()-this->sp->modules_wh[ i-1-sequence_pair_t::sequence_n].get_y());
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_variables_connections(){
+    for(int i = 0; i<this->sp->connections.size(); ++i){
+        string var_name1 = "x_e_l"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->x_edge_offset_l+i, var_name1.c_str());
+        this->sp->ILP_solver.set_variable_double_range(this->sp->x_edge_offset_l+i, 0.0, chip_t::get_width());
+
+        string var_name2 = "x_e_r"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->x_edge_offset_r+i, var_name2.c_str());
+        this->sp->ILP_solver.set_variable_double_range(this->sp->x_edge_offset_r+i, 0.0, chip_t::get_width());
+
+        string var_name3 = "y_e_l"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->y_edge_offset_l+i, var_name3.c_str());
+        this->sp->ILP_solver.set_variable_double_range(this->sp->y_edge_offset_l+i, 0.0, chip_t::get_height());
+
+        string var_name4 = "y_e_r"+ std::to_string(i);
+        glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->y_edge_offset_r+i, var_name4.c_str());
+        this->sp->ILP_solver.set_variable_double_range(this->sp->y_edge_offset_r+i, 0.0, chip_t::get_height());
+    }
+}
+
+void sp_ilp_settings_find_position_with_area_t::set_coef(std::vector<double> & coef){
+    for(int i = 0; i<this->sp->connections.size(); ++i){
+        coef[i+this->sp->x_edge_offset_r] = this->sp->connections[i].w;
+        coef[i+this->sp->x_edge_offset_l] = -this->sp->connections[i].w;
+        coef[i+this->sp->y_edge_offset_r] = this->sp->connections[i].w;
+        coef[i+this->sp->y_edge_offset_l] = -this->sp->connections[i].w;
     }
 }

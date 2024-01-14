@@ -174,7 +174,7 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     double ori_wirelength = ori.predicted_wirelength;
-    double after_wirelength = after.get_wirelength(true, false);
+    double after_wirelength = after.update_wirelength(true, false);
     if(after_wirelength<=0||ori_wirelength<=0){
         return 0;
     }
