@@ -59,8 +59,8 @@ void tester_t::test_sp(){
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
 
-        // SP.find_position(true, true, 0, 0);
-        // SP.find_position_with_area(true, true, 0, 0);
+        SP.find_position_allow_illegal(true, true, 0, 0);
+        //SP.find_position_with_area(true, true, 0, 0);
         // SP = SA_solver.post_process(SP);
         // SP.fill_near();
         // SP.overlap_optimization();
@@ -73,8 +73,22 @@ void tester_t::test_sp(){
         // cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
         // cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
         // cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
-        SP.to_rectilinear_and_plot();
+        //SP.to_rectilinear_and_plot();
         //SP.sequence_pair_validation();
-        //SP.to_fp().GUI_validation();
+        SP.sequence_pair_validation();
     }
+}
+
+void tester_t::test_init(){
+    sequence_pair_enumerator_t SPEN;
+    SPEN.init_timeout = 1e10;
+    SPEN.generate_sequence_pairs(1);
+    sequence_pair_t SP = SPEN.valid_sequence_pairs[0];
+    bool ok = SP.find_position(true, true, 0, 0);
+    if(ok){
+        cout<<std::setprecision(16)<<"Init success, got wirelength: "<<SP.z<<endl;
+        //SP.predict_wirelength(true, true);
+    }
+    SP.sequence_pair_validation();
+
 }

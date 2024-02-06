@@ -272,6 +272,7 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
             }
             this->modules_wh_i = result_wh_i;
             this->modules_positions = result_pos;
+            this->z = ILP_result.z;
         }
         return true;
     }
@@ -324,46 +325,6 @@ void sequence_pair_t::build_graph() {
         sequence_pair_t::connection_graph_deg+=connected_id.size();
         sequence_pair_t::connections.push_back({connected_id, input_multi_net->weight});
     }
-    // for(int i = 0; i<sequence_n; ++i) {
-    //     deg_w[i].second = i;
-    //     if(seq_is_fix[i]){
-    //         const vector<std::pair<const module_t* const, const int>> neighbors
-    //                 = (seq_fixed_map[i])->getConnections();
-    //         for(const auto neighbor:neighbors){
-    //             int neighbor_i = -1;
-    //             if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-    //                 neighbor_i = fix_module_to_id_m[neighbor.first];
-    //             }
-    //             if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-    //                 neighbor_i = soft_module_to_id_m[neighbor.first];
-    //             }
-    //             connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-    //             deg_w[i].first+=neighbor.second;
-    //             if(i>neighbor_i){
-    //                 connections.push_back({{i, neighbor_i}, neighbor.second});
-    //             }
-
-    //         }
-    //     }
-    //     else{
-    //         const vector<std::pair<const module_t* const, const int>> neighbors
-    //                 = (seq_soft_map[i])->getConnections();
-    //         for(const auto neighbor:neighbors){
-    //             int neighbor_i = -1;
-    //             if(sequence_pair_t::fix_module_to_id_m.count(neighbor.first)){
-    //                 neighbor_i = fix_module_to_id_m[neighbor.first];
-    //             }
-    //             if(sequence_pair_t::soft_module_to_id_m.count(neighbor.first)) {
-    //                 neighbor_i = soft_module_to_id_m[neighbor.first];
-    //             }
-    //             connections_VE[neighbor_i][i] = connections_VE[i][neighbor_i] = neighbor.second;
-    //             deg_w[i].first+=neighbor.second;
-    //             if(i>neighbor_i){
-    //                 connections.push_back({{i, neighbor_i}, neighbor.second});
-    //             }
-    //         }
-    //     }
-    // }
     sort(deg_w.begin(), deg_w.end());
     std::reverse(deg_w.begin(), deg_w.end()); //incremental
 }
@@ -653,8 +614,8 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->predicted_wirelength = sum;
-    // cout<< "actual : "<<this->predicted_wirelength<<endl;
-    // cout<< "LP result : "<<this->ILP_result.z<<endl;
+    cout<< "actual : "<<this->predicted_wirelength<<endl;
+    cout<< "LP result : "<<this->ILP_result.z<<endl;
 }
 
 void sequence_pair_t::to_rectilinear(){
@@ -798,6 +759,105 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
         return true;
     }
     else{return false;}
+}
+
+bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v){
+
+    build_constraint_graph();
+    constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n;
+    constraint_i = 1; //constraint_counter
+    variable_n = 4*sequence_n + 5*soft_n;
+    if(minimize_wirelength){
+        variable_n += 4*sequence_pair_t::connections.size();
+        constraint_n += 2 * sequence_pair_t::connections.size() + 4 * sequence_pair_t::connection_graph_deg;
+        //constraint_n+=10*sequence_pair_t::connections.size();
+    }
+    x_module_offset = 1;
+    y_module_offset = 1+sequence_n;
+    shape_types.resize(5);
+    for(int i = 0; i<5; ++i){
+        shape_types[i] = 1+2*sequence_n+i*soft_n;
+    }
+    x_edge_offset_l = 1+2*sequence_n+5*soft_n;
+    x_edge_offset_r = 1+2*sequence_n+5*soft_n+this->connections.size();
+    y_edge_offset_l = 1+2*sequence_n+5*soft_n+2*this->connections.size();
+    y_edge_offset_r = 1+2*sequence_n+5*soft_n+3*this->connections.size();
+
+    x_overlap = 1+2*sequence_n+5*soft_n+4*this->connections.size();
+    y_overlap = 1+3*sequence_n+5*soft_n+4*this->connections.size();
+
+    //apart from constraint graph, every fix module need 2 additional condition
+    ILP_solver = ILP_solver_t();
+    ILP_solver.init("ILP_solver", constraint_n, variable_n);
+    if(ILP_solver.get_is_invalid()){return false;}
+    ILP_solver.set_min();
+
+
+    vector<double> coef(variable_n+1, 0);
+
+    //set constraints to place modules
+    //if horizontal constraint graph got i->j them x_j - x_i >= w
+    sp_ilp_settings_find_position_t sp_ilp_settings(this);
+    
+    sp_ilp_settings.set_constraints_modules_allow_overlap_h();
+    //if vertical constraint graph got i->j them y_j - y_i >= h
+    sp_ilp_settings.set_constraints_modules_allow_overlap_v();
+    //set constraints to fix module
+    sp_ilp_settings.set_constraints_modules_fixed();
+    
+    if(minimize_wirelength){
+        //set constraints to give the direction to the edges
+        //x_e_r >= x_e_l
+        sp_ilp_settings.set_constraints_net_direction();
+        //set edge and block left(bottom) constraints
+        sp_ilp_settings.set_constraints_net();
+    }
+    //w+h = 1
+    sp_ilp_settings.set_constraints_ratio_equal_1();
+    //set modules' boundaires
+    sp_ilp_settings.set_constraints_boundaries();
+    //set variables of modules
+    sp_ilp_settings.set_variables_modules();
+    sp_ilp_settings.set_variables_allow_overlap();
+
+    if(minimize_wirelength){
+        sp_ilp_settings.set_variables_connections();
+    }
+    sp_ilp_settings.set_variables_shapes();
+
+
+    //set coefficient of the objective function
+    if(minimize_wirelength){
+        sp_ilp_settings.set_coef_allow_overlap(coef);
+        //sp_ilp_settings.set_coef(coef);
+    }
+    //solve
+    ILP_solver.set_obj_coef(coef);
+    ILP_solver.load();
+    ILP_result = ILP_solver.solve(false);
+
+
+    if(ILP_result.legal){
+        if(load_result){
+            vector<vec2d_t> result_pos = get_LP_res_pos();
+            auto[result_wh, result_wh_i] = get_LP_res_wh();
+           
+            for(int i = 0; i<sequence_pair_t::soft_n; ++i){
+                this->modules_wh[i] = result_wh[i];
+            }
+            this->modules_wh_i = result_wh_i;
+            this->modules_positions = result_pos;
+            // for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
+            //     cout<< "{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
+            // }
+            this->z = ILP_result.z;
+            //cout<<this->z<<endl;
+        }
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {

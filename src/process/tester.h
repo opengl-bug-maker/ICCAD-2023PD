@@ -6,4 +6,5 @@ public:
     void test_qs();
 
     void test_sp();
+    void test_init();
 };

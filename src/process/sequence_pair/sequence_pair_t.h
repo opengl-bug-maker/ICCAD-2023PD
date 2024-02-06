@@ -30,6 +30,7 @@ public:
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
+    bool find_position_allow_illegal(bool, bool, int, int);
     void predict_wirelength(bool, bool);
     void to_rectilinear();
     void to_rectilinear_and_plot();
@@ -84,6 +85,7 @@ public:
     static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
     static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
     double predicted_wirelength = -1;
+    double z = -1;
     vector<int> add_soft_order;
     vector<int> is_in_seq;
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bouding_lines;
@@ -141,7 +143,7 @@ private:
 
     //properties for LP
     int constraint_n, constraint_i, variable_n;
-    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r;
+    int x_module_offset, y_module_offset, x_edge_offset_l, x_edge_offset_r, y_edge_offset_l, y_edge_offset_r, x_overlap, y_overlap;
     int near_x_offset, near_y_offset;
     vector<vector<int>> near_x_map,near_y_map;
     vector<vector<int>> near_x_id, near_y_id;
