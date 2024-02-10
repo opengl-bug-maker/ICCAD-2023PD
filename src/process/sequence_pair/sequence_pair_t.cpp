@@ -296,6 +296,22 @@ void sequence_pair_t::sequence_pair_validation() {
 
 }
 
+void sequence_pair_t::sequence_pair_validation(int t) {
+    vector<std::pair<rect_t, std::string>> rects;
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        if(this->modules_positions[i].get_x() < 0 || this->modules_positions[i].get_y() < 0){continue;}
+        if(this->seq_is_fix[i]){
+            rects.push_back({{this->modules_positions[i], this->modules_wh[i]}, "f" + std::to_string(i)});
+        }
+        else{
+            rects.push_back({{this->modules_positions[i], this->modules_wh[i]}, "s" + std::to_string(i)});
+        }
+    }
+    string str = "SQP, t = "+std::to_string(t);
+    visualizer_t::show_fp_rect_no_border(rects, str);
+
+}
+
 void sequence_pair_t::set_bounding_lines(){
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(this->carved[i]){continue;}

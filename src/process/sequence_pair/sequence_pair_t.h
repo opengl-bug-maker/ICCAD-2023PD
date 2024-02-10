@@ -99,6 +99,7 @@ public:
     void print_inline();
     void write_inline();
     void sequence_pair_validation();
+    void sequence_pair_validation(int);
     void print_result();
     void set_bounding_lines();
 

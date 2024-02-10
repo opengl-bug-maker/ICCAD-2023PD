@@ -176,7 +176,7 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         }
         //if(legal_pos.size()){break;}
     }
-    sort(legal_pos.begin(), legal_pos.end());
+    sort(legal_pos.begin(), legal_pos.end()); //open this line to get an illegal initialization
     cout<<i<<endl;
     for(auto& pos:legal_pos){
         int j = pos.second[0], k = pos.second[1];

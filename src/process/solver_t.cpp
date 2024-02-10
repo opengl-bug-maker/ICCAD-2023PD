@@ -86,6 +86,8 @@ void solver_t::run() {
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = this->init_timeout;
     SPEN.generate_sequence_pairs(1);
+    SPEN.valid_sequence_pairs[0].sequence_pair_validation();
+    SPEN.valid_sequence_pairs[0].print_inline();
     for(auto& e:SPEN.valid_sequence_pairs){double useless = e.update_wirelength(true, true);}
 
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
