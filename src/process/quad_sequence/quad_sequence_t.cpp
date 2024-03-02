@@ -396,8 +396,8 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
                     G_VV[7][j][i] = 1;
                 }
                 else{
-                    G[0][j].push_back(i); //wtf
-                    G_VV[0][j][i] = 1;
+                    G[0][i].push_back(j); //wtf
+                    G_VV[0][i][j] = 1;
                     //G[1][j].push_back(i); //wtf
                 }
             }
@@ -443,13 +443,13 @@ void quad_sequence_t::build_constraint_graph_from_SP(sequence_pair_t SP){
 
 
     //hot fix
-    G_VV[4][2][5] = 0;
-    G_VV[5][2][5] = 1;
+    // G_VV[4][2][5] = 0;
+    // G_VV[5][2][5] = 1;
 
-    G_VV[4][3][12] = 0;
-    G_VV[5][3][12] = 1;
-    G_VV[0][11][10] = 0;
-    G_VV[1][10][11] = 1;
+    // G_VV[4][3][12] = 0;
+    // G_VV[5][3][12] = 1;
+    // G_VV[0][11][10] = 0;
+    // G_VV[1][10][11] = 1;
 
     G_VV_to_G();
 
@@ -523,7 +523,7 @@ void quad_sequence_t::build_constraint_graph(){
 void quad_sequence_t::set_constraints_modules_overlap(){
     for(int i = 0; i<this->G[0].size(); ++i){
         for(int j = 0; j<this->G[0][i].size(); ++j){
-            int v = i, u = G[0][i][j]; //wtf
+            int u = i, v = G[0][i][j]; //wtf
             ILP_solver.set_constraint_upb(constraint_i, 2, {x_modules_offsets[u]+2, x_modules_offsets[v]+0}, {1, -1}, "ux2 - vx0", 0);
             constraint_i++;
             ILP_solver.set_constraint_upb(constraint_i, 2, {x_modules_offsets[u]+3, x_modules_offsets[v]+1}, {1, -1}, "ux3 - vx1", 0);
