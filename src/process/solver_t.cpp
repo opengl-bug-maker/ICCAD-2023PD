@@ -49,7 +49,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 1*time_left, 0.5, 0.01, false, 0, 0.33, false);
+    SA_solver.run(SPEN, 1*time_left, 0.5, 0.01, false, 0, 1, false);
     // // cout<<"---------------Stage 2----------------"<<endl;
     // SA_solver.run(SPEN, 0.6 * time_left, 0.03, 0.008, true, 0, 1, false);
     // //  cout<<"---------------Stage 3----------------"<<endl;

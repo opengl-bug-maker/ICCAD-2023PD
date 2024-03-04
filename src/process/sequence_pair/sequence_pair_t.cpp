@@ -151,7 +151,7 @@ void sequence_pair_t::build_constraint_graph() {
             }
         }
     }
-    simplify_constraint_graph();
+    //simplify_constraint_graph();
 }
 
 vector<vec2d_t> sequence_pair_t::get_LP_res_pos(){
@@ -864,7 +864,7 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
             this->modules_wh_i = result_wh_i;
             this->modules_positions = result_pos;
             // for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
-            //     cout<< "{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
+            //     cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
             // }
             this->z = ILP_result.z;
             //cout<<this->z<<endl;

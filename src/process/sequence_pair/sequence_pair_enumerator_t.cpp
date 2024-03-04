@@ -158,11 +158,11 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
             }
             if(success){
                 double wl = this->seed_SP.z;
-                legal_pos.push_back({wl, {jj, kk}});
+                //legal_pos.push_back({wl, {jj, kk}});
                 //break;
-                // if(this->add_soft_process_cont(i+1, with_area, cutoff, jj, kk)){
-                //     fnd|=1;
-                // }
+                if(this->add_soft_process_cont(i+1, with_area, cutoff, jj, kk)){
+                    return true;
+                }
             }
             this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
             seed_SP.v_sequence.erase(seed_SP.v_sequence.begin() + jj);
@@ -176,24 +176,24 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         }
         //if(legal_pos.size()){break;}
     }
-    sort(legal_pos.begin(), legal_pos.end()); //open this line to get an illegal initialization
-    cout<<i<<endl;
-    for(auto& pos:legal_pos){
-        int j = pos.second[0], k = pos.second[1];
-        seed_SP.v_sequence.insert(seed_SP.v_sequence.begin() + j, this->seed_SP.add_soft_order[i]);
-        seed_SP.h_sequence.insert(seed_SP.h_sequence.begin() + k, this->seed_SP.add_soft_order[i]);
-        this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
-        bool ok = this->add_soft_process_cont(i+1, with_area, cutoff, j, k);
-        if(ok==false){
-            cout<<"BT"<<endl;
-        }
-        this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
-        seed_SP.v_sequence.erase(seed_SP.v_sequence.begin() + j);
-        seed_SP.h_sequence.erase(seed_SP.h_sequence.begin() + k);
-        if(ok){
-            return true;
-        }
-    }
+    // sort(legal_pos.begin(), legal_pos.end()); //open this line to get an illegal initialization
+    // cout<<i<<endl;
+    // for(auto& pos:legal_pos){
+    //     int j = pos.second[0], k = pos.second[1];
+    //     seed_SP.v_sequence.insert(seed_SP.v_sequence.begin() + j, this->seed_SP.add_soft_order[i]);
+    //     seed_SP.h_sequence.insert(seed_SP.h_sequence.begin() + k, this->seed_SP.add_soft_order[i]);
+    //     this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
+    //     bool ok = this->add_soft_process_cont(i+1, with_area, cutoff, j, k);
+    //     if(ok==false){
+    //         cout<<"BT"<<endl;
+    //     }
+    //     this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
+    //     seed_SP.v_sequence.erase(seed_SP.v_sequence.begin() + j);
+    //     seed_SP.h_sequence.erase(seed_SP.h_sequence.begin() + k);
+    //     if(ok){
+    //         return true;
+    //     }
+    // }
     //cout<<i<<" : success n  = "<<success_n<<endl;
     return false;
 }

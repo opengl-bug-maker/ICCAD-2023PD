@@ -59,7 +59,10 @@ void tester_t::test_sp(){
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
 
-        SP.find_position_allow_illegal(true, true, 0, 0);
+        SP.find_position(true, true, 0, 0);
+        //SP.find_position_allow_illegal(true, true, 0, 0);
+        
+        //SP.to_rectilinear();
         //SP.find_position_with_area(true, true, 0, 0);
         // SP = SA_solver.post_process(SP);
         // SP.fill_near();
