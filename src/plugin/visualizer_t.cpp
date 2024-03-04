@@ -168,27 +168,24 @@ void visualizer_t::draw_bounding_line_connection(std::vector<std::pair<std::vect
     auto max_value = -1.0e9;
     auto min_value = 1.0e9;
     auto width_min = 1.0;
-    auto width_max = 100.0;
+    auto width_max = 0.02 * std::min(chip_t::get_width(), chip_t::get_height());
     for(auto tab : table){
         for(auto ta : tab){
             min_value = std::min(min_value, (double)ta);
             max_value = std::max(max_value, (double)ta);
         }
     }
-
+    std::cout<< bounding_lines.size()<<std::endl;
     for(int i = 0; i < table.size(); ++i) {
-        for(int j = i; j < table[i].size(); ++j) {
-            if(table[i][j] == 0) continue;
-            vec2d_t all_point_st = get_center(bounding_lines[i].first);
-            vec2d_t all_point_en = get_center(bounding_lines[j].first);
-
-            auto slope_vec = all_point_en - all_point_st;
+        for(int j = i + 1; j < table[i].size(); ++j) {
+            auto st = (bounding_lines[i].first[0] + bounding_lines[i].first[2]) / 2.0;
+            auto en = (bounding_lines[j].first[0] + bounding_lines[j].first[2]) / 2.0;
+            auto slope_vec = en - st;
             auto rvs_vec = vec2d_t(-slope_vec.get_y(), slope_vec.get_x());
             rvs_vec = rvs_vec / rvs_vec.get_length();
             rvs_vec = rvs_vec * ((table[i][j] - min_value) / (max_value - min_value) * (width_max - width_min) + width_min);
-            // bounding_lines.push_back({{st, en}, std::to_string(table[i][j])});
-            // bounding_lines.push_back({{all_point_st - rvs_vec, all_point_st + rvs_vec, all_point_en + rvs_vec, all_point_en - rvs_vec}, std::to_string(table[i][j])});
-            bounding_lines.push_back({{all_point_st - rvs_vec, all_point_st + rvs_vec, all_point_en + rvs_vec, all_point_en - rvs_vec}, ""});
+            if(table[i][j] != 0)
+                bounding_lines.push_back({{st - rvs_vec, st + rvs_vec, en + rvs_vec, en - rvs_vec}, std::to_string(table[i][j])});
         }
     }
     visualizer_t::draw_bounding_line(bounding_lines);

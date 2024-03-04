@@ -215,3 +215,11 @@ std::ostream &operator<<(std::ostream &os, const rect_t &vec) {
     os << "{" << vec.get_left_lower().get_x() << ", " << vec.get_left_lower().get_y() << " | " << vec.get_size().get_x() << ", " << vec.get_size().get_y() << "}";
     return os;
 }
+
+std::vector<vec2d_t> rect_t::to_bounding_point() const {
+    return {
+        this->get_left_lower(),
+        this->get_left_lower() + vec2d_t(0, this->Size.get_y()),
+        this->get_right_upper(),
+        this->get_left_lower() + vec2d_t(this->Size.get_x(), 0)};
+}

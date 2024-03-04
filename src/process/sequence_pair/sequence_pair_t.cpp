@@ -292,8 +292,12 @@ void sequence_pair_t::sequence_pair_validation() {
             rects.push_back({{this->modules_positions[i], this->modules_wh[i]}, "s" + std::to_string(i)});
         }
     }
-    visualizer_t::show_fp_rect_no_border(rects, "SQP");
-
+    //visualizer_t::show_fp_rect_no_border(rects, "SQP");
+    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bounding_lines;
+    for(auto rect:rects){
+        bounding_lines.push_back({rect.first.to_bounding_point(), rect.second});
+    }
+    visualizer_t::draw_bounding_line_connection(bounding_lines);
 }
 
 void sequence_pair_t::sequence_pair_validation(int t) {
@@ -308,8 +312,7 @@ void sequence_pair_t::sequence_pair_validation(int t) {
         }
     }
     string str = "SQP, t = "+std::to_string(t);
-    visualizer_t::show_fp_rect_no_border(rects, str);
-
+    //visualizer_t::show_fp_rect_no_border(rects, str);
 }
 
 void sequence_pair_t::set_bounding_lines(){

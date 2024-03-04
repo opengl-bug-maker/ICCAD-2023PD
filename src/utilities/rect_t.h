@@ -46,6 +46,8 @@ public:
 
     const rect_t merge_bounding_rect(const rect_t& rect) const;
 
+    std::vector<vec2d_t> to_bounding_point() const;
+
     bool operator==(const rect_t& rect) const;
 
     bool operator!=(const rect_t& rect) const;
