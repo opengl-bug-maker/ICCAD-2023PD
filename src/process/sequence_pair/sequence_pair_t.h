@@ -30,7 +30,8 @@ public:
     //essential
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
-    bool find_position_allow_illegal(bool, bool, int, int);
+    bool find_position_allow_illegal_fill(bool, bool, int, int);
+    bool find_positoin_allow_illegal(bool, bool, int, int);
     void predict_wirelength(bool, bool);
     void to_rectilinear();
     void to_rectilinear_and_plot();
@@ -90,8 +91,9 @@ public:
     vector<int> is_in_seq;
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bouding_lines;
     vector<int> carved;
+    
     vector<vec2d_t> get_4_points(vec2d_t, vec2d_t);
-
+    vector<int> get_correct_area();
     void fill_near();
     void overlap_optimization();
     void carve();
@@ -123,8 +125,8 @@ private:
     bool is_completed();
     void build_constraint_graph();
     void simplify_constraint_graph();
-    void swap_seq_number(int a, int b,bool, bool);
     
+    void swap_seq_number(int a, int b, bool, bool);
 
     //debug
     void print();

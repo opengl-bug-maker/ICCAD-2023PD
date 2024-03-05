@@ -310,8 +310,8 @@ void sp_ilp_settings_find_position_t::set_coef_allow_overlap(std::vector<double>
         
     }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        coef[i+this->sp->x_overlap] = 0;
-        coef[i+this->sp->y_overlap] = 0;
+        coef[i+this->sp->x_overlap] = 0.1;
+        coef[i+this->sp->y_overlap] = 0.1;
         //give overlap coefficient a huge penalty
     }
 }

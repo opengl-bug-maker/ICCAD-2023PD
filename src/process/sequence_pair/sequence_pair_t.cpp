@@ -151,6 +151,9 @@ void sequence_pair_t::build_constraint_graph() {
             }
         }
     }
+    // for(auto& e:this->constraint_graph_v){
+    //     cout<< e.from<<" "<<e.to<<" "<<endl;
+    // }
     //simplify_constraint_graph();
 }
 
@@ -312,7 +315,7 @@ void sequence_pair_t::sequence_pair_validation(int t) {
         }
     }
     string str = "SQP, t = "+std::to_string(t);
-    //visualizer_t::show_fp_rect_no_border(rects, str);
+    visualizer_t::show_fp_rect_no_border(rects, str);
 }
 
 void sequence_pair_t::set_bounding_lines(){
@@ -327,6 +330,8 @@ void sequence_pair_t::set_bounding_lines(){
     }
     
 }
+
+
 
 void sequence_pair_t::build_graph() {
     connections.clear();
@@ -579,15 +584,14 @@ void sequence_pair_t::print_connections() {
 }
 
 void sequence_pair_t::print_result(){
-    cout<<"Positions: "<<endl;
-    int i = 0;
-    for(auto& e:this->modules_positions){
-        cout<<"i: "<<i++<<e<<endl;
-    }
-    i = 0;
-    cout<<"widths, heights: "<<endl;
-    for(auto& e:this->modules_wh){
-        cout<<"i: "<<i++<<e<<endl;
+        
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        double area = this->modules_wh[i].get_x()*this->modules_wh[i].get_y();
+        cout<<i<<", pos : "<<std::setprecision(16)<<this->modules_positions[i]<<endl;
+        cout<<i<<", area: "<<std::setprecision(16)<<area<<endl;
+        cout<<i<<", wh : "<<std::setprecision(16)<<this->modules_wh[i]<<endl;
+        cout<<i<<", minimum area: "<<std::setprecision(16)<<this->modules_area[i]<<endl;
+        cout<<i<<", area - minimum: "<<std::setprecision(16)<<area - this->modules_area[i]<<endl;
     }
 }
 
@@ -656,8 +660,7 @@ void sequence_pair_t::to_rectilinear(){
 }
 
 void sequence_pair_t::to_rectilinear_and_plot(){
-    bool a = this->find_position(true, true, 0, 0);
-    bool b = this->find_position_with_area(true, true, 0, 0);
+    bool a = this->find_position_allow_illegal_fill(true, true, 0, 0);
     for(auto& e:this->is_in_seq){e = 1;}
     this->fill_near();
     this->overlap_optimization();
@@ -780,7 +783,7 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
     else{return false;}
 }
 
-bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v){
+bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v){
 
     build_constraint_graph();
     constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n;
@@ -866,17 +869,37 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
             }
             this->modules_wh_i = result_wh_i;
             this->modules_positions = result_pos;
-            // for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
-            //     cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
-            // }
+            for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
+                cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
+            }
             this->z = ILP_result.z;
             //cout<<this->z<<endl;
         }
         return true;
     }
     else{
+        this->z = -1;
         return false;
     }
+}
+
+bool sequence_pair_t::find_positoin_allow_illegal(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v)
+{
+    bool first_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
+    this->sequence_pair_validation(1);
+    if(first_attempt==false){return false;}
+    //to adjust area here
+    vector<int> area_compensation = this->get_correct_area();
+    vector<vector<vec2d_t>> ori_wh = sequence_pair_t::soft_area_to_w_h_m_5;
+    vector<vector<vec2d_t>> new_shape_5;
+    area_compensation[3] = 0;
+    for(int i = 0; i<sequence_n; ++i){
+        cout<< area_compensation[i]<<" ";
+        new_shape_5.push_back(sequence_pair_t::find_w_h(this->modules_area[i]+area_compensation[i], 5));
+    }
+    sequence_pair_t::soft_area_to_w_h_m_5 = new_shape_5;
+    bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
+    return second_attempt;
 }
 
 void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {
@@ -1175,3 +1198,19 @@ void sequence_pair_t::simplify_constraint_graph() {
 }
 
 
+vector<int> sequence_pair_t::get_correct_area() {
+    vector<rect_t> rects;
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        rects.push_back({this->modules_positions[i], this->modules_wh[i]});
+    }
+    int n = rects.size();
+    int soft = chip_t::get_soft_modules().size();
+    vector<int> result(n, 0);
+    for(int i = 0; i < soft; ++i) {
+        for(int j = soft; j < n; ++j) {
+            if(rects[i].is_collision(rects[j]))
+                result[i] += rects[j].get_area();
+        }
+    }
+    return result;
+}

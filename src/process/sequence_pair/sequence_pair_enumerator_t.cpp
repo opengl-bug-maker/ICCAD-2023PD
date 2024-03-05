@@ -105,6 +105,7 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
     if(this->current_sp_n >= this->target_sp_n){
         return false;
     }
+    cout<<i<<endl;
     if(i>=this->seed_SP.fix_start_idx){
         this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
         this->res_SP = this->seed_SP;
@@ -153,8 +154,8 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
                 success = this->seed_SP.find_position_with_area(false, false, 0, 0);
             }
             else{
-                success = this->seed_SP.find_position_allow_illegal(true, true, 0, 0);
-                //success = this->seed_SP.find_position(true, true, 0, 0);
+                //success = this->seed_SP.find_position_allow_illegal(true, true, 0, 0);
+                success = this->seed_SP.find_position(true, true, 0, 0);
             }
             if(success){
                 double wl = this->seed_SP.z;

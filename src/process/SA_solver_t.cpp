@@ -181,8 +181,8 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
     // double ori_wirelength = ori.predicted_wirelength;
     // double after_wirelength = after.update_wirelength(true, false);
-    bool a = ori.find_position_allow_illegal(true, true, 0, 0);
-    bool b = after.find_position_allow_illegal(true, true, 0, 0);
+    bool a = ori.find_position_allow_illegal_fill(true, true, 0, 0);
+    bool b = after.find_position_allow_illegal_fill(true, true, 0, 0);
     double ori_wirelength = ori.z;
     double after_wirelength = after.z;
     if(after_wirelength<=0||ori_wirelength<=0){
@@ -226,7 +226,7 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                     if(legal_neighbors.size()){return;}
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
-                    bool success = neighbor.find_position_allow_illegal(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                    bool success = neighbor.find_position_allow_illegal_fill(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
                     if(success){
                         double delta = SA->get_delta(SP, neighbor);
                         bool change = SA->sample_p(delta);
