@@ -175,7 +175,6 @@ void visualizer_t::draw_bounding_line_connection(std::vector<std::pair<std::vect
             max_value = std::max(max_value, (double)ta);
         }
     }
-    std::cout<< bounding_lines.size()<<std::endl;
     for(int i = 0; i < table.size(); ++i) {
         for(int j = i + 1; j < table[i].size(); ++j) {
             auto st = (bounding_lines[i].first[0] + bounding_lines[i].first[2]) / 2.0;

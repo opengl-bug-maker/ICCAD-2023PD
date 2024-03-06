@@ -90,10 +90,13 @@ public:
     vector<int> add_soft_order;
     vector<int> is_in_seq;
     std::vector<std::pair<std::vector<vec2d_t>,std::string>> bouding_lines;
-    vector<int> carved;
+    vector<int> carved; 
+    vector<int> allow_to_overlap;
+    
     
     vector<vec2d_t> get_4_points(vec2d_t, vec2d_t);
     vector<int> get_correct_area();
+    vector<int> get_correct_compensation();
     void fill_near();
     void overlap_optimization();
     void carve();
