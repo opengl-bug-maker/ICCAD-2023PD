@@ -378,6 +378,26 @@ void sequence_pair_t::print() {
 
 }
 
+bool sequence_pair_t::check_area_ratio(){
+    vector<int> area_compensation = this->get_correct_area();
+    //this function will check the area, 1:2 constraints, but no overlap and 80% constraint
+    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+        if(sequence_pair_t::seq_is_fix[i]){continue;}
+        double area = this->modules_wh[i].get_x() * this->modules_wh[i].get_y();
+        double ratio = this->modules_wh[i].get_x()/this->modules_wh[i].get_y();
+        if(ratio>2||ratio<0.5){
+            return false;
+        }
+        double min = this->modules_area[i];
+        
+        if(area<min+area_compensation[i]){
+            return false;
+        }
+    }
+    return true;
+
+}
+
 void sequence_pair_t::swap_v(int a,  int b) {
     std::swap(this->v_sequence[a], this->v_sequence[b]);
 }
@@ -613,7 +633,7 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         success = this->find_position_with_area(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     }
     else{
-        success = this->find_position(minimize_wirelength,true,0, 0); //need result to calculate wirelength
+        success = this->find_position_allow_illegal(minimize_wirelength,true,0, 0); //need result to calculate wirelength
     }
     if(success==false){
         this->predicted_wirelength = -1;
@@ -869,9 +889,9 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
             }
             this->modules_wh_i = result_wh_i;
             this->modules_positions = result_pos;
-            for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
-                cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
-            }
+            // for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
+            //     cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
+            // }
             this->z = ILP_result.z;
             //cout<<this->z<<endl;
         }
@@ -883,10 +903,10 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     }
 }
 
-bool sequence_pair_t::find_positoin_allow_illegal(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v)
+bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v)
 {
     bool first_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
-    this->sequence_pair_validation(1);
+    //this->sequence_pair_validation(1);
     if(first_attempt==false){return false;}
     //to adjust area here
     vector<int> area_compensation = this->get_correct_area();
@@ -894,9 +914,10 @@ bool sequence_pair_t::find_positoin_allow_illegal(bool minimize_wirelength, bool
     vector<vector<vec2d_t>> new_shape_5;
     area_compensation[3] = 0;
     for(int i = 0; i<sequence_n; ++i){
-        cout<< area_compensation[i]<<" ";
+        //cout<< area_compensation[i]<<" ";
         new_shape_5.push_back(sequence_pair_t::find_w_h(this->modules_area[i]+area_compensation[i], 5));
     }
+    //cout<<endl;
     sequence_pair_t::soft_area_to_w_h_m_5 = new_shape_5;
     bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
     return second_attempt;

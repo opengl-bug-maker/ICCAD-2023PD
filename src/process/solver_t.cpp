@@ -49,9 +49,10 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 1*time_left, 0.5, 0.01, false, 0, 1, false);
-    // // cout<<"---------------Stage 2----------------"<<endl;
-    // SA_solver.run(SPEN, 0.6 * time_left, 0.03, 0.008, true, 0, 1, false);
+    SA_solver.run(SPEN, 0.5*time_left, 0.5, 0.01, false, 0, 1, false);
+    SA_solver.run(SPEN, 0.5*time_left, 0.03, 0.008, false, 0, 1, true);
+    // cout<<"---------------Stage 2----------------"<<endl;
+    //SA_solver.run(SPEN, 0.7 * time_left, 0.03, 0.008, true, 0, 1, true);
     // //  cout<<"---------------Stage 3----------------"<<endl;
     // SA_solver.run(SPEN, 0.3 * time_left, 0.1, 0.008, true, 0, 1, true);
     SPEN.updated_best_SP();
@@ -93,12 +94,12 @@ void solver_t::run() {
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     this->SA_process(SPEN);
-    cout<<"----------------"<<endl;
-    cout<<"Load specific sequence pair"<<endl;
-    this->load_specific_best();
-    cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
-    this->runtime_timer.timer_end();
-    this->runtime_timer.print_time_elapsed();
+    // cout<<"----------------"<<endl;
+    // cout<<"Load specific sequence pair"<<endl;
+    // this->load_specific_best();
+    // cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
+    // this->runtime_timer.timer_end();
+    // this->runtime_timer.print_time_elapsed();
 }
 
 void solver_t::set_timer_start() {

@@ -21,7 +21,7 @@ bool SA_solver_t::sample_p(double delta_c) {
 }
 SA_solver_t::SA_solver_t() {
 }
-void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, double enable_from, double enable_to, bool rectilinear) {
+void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double init_t, double end_t, bool load_back, double enable_from, double enable_to, bool overlap) {
     this->swap_enable = vector<int>(sequence_pair_t::sequence_n, 0);
     for(int i = static_cast<int>(sequence_pair_t::sequence_n * enable_from); i<static_cast<int>(sequence_pair_t::sequence_n * enable_to); ++i){
         this->swap_enable[i] = 1;
@@ -41,7 +41,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
         this->it_timer.timer_start();
         sequence_pair_t& SP = SPEN.valid_sequence_pairs[0];
-        sequence_pair_t after = find_neighbor_parallel(SP);
+        sequence_pair_t after = find_neighbor_parallel(SP, overlap);
         //sequence_pair_t after = find_neighbor_sequential(SP);
         
         // double SP_wirelength = SP.predicted_wirelength;
@@ -49,10 +49,6 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
         double SP_wirelength = SP.z;
         double after_wirelength = after.z;
         if(after_wirelength!=-1){
-            if(rectilinear){
-                after.to_rectilinear();
-                after.predicted_wirelength = after.rectilinear_wirelength;
-            }
             SP = after;
         }
         if(SP_wirelength < best_wirelength && SP_wirelength!=-1){
@@ -81,7 +77,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             cout<<"current wirelength : "<<std::setprecision(16)<<SP_wirelength<<endl;
             cout<<"------------------------------"<<endl;
         }
-        if(it%200==0){
+        if(it%1000==0){
             SP.sequence_pair_validation(it);
         }
         runtime_timer.timer_end();
@@ -100,7 +96,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
     best_sp.sequence_pair_validation();
 }
 
-void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA, sequence_pair_t);
+void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA, sequence_pair_t, bool);
 sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
@@ -130,7 +126,7 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
                     //find_position_timer.print_time_elapsed();
 
                     if(success){
-                        double delta = get_delta(SP, neighbor);
+                        double delta = get_delta(SP, neighbor, false);
                         bool change = sample_p(delta);
                         if(change){
                             find_neighbor_time.timer_end();
@@ -146,7 +142,7 @@ sequence_pair_t SA_solver_t::find_neighbor_sequential(sequence_pair_t SP){
     }
     return SP; //can't find any neighbor
 }
-sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
+sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool overlap) {
     vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         v_map[SP.v_sequence[i]] = h_map[SP.h_sequence[i]] = i;
@@ -165,7 +161,7 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
     double x = sequence_pair_t::sequence_n/thread_n;
 
     for(int i = 0; i<thread_n; ++i){
-        threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, &rand_i, &rand_j, &h_map, &v_map, this, SP));
+        threads.push_back(std::thread(find_neighbor_threads_i, i*x, (i+1)*x, &rand_i, &rand_j, &h_map, &v_map, this, SP, overlap));
     }
     for(int i = 0; i<thread_n; ++i){
         threads[i].join();
@@ -178,11 +174,18 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP) {
     }
 }
 
-double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after) {
+double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after, bool overlap) {
     // double ori_wirelength = ori.predicted_wirelength;
     // double after_wirelength = after.update_wirelength(true, false);
-    bool a = ori.find_position_allow_illegal_fill(true, true, 0, 0);
-    bool b = after.find_position_allow_illegal_fill(true, true, 0, 0);
+    if(overlap){
+        bool a = ori.find_position_allow_illegal(true, true, 0, 0);   
+        bool b = after.find_position_allow_illegal(true, true, 0, 0);   
+    }
+    else{
+        bool a = ori.find_position(true, true, 0, 0);   
+        bool b = after.find_position(true, true, 0, 0);   
+    }
+    
     double ori_wirelength = ori.z;
     double after_wirelength = after.z;
     if(after_wirelength<=0||ori_wirelength<=0){
@@ -213,7 +216,7 @@ void SA_solver_t::update_parameters() {
     this->r =  new_r;
 }
 
-void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA,sequence_pair_t SP){
+void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector<int>* rand_j, vector<int>* h_map, vector<int>* v_map, SA_solver_t* SA,sequence_pair_t SP, bool overlap){
     sequence_pair_t neighbor = SP;
     for(int i = i_start; i<i_end; ++i){
         for(int j = 0; j<sequence_pair_t::sequence_n; ++j){
@@ -226,9 +229,16 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                     if(legal_neighbors.size()){return;}
                     if(m){std::swap(neighbor.v_sequence[p], neighbor.v_sequence[q]);}
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
-                    bool success = neighbor.find_position_allow_illegal_fill(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                    bool success = false;
+                    if(overlap){
+                        success = neighbor.find_position_allow_illegal(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                    }
+                    else{
+                        success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                    }
+                    
                     if(success){
-                        double delta = SA->get_delta(SP, neighbor);
+                        double delta = SA->get_delta(SP, neighbor, overlap);
                         bool change = SA->sample_p(delta);
                         if(change){
                             legal_neighbors_mutex.lock();

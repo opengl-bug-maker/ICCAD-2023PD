@@ -31,7 +31,7 @@ public:
     bool find_position(bool,bool,int,int); // verify if the current sequence pair form the legal position
     bool find_position_with_area(bool,bool,int,int);
     bool find_position_allow_illegal_fill(bool, bool, int, int);
-    bool find_positoin_allow_illegal(bool, bool, int, int);
+    bool find_position_allow_illegal(bool, bool, int, int);
     void predict_wirelength(bool, bool);
     void to_rectilinear();
     void to_rectilinear_and_plot();
@@ -104,6 +104,7 @@ public:
     void sequence_pair_validation(int);
     void print_result();
     void set_bounding_lines();
+    bool check_area_ratio();
 
     double rectilinear_wirelength = 0;
 private:

@@ -62,13 +62,14 @@ void tester_t::test_sp(){
 
         bool a = SP.find_position(true, true, 0, 0);
         SP.sequence_pair_validation(0);
-        bool b = SP.find_positoin_allow_illegal(true, true, 0, 0);
-        
-        // if(b==false){
-        //     cout<<"FAIL"<<endl;
-        // }
-        // SP.print_result();
-        // cout<<"WL: "<<std::setprecision(16)<<SP.z<<endl;
+        bool b = SP.find_position_allow_illegal(true, true, 0, 0);
+        bool c = SP.check_area_ratio();
+        if(b==false || c==false){
+            cout<<"FAIL"<<endl;
+        }
+        SP.print_result();
+        SP.update_wirelength(true, false);
+        SP.sequence_pair_validation(1);
         //SP.to_rectilinear_and_plot();
         //SP.to_rectilinear();
         //SP.find_position_with_area(true, true, 0, 0);
@@ -86,7 +87,7 @@ void tester_t::test_sp(){
         // cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
         //SP.to_rectilinear_and_plot();
         //SP.sequence_pair_validation();
-        SP.sequence_pair_validation();
+        
     }
 }
 

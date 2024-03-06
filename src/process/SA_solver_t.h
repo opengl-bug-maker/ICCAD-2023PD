@@ -14,7 +14,7 @@ public:
 
     void run(sequence_pair_enumerator_t&,double, double, double,bool, double, double, bool rectilinear);
 
-    double get_delta(sequence_pair_t&, sequence_pair_t&);
+    double get_delta(sequence_pair_t&, sequence_pair_t&, bool);
 
     void parameters_init(double, double);
 
@@ -26,7 +26,7 @@ public:
 
 //    void find_greater(sequence_pair_t&, double timeout);
 
-    sequence_pair_t find_neighbor_parallel(sequence_pair_t);
+    sequence_pair_t find_neighbor_parallel(sequence_pair_t, bool);
 
     sequence_pair_t find_neighbor_sequential(sequence_pair_t);
 
