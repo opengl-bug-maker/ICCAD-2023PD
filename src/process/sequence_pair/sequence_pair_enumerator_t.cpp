@@ -107,7 +107,7 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
     }
     cout<<i<<endl;
     if(i>=this->seed_SP.fix_start_idx){
-        this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
+        //this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
         this->res_SP = this->seed_SP;
         //if(this->seed_SP.predicted_wirelength!=-1){
             this->valid_sequence_pairs.push_back(this->seed_SP);

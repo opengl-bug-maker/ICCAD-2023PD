@@ -680,7 +680,7 @@ void sequence_pair_t::to_rectilinear(){
 }
 
 void sequence_pair_t::to_rectilinear_and_plot(){
-    bool a = this->find_position_allow_illegal_fill(true, true, 0, 0);
+    bool a = this->find_position(true, true, 0, 0);
     for(auto& e:this->is_in_seq){e = 1;}
     this->fill_near();
     this->overlap_optimization();
@@ -1232,6 +1232,10 @@ vector<int> sequence_pair_t::get_correct_area() {
             if(rects[i].is_collision(rects[j]))
                 result[i] += rects[j].get_area();
         }
+    }
+    for(int i = 0; i < soft; ++i) {
+        if(rects[i].get_area() < 4 * result[i])
+            result[i] += (4 * result[i] - rects[i].get_area());
     }
     return result;
 }
