@@ -77,9 +77,9 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             cout<<"current wirelength : "<<std::setprecision(16)<<SP_wirelength<<endl;
             cout<<"------------------------------"<<endl;
         }
-        if(it%1000==0){
-            SP.sequence_pair_validation(it);
-        }
+        // if(it%1000==0){
+        //     SP.sequence_pair_validation(it);
+        // }
         runtime_timer.timer_end();
         if(runtime_timer.get_time_elapsed() >= timeout){break;}
         this->t*=r;

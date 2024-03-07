@@ -154,7 +154,7 @@ void sequence_pair_t::build_constraint_graph() {
     // for(auto& e:this->constraint_graph_v){
     //     cout<< e.from<<" "<<e.to<<" "<<endl;
     // }
-    //simplify_constraint_graph();
+    
 }
 
 vector<vec2d_t> sequence_pair_t::get_LP_res_pos(){
@@ -198,6 +198,7 @@ pair<vector<vec2d_t>, vector<int>> sequence_pair_t::get_LP_res_wh(){
 }
 bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v) {
     build_constraint_graph();
+    simplify_constraint_graph();
     constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n;
     constraint_i = 1; //constraint_counter
     variable_n = 2*sequence_n + 5*soft_n;
@@ -681,6 +682,9 @@ void sequence_pair_t::to_rectilinear(){
 
 void sequence_pair_t::to_rectilinear_and_plot(){
     bool a = this->find_position(true, true, 0, 0);
+    this->print_result();
+    bool b = this->find_position_with_area(true, true, 0, 0);
+    //bool c = this->find_position_allow_illegal(true, true, 0, 0);
     for(auto& e:this->is_in_seq){e = 1;}
     this->fill_near();
     this->overlap_optimization();
@@ -913,10 +917,13 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
 {
     this->allow_to_overlap = vector<int>(sequence_pair_t::sequence_n, 1);
     bool first_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
-    this->print_result();
-    if(first_attempt==false){return false;}
+    //this->print_result();
+    if(first_attempt==false){
+        this->find_position(true, true, 0, 0);
+        return false;
+    }
     //to adjust area here
-    this->sequence_pair_validation(1);
+    //this->sequence_pair_validation(1);
     vector<int> area_compensation = this->get_correct_compensation();
     vector<vector<vec2d_t>> ori_wh = sequence_pair_t::soft_area_to_w_h_m_5;
     vector<vector<vec2d_t>> new_shape_5;
@@ -927,9 +934,15 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
     sequence_pair_t::soft_area_to_w_h_m_5 = new_shape_5;
     bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
     vector<int> area_compensation_after = this->get_correct_area();
-    if(second_attempt==false){return false;}
+    if(second_attempt==false){
+        this->find_position(true, true, 0, 0);
+        return false;
+    }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        if(area_compensation_after[i]>area_compensation[i]){return false;}
+        if(area_compensation_after[i]>area_compensation[i]){
+            this->find_position(true, true, 0, 0);
+            return false;
+        }
     }
     return true;
 }
