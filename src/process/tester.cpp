@@ -61,30 +61,15 @@ void tester_t::test_sp(){
         for(auto& e:SP.is_in_seq){e = 1;}
 
         bool a = SP.find_position(true, true, 0, 0);
-        // SP.sequence_pair_validation(0);
-        bool b = SP.find_position_allow_illegal(true, true, 0, 0);
-        // SP.sequence_pair_validation(2);
-        // bool c = SP.check_area_ratio();
-        // if(b==false || c==false){
-        //     cout<<"FAIL"<<endl;
-        // }
-        // SP.print_result();
-        // SP.update_wirelength(true, false);
-        //SP.to_rectilinear_and_plot();
-        //SP.to_rectilinear();
-        //SP.find_position_with_area(true, true, 0, 0);
-        // SP = SA_solver.post_process(SP);
-        // SP.fill_near();
-        // SP.overlap_optimization();
-        // SP.carve();
-        // SP.set_bounding_lines();
-        // //visualizer_t::draw_bounding_line(SP.bouding_lines);
-        // visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
-        // SP.print_inline();
-        // SP.print_result();
-        // cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
-        // cout<<"Rectilinear wirelength: "<<SP.rectilinear_wirelength<<endl;
-        // cout<<std::setprecision(2)<<(SP.predicted_wirelength-SP.rectilinear_wirelength)/SP.predicted_wirelength*100<<"% optimization"<<endl;
+        bool b = SP.find_position_with_area(true, true, 0, 0);
+        double z1 = SP.update_wirelength(true, false);
+        bool c = SP.find_position_allow_illegal(true, true, 0, 0);
+        double z2 = SP.update_wirelength(true, false);
+        if(z1<z2){
+            bool a = SP.find_position(true, true, 0, 0);
+            double z = SP.find_position_with_area(true, true, 0, 0);
+        }
+        SP.print_result();
         SP.to_rectilinear_and_plot();
         //SP.sequence_pair_validation();
         

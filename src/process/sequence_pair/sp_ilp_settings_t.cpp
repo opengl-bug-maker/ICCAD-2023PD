@@ -310,8 +310,8 @@ void sp_ilp_settings_find_position_t::set_coef_allow_overlap(std::vector<double>
         
     }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        coef[i+this->sp->x_overlap] = 0.1;
-        coef[i+this->sp->y_overlap] = 0.1;
+        coef[i+this->sp->x_overlap] = 0;
+        coef[i+this->sp->y_overlap] = 0;
         //give overlap coefficient a huge penalty
     }
 }
@@ -421,12 +421,12 @@ void sp_ilp_settings_find_position_t::set_variables_hands(){
     for(int i = 0; i<this->sp->near_x.size(); ++i){
         string var_name = "x_hand" + std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->near_x_offset+i, var_name.c_str());
-        this->sp->ILP_solver.set_variable_double_range(this->sp->near_x_offset + i, 0, 1);
+        this->sp->ILP_solver.set_variable_double_range_int(this->sp->near_x_offset + i, 0, 1);
     }
     for(int i = 0; i<this->sp->near_y.size(); ++i){
         string var_name = "y_hand" + std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, this->sp->near_y_offset + i, var_name.c_str());
-        this->sp->ILP_solver.set_variable_double_range(this->sp->near_y_offset + i, 0, 1);
+        this->sp->ILP_solver.set_variable_double_range_int(this->sp->near_y_offset + i, 0, 1);
     }
 }
 

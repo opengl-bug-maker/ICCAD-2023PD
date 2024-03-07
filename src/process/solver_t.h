@@ -43,7 +43,6 @@ public:
 
     void test_parallel();
 
-
     
     
     double runtime = 26*60*1000, SA_runtime = 20*60*1000, init_timeout = 20*60*1000; // ms

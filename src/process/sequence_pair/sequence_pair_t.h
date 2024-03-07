@@ -51,6 +51,7 @@ public:
     int get_vi(int);
     int get_hi(int);
     double update_wirelength(bool minimize, bool with_area);
+    void update_wirelength_rectilinear();
     std::vector<int> get_v();
     std::vector<int> get_h();
 
