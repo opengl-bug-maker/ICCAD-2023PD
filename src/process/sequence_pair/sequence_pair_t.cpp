@@ -420,13 +420,13 @@ void sequence_pair_t::print_inline() {
         if(i!=this->h_sequence.size()-1){cout<<", ";}
     }
     cout<<"}"<<endl;
-    this->print_shapes_i();
+//    this->print_shapes_i();
 //    for(int i = 0; i<this->soft_n; ++i){
 //        for(auto& shape:sequence_pair_t::soft_area_to_w_h_m_5[i]){
 //            cout<<"{"<<shape.get_x()<<","<<shape.get_y()<<"} ";
 //        }
 //    }
-    cout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, true)<<endl;
+//    cout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, false)<<endl;
 }
 void sequence_pair_t::print_shapes_i() {
     cout<<"shapes of the SP : {";
@@ -658,8 +658,8 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
         sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->predicted_wirelength = sum;
-    cout<< "actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
-    cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
+    // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+    // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
 }
 
 void sequence_pair_t::to_rectilinear(){
@@ -918,8 +918,7 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
     bool first_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
     //this->print_result();
     if(first_attempt==false){
-        this->find_position(true, true, 0, 0);
-        return false;
+        return this->find_position(true, true, 0, 0);
     }
     //to adjust area here
     //this->sequence_pair_validation(1);
@@ -934,14 +933,32 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
     bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
     vector<int> area_compensation_after = this->get_correct_area();
     if(second_attempt==false){
-        this->find_position(true, true, 0, 0);
-        return false;
+        return this->find_position(true, true, 0, 0);
     }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(area_compensation_after[i]>area_compensation[i]){
-            this->find_position(true, true, 0, 0);
-            return false;
+            return this->find_position(true, true, 0, 0);;
         }
+    }
+    return true;
+}
+
+bool sequence_pair_t::find_position_allow_illegal_process()
+{
+    bool a = this->find_position(true, true, 0, 0);
+    bool b = this->find_position_with_area(true, true, 0, 0);
+    double z1 = this->z;
+    bool c = this->find_position_allow_illegal(true, true, 0, 0);
+    double z2 = this->z;
+    if(a==false&&c==false){
+        return false;
+    }
+    if(a^c){
+        return true;
+    }
+    if(z1<z2){
+        bool a = this->find_position(true, true, 0, 0);
+        double z = this->find_position_with_area(true, true, 0, 0);
     }
     return true;
 }
@@ -1187,8 +1204,8 @@ void sequence_pair_t::update_wirelength_rectilinear(){
         sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->predicted_wirelength = sum;
-    cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
-    cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
+    // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+    // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
 }
 
 void sequence_pair_t::print_wirelength(bool minimize, bool with_area) {

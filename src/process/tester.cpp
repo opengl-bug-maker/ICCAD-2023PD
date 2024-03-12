@@ -60,19 +60,14 @@ void tester_t::test_sp(){
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
 
-        bool a = SP.find_position(true, true, 0, 0);
-        bool b = SP.find_position_with_area(true, true, 0, 0);
-        double z1 = SP.update_wirelength(true, false);
-        bool c = SP.find_position_allow_illegal(true, true, 0, 0);
-        double z2 = SP.update_wirelength(true, false);
-        if(z1<z2){
-            bool a = SP.find_position(true, true, 0, 0);
-            double z = SP.find_position_with_area(true, true, 0, 0);
+        bool success = SP.find_position_allow_illegal_process();
+        if(success==false){
+            cout<<"Unable to initialize"<<endl;
         }
+        double z = SP.update_wirelength(true, true);
         SP.print_result();
         SP.to_rectilinear_and_plot();
-        //SP.sequence_pair_validation();
-        
+        SP.sequence_pair_validation();
     }
 }
 

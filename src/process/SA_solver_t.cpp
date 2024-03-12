@@ -177,13 +177,14 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool ove
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after, bool overlap) {
     // double ori_wirelength = ori.predicted_wirelength;
     // double after_wirelength = after.update_wirelength(true, false);
+    bool a, b;
     if(overlap){
-        bool a = ori.find_position_allow_illegal(true, true, 0, 0);   
-        bool b = after.find_position_allow_illegal(true, true, 0, 0);   
+        a = ori.find_position_allow_illegal(true, true, 0, 0);   
+        b = after.find_position_allow_illegal(true, true, 0, 0);   
     }
     else{
-        bool a = ori.find_position(true, true, 0, 0);   
-        bool b = after.find_position(true, true, 0, 0);   
+        a = ori.find_position(true, true, 0, 0);   
+        b = after.find_position(true, true, 0, 0);   
     }
     
     double ori_wirelength = ori.z;
@@ -231,12 +232,12 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                     if(n){std::swap(neighbor.h_sequence[p], neighbor.h_sequence[q]);}
                     bool success = false;
                     if(overlap){
-                        success = neighbor.find_position_allow_illegal(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                        success = neighbor.find_position_allow_illegal_process(); //6ms at most  (the shapes of the neighbor SP were calculated)
+                        //success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
                     }
                     else{
                         success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
                     }
-                    
                     if(success){
                         double delta = SA->get_delta(SP, neighbor, overlap);
                         bool change = SA->sample_p(delta);

@@ -49,23 +49,16 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 0.1*time_left, 0.5, 0.01, false, 0, 0.33, false);
-    SA_solver.run(SPEN, 0.1*time_left, 0.03, 0.01, false, 0, 0.6, false);
-    SA_solver.run(SPEN, 0.8*time_left, 0.03, 0.008, false, 0, 1, false);
-    //SA_solver.run(SPEN, 0.4*time_left, 0.01, 0.008, false, 0, 1, true);
-    // cout<<"---------------Stage 2----------------"<<endl;
-    //SA_solver.run(SPEN, 0.7 * time_left, 0.03, 0.008, true, 0, 1, true);
-    // //  cout<<"---------------Stage 3----------------"<<endl;
-    // SA_solver.run(SPEN, 0.3 * time_left, 0.1, 0.008, true, 0, 1, true);
+    SA_solver.run(SPEN, 0.9*time_left, 0.3, 0.01, false, 0, 1, false);
+    // SA_solver.run(SPEN, 0.4*time_left, 0.3, 0.01, false, 0, 1, false);
+    SA_solver.run(SPEN, 0.1*time_left, 0.1, 0.008, false, 0, 1, true);
     SPEN.updated_best_SP();
+    SPEN.valid_sequence_pairs[0].print_inline();
 
-
-    sequence_pair_t best_sp;
-    best_sp.v_sequence = SPEN.valid_sequence_pairs[0].v_sequence;
-    best_sp.h_sequence = SPEN.valid_sequence_pairs[0].h_sequence;
-    for(auto& e:best_sp.is_in_seq){e = 1;}
-    //best_sp.sequence_pair_validation();
-    best_sp.print_inline();
+    SPEN.valid_sequence_pairs[0].sequence_pair_validation(1);
+    SPEN.valid_sequence_pairs[0].update_wirelength(true, true);
+    SPEN.valid_sequence_pairs[0].to_rectilinear_and_plot();
+    //best_sp.print_inline();
     // best_sp.to_rectilinear();
     // best_sp.to_rectilinear_and_plot();
     //SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);

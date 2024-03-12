@@ -32,6 +32,7 @@ public:
     bool find_position_with_area(bool,bool,int,int);
     bool find_position_allow_illegal_fill(bool, bool, int, int);
     bool find_position_allow_illegal(bool, bool, int, int);
+    bool find_position_allow_illegal_process();
     void predict_wirelength(bool, bool);
     void to_rectilinear();
     void to_rectilinear_and_plot();
