@@ -37,13 +37,20 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_h()
 void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
     for(int i = 0; i<this->sp->constraint_graph_h.size(); ++i){
         int from = this->sp->constraint_graph_h[i].from, to = this->sp->constraint_graph_h[i].to,w = this->sp->constraint_graph_h[i].w;
-        string constraint_name = "h_c"+ std::to_string(i);
         double overlap_var = 0.0;
+        double from_area = this->sp->modules_area[from], to_area = this->sp->modules_area[to];
+        double ratio = from_area/to_area;
+        if( (ratio>=area_overlap_contraint || ratio  <= 1/area_overlap_contraint) && this->sp->is_transitive_h[from][to]==0){
+            overlap_var = -1;
+        }
+        if(sequence_pair_t::seq_is_fix[from] && this->sp->modules_area[from]>=this->sp->modules_area[to]){
+            overlap_var = 0;
+        }
+        if(sequence_pair_t::seq_is_fix[to] && this->sp->modules_area[to]>=this->sp->modules_area[from]){
+            overlap_var = 0;
+        }
+        string constraint_name = "h_c"+ std::to_string(i);
         if(this->sp->seq_is_fix[from]){
-            double from_area = this->sp->modules_area[from], to_area = this->sp->modules_area[to];
-            if(to_area>=from_area*area_overlap_contraint){
-                overlap_var = -1;
-            }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 3, {from+this->sp->x_module_offset, to+this->sp->x_module_offset, from+this->sp->x_overlap}, {1, -1, overlap_var}, constraint_name, -w);
         }
         else{
@@ -52,14 +59,6 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
             for(int j = 0; j<5; ++j){
                 w[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_x();
             }
-            if( this->sp->seq_is_fix[from] || this->sp->seq_is_fix[to]){
-                double fix_area = this->sp->seq_is_fix[from]?this->sp->modules_area[from]:this->sp->modules_area[to];
-                double soft_area = this->sp->seq_is_fix[to]?this->sp->modules_area[from]:this->sp->modules_area[to];
-                if(soft_area>=area_overlap_contraint*fix_area){
-                    overlap_var = -1;
-                }
-            }
-            
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 8,
                                   {from+this->sp->x_module_offset, to+this->sp->x_module_offset, from+this->sp->x_overlap,
                                            this->sp->shape_types[0] + from,
@@ -77,11 +76,18 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
         int from = this->sp->constraint_graph_v[i].from, to = this->sp->constraint_graph_v[i].to, w = this->sp->constraint_graph_v[i].w;
         string constraint_name = "v_c"+ std::to_string(i);
         double overlap_var = 0.0;
+        double from_area = this->sp->modules_area[from], to_area = this->sp->modules_area[to];
+        double ratio = from_area/to_area;
+        if( (ratio>=area_overlap_contraint || ratio  <= 1/area_overlap_contraint) && this->sp->is_transitive_v[from][to]==0){
+            overlap_var = -1;
+        }
+        if(sequence_pair_t::seq_is_fix[from] && this->sp->modules_area[from]>=this->sp->modules_area[to]){
+            overlap_var = 0;
+        }
+        if(sequence_pair_t::seq_is_fix[to] && this->sp->modules_area[to]>=this->sp->modules_area[from]){
+            overlap_var = 0;
+        }
         if(this->sp->seq_is_fix[from]){
-            double from_area = this->sp->modules_area[from], to_area = this->sp->modules_area[to];
-            if(to_area>=from_area*area_overlap_contraint){
-                overlap_var = -1;
-            }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 3, {from+this->sp->y_module_offset, to+this->sp->y_module_offset , from+this->sp->y_overlap}, {1, -1,overlap_var}, constraint_name, -w);
         }
         else{
@@ -89,14 +95,6 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
             vector<double> h(5);
             for(int j = 0; j<5; ++j){
                 h[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_y();    
-            }
-            
-            if( this->sp->seq_is_fix[from] || this->sp->seq_is_fix[to]){
-                double fix_area = this->sp->seq_is_fix[from]?this->sp->modules_area[from]:this->sp->modules_area[to];
-                double soft_area = this->sp->seq_is_fix[to]?this->sp->modules_area[from]:this->sp->modules_area[to];
-                if(soft_area>=area_overlap_contraint*fix_area){
-                    overlap_var = -1;
-                }
             }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 8,
                               {from+this->sp->y_module_offset, to+this->sp->y_module_offset, from+this->sp->y_overlap,
@@ -258,9 +256,9 @@ void sp_ilp_settings_find_position_t::set_variables_allow_overlap(){
     for(int i = 0;i<sequence_pair_t::sequence_n; ++i){ //x
         string var_name = "x"+ std::to_string(i);
         glp_set_col_name(this->sp->ILP_solver.ILP, i+this->sp->x_module_offset, var_name.c_str());
-        this->sp->ILP_solver.set_variable_double_range(i+this->sp->x_overlap, 0.0,chip_t::get_width());
+        this->sp->ILP_solver.set_variable_double_range(i+this->sp->x_overlap, 0.0,sqrt(this->sp->modules_area[i]*0.5));
         glp_set_col_name(this->sp->ILP_solver.ILP, i+this->sp->y_module_offset, var_name.c_str());
-        this->sp->ILP_solver.set_variable_double_range(i+this->sp->y_overlap, 0.0, chip_t::get_height());
+        this->sp->ILP_solver.set_variable_double_range(i+this->sp->y_overlap, 0.0, sqrt(this->sp->modules_area[i]*0.5));
     }
 }
 void sp_ilp_settings_find_position_t::set_variables_connections(){

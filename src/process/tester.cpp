@@ -59,7 +59,6 @@ void tester_t::test_sp(){
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
-
         bool success = SP.find_position_allow_illegal_process();
         if(success==false){
             cout<<"Unable to initialize"<<endl;
@@ -67,6 +66,7 @@ void tester_t::test_sp(){
         double z = SP.update_wirelength(true, true);
         SP.print_result();
         SP.to_rectilinear_and_plot();
+        SP.sequence_pair_validation();
         SP.sequence_pair_validation();
     }
 }

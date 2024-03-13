@@ -605,7 +605,7 @@ void sequence_pair_t::print_connections() {
 }
 
 void sequence_pair_t::print_result(){
-        
+    vector<int> area_compensation = this->get_correct_area();
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         double area = this->modules_wh[i].get_x()*this->modules_wh[i].get_y();
         cout<<i<<", pos : "<<std::setprecision(16)<<this->modules_positions[i]<<endl;
@@ -613,6 +613,8 @@ void sequence_pair_t::print_result(){
         cout<<i<<", wh : "<<std::setprecision(16)<<this->modules_wh[i]<<endl;
         cout<<i<<", minimum area: "<<std::setprecision(16)<<this->modules_area[i]<<endl;
         cout<<i<<", area - minimum: "<<std::setprecision(16)<<area - this->modules_area[i]<<endl;
+        cout<<i<<", area - compensation: "<<std::setprecision(16)<<area - area_compensation[i]<<endl;
+        cout<<i<<", Ratio: "<<std::setprecision(3)<<(1-static_cast<double>(area_compensation[i])/this->modules_area[i])*100<<"%"<<endl;
     }
 }
 
@@ -693,8 +695,8 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     //visualizer_t::draw_bounding_line_connection(this->bouding_lines);
     //this->print_inline();
     //this->print_result();
-    cout<<"Rectangle wirelength: "<<this->predicted_wirelength<<endl;
-    cout<<"Rectilinear wirelength: "<<this->rectilinear_wirelength<<endl;
+    cout<<"Rectangle wirelength: "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+    cout<<"Rectilinear wirelength: "<<std::setprecision(16)<<this->rectilinear_wirelength<<endl;
     cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
     //this->sequence_pair_validation();
     //this->to_fp().GUI_validation();
@@ -809,6 +811,8 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
 bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength, bool load_result,int overlap_h, int overlap_v){
 
     build_constraint_graph();
+    mark_transitive_edge();
+    //simplify_constraint_graph();
     constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n;
     constraint_i = 1; //constraint_counter
     variable_n = 4*sequence_n + 5*soft_n;
@@ -1251,6 +1255,7 @@ void sequence_pair_t::write_inline() {
 
 void sequence_pair_t::simplify_constraint_graph() {
     int N = sequence_pair_t::sequence_n;
+    this->is_transitive_v = this->is_transitive_h = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_pair_t::sequence_n, 0));
     {
         vector<vector<int>> G(N, vector<int>(N, 0));
         vector<edge_t> simplified;
@@ -1262,6 +1267,7 @@ void sequence_pair_t::simplify_constraint_graph() {
                 for(int k = 0; k<N; ++k){
                     if(G[i][k]&&G[k][j]){
                         G[i][j] = 0;
+                        this->is_transitive_v[i][j] = 1;
                     }
                 }
             }
@@ -1284,6 +1290,7 @@ void sequence_pair_t::simplify_constraint_graph() {
                 for(int k = 0; k<N; ++k){
                     if(G[i][k]&&G[k][j]){
                         G[i][j] = 0;
+                        this->is_transitive_h[i][j] = 1;
                     }
                 }
             }
@@ -1297,6 +1304,60 @@ void sequence_pair_t::simplify_constraint_graph() {
     }
 }
 
+void sequence_pair_t::mark_transitive_edge(){
+    int N = sequence_pair_t::sequence_n;
+    this->is_transitive_v = this->is_transitive_h = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_pair_t::sequence_n, 0));
+    {
+        vector<vector<int>> G(N, vector<int>(N, 0));
+        vector<edge_t> simplified;
+        for(auto& e:this->constraint_graph_v){
+            G[e.from][e.to] = 1;
+        }
+        for(int i = 0; i<N; ++i){
+            for(int j = 0; j<N; ++j){
+                for(int k = 0; k<N; ++k){
+                    if(G[i][k]&&G[k][j]){
+                        G[i][j] = 0;
+                        this->is_transitive_v[i][j] = 1;
+                    }
+                }
+            }
+        }
+        for(auto& e: this->constraint_graph_v){
+            if(G[e.from][e.to]){
+                simplified.push_back(e);
+            }
+        }
+        //this->constraint_graph_v = simplified;
+    }
+    {
+        vector<vector<int>> G(N, vector<int>(N, 0));
+        vector<edge_t> simplified;
+        for(auto& e:this->constraint_graph_h){
+            G[e.from][e.to] = 1;
+        }
+        for(int i = 0; i<N; ++i){
+            for(int j = 0; j<N; ++j){
+                for(int k = 0; k<N; ++k){
+                    if(G[i][k]&&G[k][j]){
+                        G[i][j] = 0;
+                        this->is_transitive_h[i][j] = 1;
+                    }
+                }
+            }
+        }
+        for(auto& e: this->constraint_graph_h){
+            if(G[e.from][e.to]){
+                simplified.push_back(e);
+            }
+        }
+        //this->constraint_graph_h = simplified;
+    }
+    for(auto& e:this->constraint_graph_v){
+        cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
+    }
+}
+
 vector<int> sequence_pair_t::get_correct_area() {
     vector<rect_t> rects;
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
@@ -1306,7 +1367,7 @@ vector<int> sequence_pair_t::get_correct_area() {
     int soft = chip_t::get_soft_modules().size();
     vector<int> result(n, 0);
     for(int i = 0; i < soft; ++i) {
-        for(int j = soft; j < n; ++j) {
+        for(int j = i+1; j < n; ++j) {
             if(rects[i].is_collision(rects[j]))
                 result[i] += rects[j].get_area();
         }
@@ -1322,7 +1383,7 @@ vector<int> sequence_pair_t::get_correct_compensation() {
     int soft = chip_t::get_soft_modules().size();
     vector<int> result(n, 0);
     for(int i = 0; i < soft; ++i) {
-        for(int j = soft; j < n; ++j) {
+        for(int j = i+1; j < n; ++j) {
             if(rects[i].is_collision(rects[j]))
                 result[i] += rects[j].get_area();
         }

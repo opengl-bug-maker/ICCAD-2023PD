@@ -131,7 +131,7 @@ private:
     bool is_completed();
     void build_constraint_graph();
     void simplify_constraint_graph();
-    
+    void mark_transitive_edge();
     void swap_seq_number(int a, int b, bool, bool);
 
     //debug
@@ -164,6 +164,7 @@ private:
     
     //properties
     vector<edge_t> constraint_graph_h, constraint_graph_v;
+    vector<vector<int>> is_transitive_h, is_transitive_v;
     //debug properties
     vector<pair<double, double>> logs;
 
