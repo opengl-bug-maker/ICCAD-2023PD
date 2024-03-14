@@ -5,6 +5,7 @@ if (APPLE)
        include_directories("/opt/homebrew/Cellar/glpk/5.0/include")
 endif ()
 
+add_subdirectory(bounding)
 add_subdirectory(output_data)
 add_subdirectory(plugin)
 add_subdirectory(polygon)
@@ -24,6 +25,7 @@ add_executable(iccad2023PD main.cpp)
 #target_compile_definitions(utilities PUBLIC DEBUG_DEF)
 
 target_link_libraries(iccad2023PD
+        bounding
         output_data
         process
         quadratic
