@@ -813,9 +813,9 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     build_constraint_graph();
     mark_transitive_edge();
     //simplify_constraint_graph();
-    constraint_n = this->constraint_graph_h.size() + this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n;
+    constraint_n = 2*this->constraint_graph_h.size() + 2*this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n + 2*sequence_pair_t::sequence_n;
     constraint_i = 1; //constraint_counter
-    variable_n = 4*sequence_n + 5*soft_n;
+    variable_n = 2*sequence_n + 5*soft_n + 2*this->constraint_graph_h.size()+this->constraint_graph_v.size();
     if(minimize_wirelength){
         variable_n += 4*sequence_pair_t::connections.size();
         constraint_n += 2 * sequence_pair_t::connections.size() + 4 * sequence_pair_t::connection_graph_deg;
@@ -833,7 +833,7 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     y_edge_offset_r = 1+2*sequence_n+5*soft_n+3*this->connections.size();
 
     x_overlap = 1+2*sequence_n+5*soft_n+4*this->connections.size();
-    y_overlap = 1+3*sequence_n+5*soft_n+4*this->connections.size();
+    y_overlap = 1+2*sequence_n+5*soft_n+4*this->connections.size() + this->constraint_graph_h.size();
 
     //apart from constraint graph, every fix module need 2 additional condition
     ILP_solver = ILP_solver_t();
@@ -851,6 +851,7 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     sp_ilp_settings.set_constraints_modules_allow_overlap_h();
     //if vertical constraint graph got i->j them y_j - y_i >= h
     sp_ilp_settings.set_constraints_modules_allow_overlap_v();
+    sp_ilp_settings.set_constraints_modules_overlap_content();
     //set constraints to fix module
     sp_ilp_settings.set_constraints_modules_fixed();
     
@@ -865,6 +866,7 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     sp_ilp_settings.set_constraints_ratio_equal_1();
     //set modules' boundaires
     sp_ilp_settings.set_constraints_boundaries();
+    
     //set variables of modules
     sp_ilp_settings.set_variables_modules();
     sp_ilp_settings.set_variables_allow_overlap();
