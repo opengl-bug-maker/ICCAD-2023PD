@@ -813,7 +813,7 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
     build_constraint_graph();
     mark_transitive_edge();
     //simplify_constraint_graph();
-    constraint_n = 2*this->constraint_graph_h.size() + 2*this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n + 2*sequence_pair_t::sequence_n;
+    constraint_n = 3*this->constraint_graph_h.size() + 3*this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n + 2*sequence_pair_t::sequence_n;
     constraint_i = 1; //constraint_counter
     variable_n = 2*sequence_n + 5*soft_n + 2*this->constraint_graph_h.size()+this->constraint_graph_v.size();
     if(minimize_wirelength){
@@ -927,7 +927,7 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
         return this->find_position(true, true, 0, 0);
     }
     //to adjust area here
-    //this->sequence_pair_validation(1);
+    this->sequence_pair_validation(1);
     vector<int> area_compensation = this->get_correct_compensation();
     vector<vector<vec2d_t>> ori_wh = sequence_pair_t::soft_area_to_w_h_m_5;
     vector<vector<vec2d_t>> new_shape_5;
@@ -937,6 +937,7 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
     //cout<<endl;
     sequence_pair_t::soft_area_to_w_h_m_5 = new_shape_5;
     bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
+    sequence_pair_t::soft_area_to_w_h_m_5 = ori_wh;
     vector<int> area_compensation_after = this->get_correct_area();
     if(second_attempt==false){
         return this->find_position(true, true, 0, 0);
@@ -964,7 +965,9 @@ bool sequence_pair_t::find_position_allow_illegal_process()
     }
     if(z1<z2){
         bool a = this->find_position(true, true, 0, 0);
-        double z = this->find_position_with_area(true, true, 0, 0);
+        bool b = this->find_position_with_area(true, true, 0, 0);
+        int x = this->z;
+        int y = 3;
     }
     return true;
 }
@@ -1370,7 +1373,7 @@ vector<int> sequence_pair_t::get_correct_area() {
     vector<int> result(n, 0);
     for(int i = 0; i < soft; ++i) {
         for(int j = i+1; j < n; ++j) {
-            if(rects[i].is_collision(rects[j]))
+            if(rects[i].is_collision(rects[j]) && this->modules_area[i]>this->modules_area[j])
                 result[i] += rects[j].get_area();
         }
     }
@@ -1386,7 +1389,7 @@ vector<int> sequence_pair_t::get_correct_compensation() {
     vector<int> result(n, 0);
     for(int i = 0; i < soft; ++i) {
         for(int j = i+1; j < n; ++j) {
-            if(rects[i].is_collision(rects[j]))
+            if(rects[i].is_collision(rects[j]) && this->modules_area[i]>this->modules_area[j])
                 result[i] += rects[j].get_area();
         }
     }

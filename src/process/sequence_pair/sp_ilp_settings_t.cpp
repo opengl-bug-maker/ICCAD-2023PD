@@ -34,7 +34,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_h()
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
+void sp_ilp_settings_find_position_t::  set_constraints_modules_allow_overlap_h(){
     for(int i = 0; i<this->sp->constraint_graph_h.size(); ++i){
         int from = this->sp->constraint_graph_h[i].from, to = this->sp->constraint_graph_h[i].to,w = this->sp->constraint_graph_h[i].w;
         double overlap_var = 0.0;
@@ -52,6 +52,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
         string constraint_name = "h_c"+ std::to_string(i);
         if(this->sp->seq_is_fix[from]){
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 3, {from+this->sp->x_module_offset, to+this->sp->x_module_offset, i+this->sp->x_overlap}, {1, -1, overlap_var}, constraint_name, -w);
+            this->sp->constraint_i++;
         }
         else{
             double area = this->sp->modules_area[from];
@@ -67,9 +68,43 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
                                            this->sp->shape_types[3] + from,
                                            this->sp->shape_types[4] + from},
                                       {1, -1, overlap_var, w[0],w[1] ,w[2],w[3], w[4]}, constraint_name, -1e-5);
-
+            this->sp->constraint_i++;
         }
-        this->sp->constraint_i++;
+        if( (sequence_pair_t::seq_is_fix[from]==false) && (sequence_pair_t::seq_is_fix[to]==false)){
+            vector<double> w_from(5), w_to(5); 
+            vector<double> vars = {1, -1};
+            for(int j = 0; j<5; ++j){
+                w_from[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_x();
+                w_to[j] = sequence_pair_t::soft_area_to_w_h_m_5[to][j].get_x();
+            }
+            for(int j = 0; j<5; ++j){
+                vars.push_back(w_from[j]);
+            }
+            for(int j = 0; j<5; ++j){
+                vars.push_back(-w_to[j]);
+            }
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, vars.size(),
+                                  {from+this->sp->x_module_offset, to+this->sp->x_module_offset,
+                                           this->sp->shape_types[0] + from,
+                                           this->sp->shape_types[1] + from,
+                                           this->sp->shape_types[2] + from,
+                                           this->sp->shape_types[3] + from,
+                                           this->sp->shape_types[4] + from,
+                                           this->sp->shape_types[0] + to,
+                                           this->sp->shape_types[1] + to,
+                                           this->sp->shape_types[2] + to,
+                                           this->sp->shape_types[3] + to,
+                                           this->sp->shape_types[4] + to
+                                    },
+                                      vars, constraint_name, -1e-5);
+            this->sp->constraint_i++;
+
+            this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2,
+                {from+this->sp->x_module_offset, to+this->sp->x_module_offset},
+                {1, -1},
+                constraint_name, -1e-5);
+            this->sp->constraint_i++;
+        } 
     }
 }
 void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
@@ -90,6 +125,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
         }
         if(this->sp->seq_is_fix[from]){
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 3, {from+this->sp->y_module_offset, to+this->sp->y_module_offset , i+this->sp->y_overlap}, {1, -1,overlap_var}, constraint_name, -w);
+            this->sp->constraint_i++;
         }
         else{
             double area = this->sp->modules_area[from];
@@ -105,9 +141,44 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
                                        this->sp->shape_types[3] + from,
                                        this->sp->shape_types[4] + from},
                                {1, -1,overlap_var,h[0],h[1],h[2],h[3],h[4]}, constraint_name, -1e-5);
-            
+            this->sp->constraint_i++;
+            if( (sequence_pair_t::seq_is_fix[from]==false) && (sequence_pair_t::seq_is_fix[to]==false)){
+                vector<double> w_from(5), w_to(5); 
+                vector<double> vars = {1, -1};
+                for(int j = 0; j<5; ++j){
+                    w_from[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_y();
+                    w_to[j] = sequence_pair_t::soft_area_to_w_h_m_5[to][j].get_y();
+                }
+                for(int j = 0; j<5; ++j){
+                    vars.push_back(w_from[j]);
+                }
+                for(int j = 0; j<5; ++j){
+                    vars.push_back(-w_to[j]);
+                }
+                this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, vars.size(),
+                                    {from+this->sp->y_module_offset, to+this->sp->y_module_offset,
+                                            this->sp->shape_types[0] + from,
+                                            this->sp->shape_types[1] + from,
+                                            this->sp->shape_types[2] + from,
+                                            this->sp->shape_types[3] + from,
+                                            this->sp->shape_types[4] + from,
+                                            this->sp->shape_types[0] + to,
+                                            this->sp->shape_types[1] + to,
+                                            this->sp->shape_types[2] + to,
+                                            this->sp->shape_types[3] + to,
+                                            this->sp->shape_types[4] + to
+                                        },
+                                        vars, constraint_name, -1e-5);
+                this->sp->constraint_i++;
+
+                this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2,
+                    {from+this->sp->y_module_offset, to+this->sp->y_module_offset},
+                    {1, -1},
+                    constraint_name, -1e-5);
+                this->sp->constraint_i++;
+            } 
         }
-        this->sp->constraint_i++;
+        
     }
 }
 void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_v()
