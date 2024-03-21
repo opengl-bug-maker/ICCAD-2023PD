@@ -12,6 +12,7 @@
 #include "circular_base_list_t.h"
 #include "circular_T_list_t.h"
 #include "bounding_line_handler_t.h"
+#include "bounding/puzzle_solver_t.h"
 #include "plugin/visualizer_t.h"
 
 class unit_tester {
@@ -143,6 +144,8 @@ class unit_tester {
 
 public:
     void runner();
+
+    void main();
 };
 
 

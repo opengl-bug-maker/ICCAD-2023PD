@@ -817,3 +817,8 @@ void unit_tester::runner() {
         std::cout << "run " << " : " << ((this->*func)() ? "true" : "false" ) << std::endl;
     }
 }
+
+void unit_tester::main() {
+    puzzle_solver_t puzzle_solver;
+    puzzle_solver.solve();
+}
