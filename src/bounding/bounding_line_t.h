@@ -6,9 +6,21 @@
 #define BOUNDINGLINE_BOUNDING_LINE_T_H
 
 #include "circular_T_list_t.h"
+#include "utilities/rect_t.h"
 #include "utilities/line_t.h"
 
 class bounding_line_t;
+
+class bounding_line_interect_result_t {
+public:
+    std::vector<bounding_line_t> union_line;
+    std::vector<bounding_line_t> intersect_line;
+    std::vector<bounding_line_t> difference_pos_line;
+    std::vector<bounding_line_t> difference_neg_line;
+    bounding_line_interect_result_t() {};
+    bounding_line_interect_result_t(std::vector<bounding_line_t> union_line, std::vector<bounding_line_t> intersect_line, std::vector<bounding_line_t> difference_pos_line, std::vector<bounding_line_t> difference_neg_line) :
+        union_line(union_line), intersect_line(intersect_line), difference_pos_line(difference_pos_line), difference_neg_line(difference_neg_line) {};
+};
 
 class bounding_line_element_t : public line_t {
 public:
@@ -25,6 +37,8 @@ class bounding_line_t {
     bool clockwise = false;
 
     double area;
+
+    rect_t bounding_rect;
     
     bounding_line_t();
 
@@ -32,24 +46,21 @@ class bounding_line_t {
 
     void update_clockwise();
 
+    void update_bounding();
+
     // bool collision(const bounding_line_t& bounding_line) const;
 public:
     circular_T_list_t<bounding_line_element_t> lines;
     bounding_line_t(circular_T_list_t<bounding_line_element_t> circular_list, bool clockwise = true);
     bounding_line_t(const std::vector<bounding_line_element_t>& lines, bool clockwise = true);
+    bounding_line_t(const rect_t& rect, bool clockwise = true);
     bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise = true);
 
     bounding_line_t operator=(const bounding_line_t& bounding_line);
 
-    // const line_t& get_left_most_line();
+    bool rough_collision(const bounding_line_t& bounding_line) const;
 
-    // const line_t& get_top_most_line();
-
-    // const line_t& get_right_most_line();
-
-    // const line_t& get_bottom_most_line();
-
-    bool touch(const bounding_line_t& bounding_line) const;
+    bool collision(const bounding_line_t& bounding_line) const;
 
     void update();
 
@@ -59,11 +70,19 @@ public:
 
     bool get_clockwise() const;
 
+    const rect_t get_bounding_rect() const;
+
     void print() const;
 
     void print_reverse() const;
 
-    friend std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
+    bool vaild_for_80percent() const;
+
+    int get_edge_count() const;
+
+    int get_vertex_count() const;
+
+    friend bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 };
 
 std::ostream& operator<<(std::ostream& os, const bounding_line_t& bounding_line);

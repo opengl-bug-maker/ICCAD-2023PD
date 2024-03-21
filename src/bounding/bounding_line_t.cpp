@@ -42,6 +42,11 @@ bounding_line_t::bounding_line_t(const std::vector<bounding_line_element_t>& lin
     for(const auto& line: lines){
         this->lines.add_at_tail(line);
     }
+    this->update();
+}
+
+bounding_line_t::bounding_line_t(const rect_t &rect, bool clockwise) : bounding_line_t(rect.to_bounding_point(), clockwise) {
+    
 }
 
 bounding_line_t::bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise) : clockwise(clockwise) {
@@ -66,30 +71,37 @@ bounding_line_t bounding_line_t::operator=(const bounding_line_t &bounding_line)
     return *this;
 }
 
-// const line_t &bounding_line_t::get_left_most_line() {
-//     return this->lines.get_root()->get_data();
-// }
+const rect_t bounding_line_t::get_bounding_rect() const {
+    return this->bounding_rect;
+}
 
-// const line_t &bounding_line_t::get_top_most_line() {
-//     return this->lines.get_root()->get_data();
-// }
+bool bounding_line_t::rough_collision(const bounding_line_t &bounding_line) const {
+    return this->get_bounding_rect().is_collision(bounding_line.get_bounding_rect());
+}
 
-// const line_t &bounding_line_t::get_right_most_line() {
-//     return this->lines.get_root()->get_data();
-// }
+bool bounding_line_t::collision(const bounding_line_t &bounding_line) const {
+    if(!rough_collision(bounding_line)) return false;
 
-// const line_t &bounding_line_t::get_bottom_most_line() {
-//     return this->lines.get_root()->get_data();
-// }
-
-bool bounding_line_t::touch(const bounding_line_t &bounding_line) const {
+    auto it0 = this->lines.get_head();
+    while(it0 = it0->get_next(), it0 != this->lines.end()) {
+        auto it1 = bounding_line.lines.get_head();
+        while(it1 = it1->get_next(), it1 != bounding_line.lines.end()) {
+            bounding_line_element_t l0 = it0->get_data();
+            bounding_line_element_t l1 = it1->get_data();
+            auto collt = l0.is_intersect(l1);
+            if(collt == line_t::collision_vertical) {
+                return true;
+            } else if (collt == line_t::collision_horizontal) {
+                if(l0.get_line_direction_type() != l1.get_line_direction_type()) {
+                    return true;
+                }
+            }
+        }
+    }
     return false;
 }
 
-std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
-    // std::cout << "before merge\n";
-    // bounding_line0.print();
-    // bounding_line1.print();
+bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
     auto it0 = bounding_line0.lines.begin();
     while(it0 != bounding_line0.lines.end()) {
         auto it1 = bounding_line1.lines.begin();
@@ -97,8 +109,6 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
             bounding_line_element_t l0 = it0->get_data();
             bounding_line_element_t l1 = it1->get_data();
             auto collt = l0.is_intersect(l1);
-            // std::cout << collt << " ";
-            // std::cout << l0 << " " << l1 << std::endl;
             if(collt == line_t::collision_vertical) {
                 vec2d_t new_point = l0.intersect_point(l1);
                 int time = 0;
@@ -113,25 +123,17 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
                 }
                 it0 = bounding_line0.lines.delete_node_get_prev(it0);
                 if(new_point != l0.get_end()) {
-                    // std::cout << "concat " << bounding_line_element_t(new_point, l0.get_end()) << "\n";
                     bounding_line0.lines.concat_next(it0, bounding_line_element_t(new_point, l0.get_end()));
                     time++;
                 }
                 if(new_point != l0.get_start()) {
-                    // std::cout << "concat " << bounding_line_element_t(l0.get_start(), new_point) << "\n";
                     bounding_line0.lines.concat_next(it0, bounding_line_element_t(l0.get_start(), new_point));
                     time++;
                 }
             } else if (collt == line_t::collision_horizontal) {
-                // std::cout << "hor coll\n";
-
                 if(l0.get_line_direction_type() != l1.get_line_direction_type()) {
                     std::optional<std::vector<line_t>> lines0 = l0.parallel_cut_reverse(l1);
                     std::optional<std::vector<line_t>> lines1 = l1.parallel_cut_reverse(l0);
-                    // if(lines0) for(auto l : lines0.value()) std::cout << l << " ";
-                    // std::cout << "\n";
-                    // if(lines1) for(auto l : lines1.value()) std::cout << l << " ";
-                    // std::cout << "\n";
                     if(lines0 && lines1) {
                         it0 = bounding_line0.lines.delete_node_get_prev(it0);
                         it1 = bounding_line1.lines.delete_node_get_prev(it1);
@@ -146,10 +148,6 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
         }
         it0 = it0->get_next();
     }
-    // std::cout << "end slicing\n";
-    // bounding_line0.print();
-    // bounding_line1.print();
-
 
     std::vector<std::pair<circular_T_node_t<bounding_line_element_t>*, circular_T_node_t<bounding_line_element_t>*>> concat_pair;
     it0 = bounding_line0.lines.get_head();
@@ -176,7 +174,7 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
     if(concat_pair.empty()) {
         bounding_line0.update();
         bounding_line1.update();
-        return {bounding_line0, bounding_line1};
+        return {{}, {}, {bounding_line0}, {bounding_line1}};
     }
 
     if(concat_pair.front().first->get_data().get_end() == concat_pair.front().second->get_data().get_start()) {
@@ -184,22 +182,13 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
         concat_pair.erase(concat_pair.begin());
     }
 
-    // std::cout << "pair \n";
-    // for(auto p : concat_pair) {
-    //     std::cout << p.first->get_data() << " " << p.second->get_data() << "\n";
-    // }
-
     int size = concat_pair.size();
-    // std::cout << "concat_size " << size << std::endl;
     if(size % 2 != 0) {
         //something wrong
         std::cout << "why QQ \n";
     }
 
-    // std::vector<circular_T_node_t<bounding_line_element_t>*> ggbs;
-
     size >>= 1;
-    // std::cout << "new list\n";
     std::vector<bounding_line_t> bounding_lines;
     bounding_lines.reserve(size);
     for(int i = 0; i < size; ++i) {
@@ -211,84 +200,56 @@ std::vector<bounding_line_t> merge(bounding_line_t bounding_line0, bounding_line
     for(int i = 0; i < size; ++i) {
         std::pair<circular_T_node_t<bounding_line_element_t>*, circular_T_node_t<bounding_line_element_t>*> fir_pair;
         std::pair<circular_T_node_t<bounding_line_element_t>*, circular_T_node_t<bounding_line_element_t>*> sec_pair;
-        // std::cout << "ori first pair " << concat_pair[i * 2].first << " " << concat_pair[i * 2].first->get_data() << " " << concat_pair[i * 2].second << " " << concat_pair[i * 2].second->get_data() << std::endl;
-        // std::cout << "ori second pair " << concat_pair[i * 2 + 1].first << " " << concat_pair[i * 2 + 1].first->get_data() << " " << concat_pair[i * 2 + 1].second << " " << concat_pair[i * 2 + 1].second->get_data() << std::endl;
-        // std::cout << concat_pair[i * 2].second->get_data().get_start() << "\n";
-        // std::cout << concat_pair[i * 2].first->get_data().get_end() << "\n";
+
         if(concat_pair[i * 2].second->get_data().get_start() == concat_pair[i * 2].first->get_data().get_end()) {
-            // std::cout << "switch pair\n";
             fir_pair = concat_pair[i * 2 + 1];
             sec_pair = concat_pair[i * 2];
         } else {
-            // std::cout << "none switch pair\n";
             fir_pair = concat_pair[i * 2];
             sec_pair = concat_pair[i * 2 + 1];
         }
-        // std::cout << "\ncheck pair1\n";
-        // for(auto p : concat_pair) {
-        //     std::cout << p.first->get_data() << " " << p.second->get_data() << "\n";
-        // }
-        // std::cout << "check pair1\n\n";
 
-        // std::cout << "first pair " << fir_pair.first << " " << fir_pair.first->get_data() << " " << fir_pair.second << " " << fir_pair.second->get_data() << std::endl;
-        // std::cout << "second pair " << sec_pair.first << " " << sec_pair.first->get_data() << " " << sec_pair.second << " " << sec_pair.second->get_data() << std::endl;
-
-        // concat_pair[i * 2 + 1].second->get_prev()->set_next(nullptr);
         sec_pair.first->set_next(sec_pair.second);
         sec_pair.second->set_prev(sec_pair.first);
-        // std::cout << sec_pair.first->get_data() << " next -> " << sec_pair.second->get_data() << std::endl;
-        // std::cout << sec_pair.second->get_data() << " prev -> " << sec_pair.first->get_data() << std::endl;
-
-        // std::cout << "\ncheck pair2\n";
-        // for(auto p : concat_pair) {
-        //     std::cout << p.first->get_data() << " " << p.second->get_data() << "\n";
-        // }
-        // std::cout << "check pair2\n\n";
 
         bounding_lines[i].lines.get_head()->set_next(fir_pair.first);
-        // std::cout << fir_pair.first->get_data() << " is " << bounding_lines[i].lines.get_head()->get_next()->get_data() << std::endl;
-        // std::cout << fir_pair.second->get_data() << " is " << bounding_lines[i].lines.get_tail()->get_prev()->get_data() << std::endl;
         bounding_lines[i].lines.get_tail()->set_prev(fir_pair.second);
 
-        // std::cout << "\ncheck pair4\n";
-        // for(auto p : concat_pair) {
-        //     std::cout << p.first->get_data() << " " << p.second->get_data() << "\n";
-        // }
-        // std::cout << "check pair4\n\n";
-        
-        // std::cout << fir_pair.second->get_data() << " is " << bounding_lines[i].lines.get_tail()->get_prev()->get_data() << std::endl;
         fir_pair.first->set_prev(bounding_lines[i].lines.get_head());
-        // std::cout << fir_pair.first->get_data() << " head " << bounding_lines[i].lines.get_head() << std::endl;
         fir_pair.second->set_next(bounding_lines[i].lines.get_tail());
-        // std::cout << fir_pair.second->get_data() << " tail " << bounding_lines[i].lines.get_tail() << std::endl;
 
-        // bounding_lines.push_back(bounding_lines[i]);
-
-
-        // std::cout <<"head : " << bounding_lines[i].lines.get_head() << std::endl;
-        // std::cout <<"tail : " << bounding_lines[i].lines.get_tail() << std::endl;
-        // std::cout << "\ncheck line\n";
-        // circular_T_node_t<bounding_line_element_t>* he = bounding_lines[i].lines.get_head();
-        // for(int i = 0; i < 30; ++i) {
-        //     std::cout << he << " " << he->get_data() << "\n";
-        //     he = he->get_next();
-        // }
-        // std::cout << "check line\n\n";
-
-        // std::cout << " update " << i << std::endl;
-        // bounding_lines[i].print();
         bounding_lines[i].update();
-        // bounding_lines.back().print();
-        // bounding_lines.back().update();
-        // std::cout << " update " << i << " done " << std::endl;
     }
-    // std::cout << "clear\n";
-    return bounding_lines;
+    bounding_line_interect_result_t bdire;
+    for(auto bd : bounding_lines) {
+        if(bd.get_clockwise()) {
+            bdire.difference_pos_line.push_back(bd);
+        } else {
+            bdire.difference_neg_line.push_back(bd);
+        }
+    }
+    return bdire;
 }
-
 
 void bounding_line_t::print_reverse() const {
     this->lines.print_reverse();
+}
+
+bool bounding_line_t::vaild_for_80percent() const {
+    return this->get_area() * 5 >= this->get_bounding_rect().get_area();
+}
+
+int bounding_line_t::get_edge_count() const {
+    return 0;
+}
+
+int bounding_line_t::get_vertex_count() const {
+    int vertex_count = 0;
+    circular_T_node_t<bounding_line_element_t>* it = this->lines.get_head();
+    while(it = it->get_next(), it != this->lines.get_tail()) {
+        vertex_count++;
+    }
+    return vertex_count;
 }
 
 void bounding_line_t::print() const {
@@ -322,9 +283,24 @@ void bounding_line_t::update_clockwise() {
     }
 }
 
+void bounding_line_t::update_bounding() {
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
+    vec2d_t left_lower(1e9);
+    vec2d_t right_upper(-1e9);
+    while(cur != this->lines.get_tail()) {
+        left_lower.set_x(std::min(left_lower.get_x(), cur->get_data().get_little_x()));
+        left_lower.set_y(std::min(left_lower.get_y(), cur->get_data().get_little_y()));
+        right_upper.set_x(std::max(right_upper.get_x(), cur->get_data().get_large_x()));
+        right_upper.set_y(std::max(right_upper.get_y(), cur->get_data().get_large_y()));
+        cur = cur->get_next();
+    }
+    this->bounding_rect = rect_t(left_lower, right_upper - left_lower);
+}
+
 void bounding_line_t::update() {
     update_area();
     update_clockwise();
+    update_bounding();
 }
 
 double bounding_line_t::get_area() const {
