@@ -20,12 +20,13 @@ public:
     void set_variables_shapes();
     void set_variables_hands();
     void set_variables_allow_overlap();
-    void set_coef(std::vector<double>&);
+    void set_constraints_modules_overlap_content();
+    void set_coef(std::vector<double> &);
     void set_coef_allow_overlap(std::vector<double>&);
     void set_constraints_opt_nets();
     void set_constraints_opt_modules();
     void set_constraints_only_one_hand();
-    double area_overlap_contraint = 6.5;
+    double area_overlap_contraint = 7;
     
 };
 
