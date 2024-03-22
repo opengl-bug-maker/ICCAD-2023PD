@@ -14,14 +14,20 @@
 using namespace std;
 
 int main(/*arg*/){
-    
+#ifdef __APPLE__
+    std::string input_file_name = "../../testcase/case10-input.txt";
+#else
     std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/case10-input.txt";
+#endif
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
     tester_t tester;
     tester.test_sp();
-    //solver.run();
-    // solver.load_specific_without_cmp();
+    return 0;
+    
+    solver_t solver;
+    solver.run();
+    solver.load_specific_without_cmp();
 
     floorplan_t fp = solver.get_best_fp();
     fp.GUI_validation();
