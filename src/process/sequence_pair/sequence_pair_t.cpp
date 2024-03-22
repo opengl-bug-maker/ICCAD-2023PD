@@ -693,48 +693,11 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     this->carve();
     this->set_bounding_lines();
     this->update_wirelength_rectilinear();
+    this->deal_bounding_line();
+
+    std::fstream file(PROJ_HOME_DIR"/outputpng/vaild_check_txt/" + chip_t::get_file_name() + ".txt", std::fstream::out);
 
     int soft = chip_t::get_soft_modules().size();
-    int n = chip_t::get_total_module_n();
-
-    std::vector<bounding_line_t> ori_bounding_lines;
-    std::vector<bounding_line_t> ori_neg_bounding_lines;
-    for(int i = 0; i < n; ++i) {
-        ori_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first));
-        ori_neg_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first, false));
-    }
-
-    std::vector<std::vector<int>> collision_num(soft);
-    for(int i = 0; i < soft; ++i) {
-        for(int j = i + 1; j < soft; ++j) {
-            if(ori_bounding_lines[i].collision(ori_neg_bounding_lines[j])) {
-                if(ori_bounding_lines[i].get_area() < ori_bounding_lines[j].get_area()) {
-                    collision_num[j].push_back(i);
-                } else {
-                    collision_num[i].push_back(j);
-                }
-            }
-        }
-    }
-    for(int i = 0; i < soft; ++i) {
-        bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
-        for(int j = soft; j < n; ++j) {
-            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
-            auto bds = bounding_line_t::merge(bd0, bd1);
-            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
-        }
-        for(auto num : collision_num[i]) {
-            if(i == num) continue;
-            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[num].first, false);
-            auto bds = bounding_line_t::merge(bd0, bd1);
-            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
-        }
-        this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};        
-    }
-    bounding_line_t(this->bouding_lines[9].first).plot();
-    bounding_line_t(this->bouding_lines[0].first).plot();
-
-    std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     for(int i = 0; i < soft; ++i) {
         bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
         double area = bd.get_area();
@@ -1275,6 +1238,46 @@ void sequence_pair_t::carve(){
         bd_to = bounding_line_t::merge(bd_to, bd_to_minus).difference_pos_line[0];
         this->bouding_lines[from] = {bd_from.get_nodes(), "s"+std::to_string(from)};
         this->bouding_lines[to] = {bd_to.get_nodes(), "s"+std::to_string(to)};
+    }
+}
+
+void sequence_pair_t::deal_bounding_line() {
+    int soft = chip_t::get_soft_modules().size();
+    int n = chip_t::get_total_module_n();
+
+    std::vector<bounding_line_t> ori_bounding_lines;
+    std::vector<bounding_line_t> ori_neg_bounding_lines;
+    for(int i = 0; i < n; ++i) {
+        ori_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first));
+        ori_neg_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first, false));
+    }
+
+    std::vector<std::vector<int>> collision_num(soft);
+    for(int i = 0; i < soft; ++i) {
+        for(int j = i + 1; j < soft; ++j) {
+            if(ori_bounding_lines[i].collision(ori_neg_bounding_lines[j])) {
+                if(ori_bounding_lines[i].get_area() < ori_bounding_lines[j].get_area()) {
+                    collision_num[j].push_back(i);
+                } else {
+                    collision_num[i].push_back(j);
+                }
+            }
+        }
+    }
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
+        for(int j = soft; j < n; ++j) {
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        for(auto num : collision_num[i]) {
+            if(i == num) continue;
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[num].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};        
     }
 }
 

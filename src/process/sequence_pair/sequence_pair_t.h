@@ -102,6 +102,7 @@ public:
     void fill_near();
     void overlap_optimization();
     void carve();
+    void deal_bounding_line();
     void change_size(int);
     void print_inline();
     void write_inline();
