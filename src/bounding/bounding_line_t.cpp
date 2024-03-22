@@ -75,6 +75,10 @@ const rect_t bounding_line_t::get_bounding_rect() const {
     return this->bounding_rect;
 }
 
+void bounding_line_t::plot(std::string plot_name) const {
+    visualizer_t::polygon_detail(this->get_nodes(), plot_name);
+}
+
 bool bounding_line_t::rough_collision(const bounding_line_t &bounding_line) const {
     return this->get_bounding_rect().is_collision(bounding_line.get_bounding_rect());
 }

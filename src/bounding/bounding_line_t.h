@@ -8,6 +8,7 @@
 #include "circular_T_list_t.h"
 #include "utilities/rect_t.h"
 #include "utilities/line_t.h"
+#include "plugin/visualizer_t.h"
 
 class bounding_line_t;
 
@@ -71,6 +72,8 @@ public:
     bool get_clockwise() const;
 
     const rect_t get_bounding_rect() const;
+
+    void plot(std::string plot_name = "") const;
 
     void print() const;
 
