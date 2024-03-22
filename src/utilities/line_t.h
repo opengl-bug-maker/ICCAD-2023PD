@@ -84,6 +84,8 @@ public:
     
     vec2d_t intersect_point(const line_t& line) const;
 
+    std::optional<line_t> merge(const line_t& line) const;
+
     line_t::line_collision_type is_intersect(const line_t& line) const;
 
     line_t::line_collision_type is_touch(const line_t& line) const;

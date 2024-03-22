@@ -34,6 +34,25 @@ bounding_line_t::bounding_line_t() {
     this->lines = circular_T_list_t<bounding_line_element_t>();
 }
 
+void bounding_line_t::reduce_line() {
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
+    std::optional<line_t> line = std::nullopt;
+    while(cur->get_next() != this->lines.get_tail()) {
+        if((line = cur->get_data().merge(cur->get_next()->get_data()))) {
+            this->lines.delete_node(cur->get_next());
+            cur = this->lines.delete_node_get_prev(cur);
+            this->lines.concat_next(cur, bounding_line_element_t(line.value()));
+            line = std::nullopt;
+        }
+        cur = cur->get_next();
+    }
+    if((line = this->lines.get_tail()->get_prev()->get_data().merge(this->lines.begin()->get_data()))) {
+        this->lines.delete_node(this->lines.get_tail()->get_prev());
+        this->lines.delete_node(this->lines.begin());
+        this->lines.add_at_head(line.value());
+    }
+}
+
 bounding_line_t::bounding_line_t(circular_T_list_t<bounding_line_element_t> circular_list, bool clockwise) : clockwise(clockwise) {
     this->lines = circular_list;
 }
@@ -302,10 +321,31 @@ void bounding_line_t::update_bounding() {
     this->bounding_rect = rect_t(left_lower, right_upper - left_lower);
 }
 
+void bounding_line_t::update_root() {
+    circular_T_node_t<bounding_line_element_t>* lower_left = this->lines.begin();
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        if(cur->get_data().get_start().get_y() < lower_left->get_data().get_start().get_y()) {
+            lower_left = cur;
+        } else if (cur->get_data().get_start().get_y() == lower_left->get_data().get_start().get_y()) {
+            if(cur->get_data().get_start().get_x() < lower_left->get_data().get_start().get_x()) {
+                lower_left = cur;
+            }
+        }
+    }
+    this->lines.drop();
+    this->lines.get_tail()->set_prev(lower_left->get_prev());
+    lower_left->get_prev()->set_next(this->lines.get_tail());
+    lower_left->set_prev(this->lines.get_head());
+    this->lines.get_head()->set_next(lower_left);
+}
+
 void bounding_line_t::update() {
+    this->reduce_line();
     this->update_area();
     this->update_clockwise();
     this->update_bounding();
+    this->update_root();
 }
 
 double bounding_line_t::get_area() const {

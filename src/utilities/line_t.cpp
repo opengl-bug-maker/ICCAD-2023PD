@@ -104,6 +104,12 @@ vec2d_t line_t::intersect_point(const line_t &line) const {
     return {line.get_large_x(), this->get_large_y()};
 }
 
+std::optional<line_t> line_t::merge(const line_t &line) const {
+    if(this->get_line_direction_type() != line.get_line_direction_type()) return std::nullopt;
+    if(this->get_end() != line.get_start()) return std::nullopt;
+    return line_t(this->get_start(), line.get_end());
+}
+
 line_t::line_collision_type line_t::is_intersect(const line_t &line) const {
     if(is_vertical(line)){
         if(this->_line_type == line_type::type_vertical){

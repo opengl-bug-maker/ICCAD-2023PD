@@ -43,11 +43,15 @@ class bounding_line_t {
     
     bounding_line_t();
 
+    void reduce_line();
+
     void update_area();
 
     void update_clockwise();
 
     void update_bounding();
+
+    void update_root();
 
     // bool collision(const bounding_line_t& bounding_line) const;
 public:
