@@ -77,6 +77,12 @@ double line_t::dot(const line_t &line) const {
     return vec0.get_x() * vec1.get_y() - vec0.get_y() * vec1.get_x();
 }
 
+double line_t::ori_dot_area() const {
+    auto vec0 = this->get_start();
+    auto vec1 = this->get_vec();
+    return vec0.get_x() * vec1.get_y() - vec0.get_y() * vec1.get_x();
+}
+
 bool line_t::is_vertical(const line_t &line) const {
     return this->_line_type != line._line_type;
 }

@@ -74,6 +74,8 @@ public:
 
     double dot(const line_t& line) const;
 
+    double ori_dot_area() const;
+
     bool is_vertical(const line_t& line) const;
 
     bool is_parallel(const line_t& line) const;
