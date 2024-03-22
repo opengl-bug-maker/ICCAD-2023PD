@@ -14,15 +14,15 @@
 using namespace std;
 
 int main(/*arg*/){
-#ifdef __APPLE__
-    std::string input_file_name = "../../testcase/case10-input.txt";
-#else
-    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/case03-input.txt";
-#endif
+    std::string case_name = chip_t::set_file_name("case10-input");
+    std::string input_file_name = PROJ_HOME_DIR"/testcase/" + case_name + ".txt";
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
+
     tester_t tester;
     tester.test_sp();
+    fgetc(stdin);
+    std::cout << "press any key to end the program" << std::endl;
     return 0;
     
     solver_t solver;
