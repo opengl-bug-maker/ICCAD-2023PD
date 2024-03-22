@@ -17,6 +17,7 @@
 #include <limits.h>
 #include "sp_ilp_settings_t.h"
 #include "bounding/bounding_line_t.h"
+#include <fstream>
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -692,6 +693,64 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     this->carve();
     this->set_bounding_lines();
     this->update_wirelength_rectilinear();
+
+    int soft = chip_t::get_soft_modules().size();
+    int n = chip_t::get_total_module_n();
+
+    std::vector<bounding_line_t> ori_bounding_lines;
+    std::vector<bounding_line_t> ori_neg_bounding_lines;
+    for(int i = 0; i < n; ++i) {
+        ori_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first));
+        ori_neg_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first, false));
+    }
+
+    std::vector<std::vector<int>> collision_num(soft);
+    for(int i = 0; i < soft; ++i) {
+        for(int j = i + 1; j < soft; ++j) {
+            if(ori_bounding_lines[i].collision(ori_neg_bounding_lines[j])) {
+                if(ori_bounding_lines[i].get_area() < ori_bounding_lines[j].get_area()) {
+                    collision_num[j].push_back(i);
+                } else {
+                    collision_num[i].push_back(j);
+                }
+            }
+        }
+    }
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
+        for(int j = soft; j < n; ++j) {
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        for(auto num : collision_num[i]) {
+            if(i == num) continue;
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[num].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};
+    }
+
+    std::fstream file("../../outputpng/vaild_check_txt/case03.txt", std::fstream::out);
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
+        double area = bd.get_area();
+        double ratio = bd.get_bounding_rect().get_size().get_x() / bd.get_bounding_rect().get_size().get_y();
+        double percent = bd.get_area() / bd.get_bounding_rect().get_area();
+        file << this->bouding_lines[i].second << ", ";
+        file << ((ratio <= 2 && ratio >= 0.5 && percent >= 0.8) ? "TRUE" : "FALSE") << ", ";
+        for(auto pos : bd.get_nodes()) {
+            file << pos << " | ";
+        }
+        file << ", ";
+        file << area << ", ";
+        file << ratio << ", ";
+        file << percent << std::endl;
+    }
+
+        
+
     visualizer_t::draw_bounding_line(this->bouding_lines);
     //visualizer_t::draw_bounding_line_connection(this->bouding_lines);
     //this->print_inline();
