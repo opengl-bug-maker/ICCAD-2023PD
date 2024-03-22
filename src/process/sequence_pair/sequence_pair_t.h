@@ -161,7 +161,7 @@ private:
     ILP_solver_t ILP_solver;
     ILP_result_t ILP_result;
     vector<vector<int>> result_carving_x, result_carving_y;
-    
+    vector<bool> result_carving_x_enable, result_carving_y_enable;
     //properties
     vector<edge_t> constraint_graph_h, constraint_graph_v;
     vector<vector<int>> is_transitive_h, is_transitive_v;
