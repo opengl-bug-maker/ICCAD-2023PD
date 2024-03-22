@@ -54,7 +54,7 @@ public:
     bounding_line_t(circular_T_list_t<bounding_line_element_t> circular_list, bool clockwise = true);
     bounding_line_t(const std::vector<bounding_line_element_t>& lines, bool clockwise = true);
     bounding_line_t(const rect_t& rect, bool clockwise = true);
-    bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise = true);
+    explicit bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise = true);
 
     bounding_line_t operator=(const bounding_line_t& bounding_line);
 
