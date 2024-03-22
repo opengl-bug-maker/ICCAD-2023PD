@@ -54,14 +54,17 @@ bounding_line_t::bounding_line_t(const std::vector<vec2d_t>& points, bool clockw
     if(clockwise){
         this->lines.add_at_tail(bounding_line_element_t(points.back(), points.front()));
         for(int i = 1; i < points.size(); ++i) {
+            if(points[i - 1] == points[i]) continue;
             this->lines.add_at_tail(bounding_line_element_t(points[i - 1], points[i]));
         }
     }else{
         this->lines.add_at_head(bounding_line_element_t(points.front(), points.back()));
         for(int i = 1; i < points.size(); ++i) {
+            if(points[i - 1] == points[i]) continue;
             this->lines.add_at_head(bounding_line_element_t(points[i], points[i - 1]));
         }
     }
+    this->update();
 }
 
 bounding_line_t bounding_line_t::operator=(const bounding_line_t &bounding_line) {
