@@ -17,7 +17,7 @@ int main(/*arg*/){
 #ifdef __APPLE__
     std::string input_file_name = "../../testcase/case10-input.txt";
 #else
-    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/case10-input.txt";
+    std::string input_file_name = "/home/jrchang/projects/ICCAD-2023PD/testcase/case03-input.txt";
 #endif
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream

@@ -25,9 +25,9 @@ add_executable(iccad2023PD main.cpp)
 #target_compile_definitions(utilities PUBLIC DEBUG_DEF)
 
 target_link_libraries(iccad2023PD
-        bounding
         output_data
         process
+        bounding
         quadratic
         polygon
         plugin

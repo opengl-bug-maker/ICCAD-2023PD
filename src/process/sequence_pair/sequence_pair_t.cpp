@@ -732,7 +732,7 @@ void sequence_pair_t::to_rectilinear_and_plot(){
         this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};
     }
 
-    std::fstream file("../../outputpng/vaild_check_txt/case03.txt", std::fstream::out);
+    std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     for(int i = 0; i < soft; ++i) {
         bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
         double area = bd.get_area();

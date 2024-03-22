@@ -8,6 +8,8 @@
 
 #include <cmath>
 #include <ostream>
+#include <optional>
+
 
 class vec2d_t {
     friend std::ostream& operator<<(std::ostream& os, const vec2d_t& vec);

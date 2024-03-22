@@ -6,7 +6,8 @@
 #define BOUNDINGLINE_LINE_T_H
 
 #include "utilities/vec2d_t.h"
-
+#include <vector>
+#include <algorithm>
 class line_t {
 public:
     enum line_type{

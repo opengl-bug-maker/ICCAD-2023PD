@@ -3,7 +3,7 @@
 //
 
 #include "bounding_line_t.h"
-
+#include <cassert>
 #pragma region bounding_line_element
 
 bounding_line_element_t::bounding_line_element_t() : line_t() {
