@@ -36,6 +36,7 @@ public:
 
 class chip_t {
     friend class similar_chip_t;
+    static std::string file_name;
     static uint32_t width, height;
     static int width_bias, height_bias;
     static uint32_t softCount, fixedCount;
@@ -62,6 +63,10 @@ public:
         mcnc,
         iccad_pd
     };
+    static std::string set_file_name(std::string file_name);
+
+    static std::string get_file_name();
+
     static void file_input(std::string fileName, file_type_t);
 
     static int get_similar_case_num();

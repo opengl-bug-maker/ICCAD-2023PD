@@ -13,6 +13,7 @@
 #include "fixed_module_t.h"
 #include "mcnc/yal_reader_t.h"
 
+std::string chip_t::file_name;
 uint32_t chip_t::width, chip_t::height;
 int chip_t::width_bias, chip_t::height_bias;
 uint32_t chip_t::softCount, chip_t::fixedCount;
@@ -26,6 +27,14 @@ std::vector<multi_net_t*> chip_t::multi_nets;
 double chip_t::module_minimum_length = 1e100;
 int chip_t::similar_case_num = -1;
 std::unordered_map<module_t*, int> module_to_id_m;
+
+std::string chip_t::set_file_name(std::string file_name) {
+    return (chip_t::file_name = file_name);
+}
+
+std::string chip_t::get_file_name() {
+    return chip_t::file_name;
+}
 
 void chip_t::file_input(std::string fileName, file_type_t file_type) {
     if(file_type==chip_t::file_type_t::iccad_pd){
