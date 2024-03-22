@@ -266,13 +266,11 @@ std::vector<vec2d_t> bounding_line_t::get_nodes() const {
 
 void bounding_line_t::update_area() {
     double area = 0;
-    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
-    while(cur->get_next() != this->lines.get_tail()) {
-        area += cur->get_data().dot(cur->get_next()->get_data());
-        cur = cur->get_next();
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        area += cur->get_data().ori_dot_area();
     }
-    area += this->lines.get_tail()->get_prev()->get_data().dot(this->lines.get_head()->get_next()->get_data());
-    this->area = area;
+    this->area = area / 2.0;
 }
 
 void bounding_line_t::update_clockwise() {
