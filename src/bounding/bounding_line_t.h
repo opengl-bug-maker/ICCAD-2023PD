@@ -85,7 +85,7 @@ public:
 
     int get_vertex_count() const;
 
-    friend bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
+    static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 };
 
 std::ostream& operator<<(std::ostream& os, const bounding_line_t& bounding_line);

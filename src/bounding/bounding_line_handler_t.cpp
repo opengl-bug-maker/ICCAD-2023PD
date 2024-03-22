@@ -29,7 +29,7 @@ void bounding_line_handler_t::add_bounding_line(const bounding_line_t &bounding_
             it++;
             continue;
         }
-        auto result = merge(*it, bounding_line);
+        auto result = bounding_line_t::merge(*it, bounding_line);
         *it = result.difference_pos_line[0];
         it++;
     }

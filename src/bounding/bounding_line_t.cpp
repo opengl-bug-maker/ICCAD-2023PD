@@ -105,7 +105,7 @@ bool bounding_line_t::collision(const bounding_line_t &bounding_line) const {
     return false;
 }
 
-bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
+bounding_line_interect_result_t bounding_line_t::merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
     auto it0 = bounding_line0.lines.begin();
     while(it0 != bounding_line0.lines.end()) {
         auto it1 = bounding_line1.lines.begin();
@@ -262,7 +262,7 @@ void bounding_line_t::print() const {
 
 std::vector<vec2d_t> bounding_line_t::get_nodes() const {
     std::vector<vec2d_t> vec;
-    for(const auto& l : this->lines.to_vector_reverse()){
+    for(const auto& l : this->lines.to_vector()){
         vec.push_back(l.get_start());
     }
     return vec;
@@ -300,9 +300,9 @@ void bounding_line_t::update_bounding() {
 }
 
 void bounding_line_t::update() {
-    update_area();
-    update_clockwise();
-    update_bounding();
+    this->update_area();
+    this->update_clockwise();
+    this->update_bounding();
 }
 
 double bounding_line_t::get_area() const {
