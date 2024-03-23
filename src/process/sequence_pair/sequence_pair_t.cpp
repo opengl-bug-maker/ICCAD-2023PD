@@ -1358,7 +1358,7 @@ void sequence_pair_t::update_wirelength_rectilinear(){
         double delta_y = y_max-y_min;
         sum+= (delta_x+delta_y)*connections[i].w;
     }
-    this->predicted_wirelength = sum;
+    this->rectilinear_wirelength = sum;
     // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
     // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
 }
