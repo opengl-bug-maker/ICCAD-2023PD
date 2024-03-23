@@ -272,12 +272,13 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
         if(load_result){
             vector<vec2d_t> result_pos = get_LP_res_pos();
             auto[result_wh, result_wh_i] = get_LP_res_wh();
-           
+            this->modules_positions.resize(result_pos.size());
             for(int i = 0; i<sequence_pair_t::soft_n; ++i){
-                this->modules_wh[i] = result_wh[i];
+                this->modules_wh[i] = {static_cast<int>(result_wh[i].get_x()), static_cast<int>(result_wh[i].get_y())};
+                this->modules_positions[i] = {static_cast<int>(result_pos[i].get_x()), static_cast<int>(result_pos[i].get_y())};
             }
             this->modules_wh_i = result_wh_i;
-            this->modules_positions = result_pos;
+            
             this->z = ILP_result.z;
         }
         return true;
@@ -693,11 +694,46 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     this->carve();
     this->set_bounding_lines();
     this->update_wirelength_rectilinear();
-    this->deal_bounding_line();
-
-    std::fstream file(PROJ_HOME_DIR"/outputpng/vaild_check_txt/" + chip_t::get_file_name() + ".txt", std::fstream::out);
 
     int soft = chip_t::get_soft_modules().size();
+    int n = chip_t::get_total_module_n();
+
+    std::vector<bounding_line_t> ori_bounding_lines;
+    std::vector<bounding_line_t> ori_neg_bounding_lines;
+    for(int i = 0; i < n; ++i) {
+        ori_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first));
+        ori_neg_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first, false));
+    }
+
+    std::vector<std::vector<int>> collision_num(soft);
+    for(int i = 0; i < soft; ++i) {
+        for(int j = i + 1; j < soft; ++j) {
+            if(ori_bounding_lines[i].collision(ori_neg_bounding_lines[j])) {
+                if(ori_bounding_lines[i].get_area() < ori_bounding_lines[j].get_area()) {
+                    collision_num[j].push_back(i);
+                } else {
+                    collision_num[i].push_back(j);
+                }
+            }
+        }
+    }
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
+        for(int j = soft; j < n; ++j) {
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        for(auto num : collision_num[i]) {
+            if(i == num) continue;
+            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[num].first, false);
+            auto bds = bounding_line_t::merge(bd0, bd1);
+            if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
+        }
+        this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};        
+    }
+
+    std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     for(int i = 0; i < soft; ++i) {
         bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
         double area = bd.get_area();
@@ -821,7 +857,7 @@ bool sequence_pair_t::find_position_with_area(bool minimize_wirelength, bool loa
             result.push_back({-1, -1});
         }
         else {
-            result.push_back( {ILP_result.var_values[i], ILP_result.var_values[i+sequence_n]});
+            result.push_back( {static_cast<int>(ILP_result.var_values[i]), static_cast<int>(ILP_result.var_values[i+sequence_n])});
         }
 
     }
@@ -918,12 +954,12 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
         if(load_result){
             vector<vec2d_t> result_pos = get_LP_res_pos();
             auto[result_wh, result_wh_i] = get_LP_res_wh();
-           
+            this->modules_positions.resize(result_pos.size());
             for(int i = 0; i<sequence_pair_t::soft_n; ++i){
-                this->modules_wh[i] = result_wh[i];
+                this->modules_wh[i] = {static_cast<int>(result_wh[i].get_x()), static_cast<int>(result_wh[i].get_y())};
+                this->modules_positions[i] = {static_cast<int>(result_pos[i].get_x()), static_cast<int>(result_pos[i].get_y())};
             }
             this->modules_wh_i = result_wh_i;
-            this->modules_positions = result_pos;
             for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
                 //cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
                 if(ILP_result.var_values[i+this->x_overlap]||ILP_result.var_values[i+this->y_overlap]){
