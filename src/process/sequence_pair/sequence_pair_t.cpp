@@ -698,7 +698,7 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     this->update_wirelength_rectilinear();
     this->deal_bounding_line();
 
-    std::string test_version = "version0003/hand0eat0";
+    std::string test_version = "version0003/hand0eat1";
 
     std::fstream file(PROJ_HOME_DIR"/outputpng/" + test_version + "/check_txt/" + chip_t::get_file_name() + ".txt", std::fstream::out);
     int soft = chip_t::get_soft_modules().size();
