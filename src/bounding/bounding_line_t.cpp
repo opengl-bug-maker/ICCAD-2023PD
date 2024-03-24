@@ -266,7 +266,12 @@ bool bounding_line_t::vaild_for_80percent() const {
 }
 
 int bounding_line_t::get_edge_count() const {
-    return 0;
+    int edge_count = 0;
+    circular_T_node_t<bounding_line_element_t>* it = this->lines.get_head();
+    while(it = it->get_next(), it != this->lines.get_tail()) {
+        edge_count++;
+    }
+    return edge_count;
 }
 
 int bounding_line_t::get_vertex_count() const {
@@ -276,6 +281,20 @@ int bounding_line_t::get_vertex_count() const {
         vertex_count++;
     }
     return vertex_count;
+}
+
+int bounding_line_t::get_vertex270_count() const {
+    int vertex270_count = 0;
+    circular_T_node_t<bounding_line_element_t>* it = this->lines.get_head();
+    while(it = it->get_next(), it->get_next() != this->lines.get_tail()) {
+        if(it->get_data().get_line_turn_direction_type(it->get_next()->get_data()) == line_t::line_turn_direction_type::turn_direction_type_left) {
+            vertex270_count++;
+        }
+    }
+    if(this->lines.get_tail()->get_prev()->get_data().get_line_turn_direction_type(this->lines.begin()->get_data()) == line_t::line_turn_direction_type::turn_direction_type_left) {
+        vertex270_count++;
+    }
+    return vertex270_count;
 }
 
 void bounding_line_t::print() const {

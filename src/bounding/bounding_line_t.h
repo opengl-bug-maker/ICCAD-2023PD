@@ -89,6 +89,8 @@ public:
 
     int get_vertex_count() const;
 
+    int get_vertex270_count() const;
+
     static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 };
 
