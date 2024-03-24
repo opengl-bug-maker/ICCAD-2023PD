@@ -20,7 +20,7 @@ void my_out(const std::string& str){
 #endif
 }
 
-void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts, std::string window_name){
+void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std::string>> polys_pts, std::string window_name, std::string svg_path){
     srand(time(NULL));
     int width = visualizer_t::max_x;
     int height = visualizer_t::max_y;
@@ -68,6 +68,11 @@ void visualizer_t::gnup_th(const std::vector<std::pair<std::vector<vec2d_t>,std:
         fputs(("set label \"" + polys_pts[m].second + "\" at " +
                 std::to_string(polys_pts[m].first[0].get_x()) + "," +
                 std::to_string(polys_pts[m].first[0].get_y()) + "\n").c_str(), pipe);
+    }
+
+    if(svg_path != "") {
+        fputs("set term svg\n", pipe);
+        fputs(("set output \"" + svg_path + "\"\n").c_str(), pipe);
     }
 
     fputs("plot 0\n", pipe);
@@ -128,19 +133,19 @@ void visualizer_t::polygon_detail_th(const std::vector<vec2d_t>& points, std::st
     if(pipe != nullptr) { pclose(pipe); }
 }
 
-void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts, std::string window_name){
-    std::thread th(visualizer_t::gnup_th, polys_pts, window_name);
+void visualizer_t::join(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& polys_pts, std::string window_name, std::string svg_path){
+    std::thread th(visualizer_t::gnup_th, polys_pts, window_name, svg_path);
     th.detach();
     return;
 }
 
-void visualizer_t::draw_bounding_line(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& bounding_lines) {
+void visualizer_t::draw_bounding_line(const std::vector<std::pair<std::vector<vec2d_t>,std::string>>& bounding_lines, std::string svg_path) {
     visualizer_t::max_x = chip_t::get_width();
     visualizer_t::max_y = chip_t::get_height();
 
     // visualizer_t::max_x = 11267;
     // visualizer_t::max_y =  10450;
-    join(bounding_lines, visualizer_t::name);
+    join(bounding_lines, visualizer_t::name, svg_path);
     visualizer_t::set_window_name("Gnuplot window");
     return ;
 }
