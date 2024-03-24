@@ -27,6 +27,13 @@ public:
         collision_vertical = 1,
         collision_type_none = 2
     };
+    enum line_turn_direction_type {
+        turn_direction_type_straight = 0,
+        turn_direction_type_left = 1,
+        turn_direction_type_around = 2,
+        turn_direction_type_right = 3,
+        turn_direction_type_none = 4
+    };
 private:
     vec2d_t _start, _end;
     line_t::line_type _line_type = line_t::line_type::type_none;
@@ -70,6 +77,8 @@ public:
     line_t::line_type get_line_type() const;
 
     line_t::line_direction_type get_line_direction_type() const;
+
+    line_t::line_turn_direction_type get_line_turn_direction_type(const line_t& line) const;
 
     vec2d_t get_vec() const;
 

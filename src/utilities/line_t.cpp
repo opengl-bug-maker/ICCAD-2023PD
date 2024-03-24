@@ -67,6 +67,12 @@ line_t::line_direction_type line_t::get_line_direction_type() const {
     return _line_direction_type;
 }
 
+line_t::line_turn_direction_type line_t::get_line_turn_direction_type(const line_t &line) const {
+    if(this->get_end() != line.get_start()) return line_turn_direction_type::turn_direction_type_none;
+    if(this->get_line_type() == line_type::type_none || line.get_line_type() == line_type::type_none) return line_turn_direction_type::turn_direction_type_none;
+    return line_t::line_turn_direction_type((line.get_line_direction_type() - this->get_line_direction_type() + 4) & 3);
+}
+
 vec2d_t line_t::get_vec() const {
     return this->_end - this->_start;
 }
