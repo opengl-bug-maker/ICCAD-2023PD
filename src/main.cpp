@@ -13,15 +13,16 @@
 #include "process/tester.h"
 using namespace std;
 
-int main(/*arg*/){
+int main(int argc, char** argv){
     std::string case_name = chip_t::set_file_name("case10-input");
+    if(argc == 2) case_name = chip_t::set_file_name(argv[1]);
     std::string input_file_name = PROJ_HOME_DIR"/testcase/" + case_name + ".txt";
     std::string output_file_name = "output.txt";
     chip_t::file_input(input_file_name, chip_t::file_type_t::iccad_pd);//fstream
 
     tester_t tester;
     tester.test_sp();
-    fgetc(stdin);
+    // fgetc(stdin);
     std::cout << "press any key to end the program" << std::endl;
     return 0;
     

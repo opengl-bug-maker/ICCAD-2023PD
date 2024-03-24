@@ -698,6 +698,9 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     this->update_wirelength_rectilinear();
     this->deal_bounding_line();
 
+    std::string test_version = "version0003/hand1eat1";
+
+    std::fstream file(PROJ_HOME_DIR"/outputpng/" + test_version + "/check_txt/" + chip_t::get_file_name() + ".txt", std::fstream::out);
     int soft = chip_t::get_soft_modules().size();
     int n = chip_t::get_total_module_n();
     std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
@@ -732,9 +735,11 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     file.close();
 
         
-
-    visualizer_t::draw_bounding_line(this->bouding_lines);
-    fgetc(stdin);
+    // visualizer_t::draw_bounding_line(this->bouding_lines);
+    visualizer_t::draw_bounding_line(this->bouding_lines, PROJ_HOME_DIR"/outputpng/" + test_version + "/normal/" + chip_t::get_file_name() + ".svg");
+    for(int i = 0; i < n; ++i) this->bouding_lines[i] = {this->bouding_lines[i].first, chip_t::get_modules()[i]->getName()};
+    visualizer_t::draw_bounding_line(this->bouding_lines, PROJ_HOME_DIR"/outputpng/" + test_version + "/origin/ori" + chip_t::get_file_name() + ".svg");
+    // fgetc(stdin);
     //visualizer_t::draw_bounding_line_connection(this->bouding_lines);
     //this->print_inline();
     //this->print_result();
