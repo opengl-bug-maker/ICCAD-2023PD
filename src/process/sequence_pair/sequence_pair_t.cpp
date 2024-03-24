@@ -273,8 +273,10 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
             vector<vec2d_t> result_pos = get_LP_res_pos();
             auto[result_wh, result_wh_i] = get_LP_res_wh();
             this->modules_positions.resize(result_pos.size());
-            for(int i = 0; i<sequence_pair_t::soft_n; ++i){
-                this->modules_wh[i] = {static_cast<int>(result_wh[i].get_x()), static_cast<int>(result_wh[i].get_y())};
+            for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
+                if(seq_is_fix[i]==false){
+                    this->modules_wh[i] = {static_cast<int>(result_wh[i].get_x()), static_cast<int>(result_wh[i].get_y())};
+                }
                 this->modules_positions[i] = {static_cast<int>(result_pos[i].get_x()), static_cast<int>(result_pos[i].get_y())};
             }
             this->modules_wh_i = result_wh_i;
