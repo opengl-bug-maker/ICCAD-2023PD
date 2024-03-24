@@ -699,21 +699,35 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     int soft = chip_t::get_soft_modules().size();
     int n = chip_t::get_total_module_n();
     std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
+    int total_vertexes = 0;
+    int total_edges = 0;
+    int total_vertexes270 = 0;
     for(int i = 0; i < soft; ++i) {
         bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
         double area = bd.get_area();
         double ratio = bd.get_bounding_rect().get_size().get_x() / bd.get_bounding_rect().get_size().get_y();
         double percent = bd.get_area() / bd.get_bounding_rect().get_area();
-        file << this->bouding_lines[i].second << ", ";
+        int ver = bd.get_vertex_count(); total_vertexes += ver;
+        int ed = bd.get_edge_count(); total_edges += ed;
+        int ver270 = bd.get_vertex270_count(); total_vertexes270 += ver270;
+        file << std::setw(3) << this->bouding_lines[i].second << ", ";
         file << ((ratio <= 2 && ratio >= 0.5 && percent >= 0.8) ? "TRUE" : "FALSE") << ", ";
+        file << std::setprecision(16) << std::setw(8) << area << ", ";
+        file << std::fixed << std::setw(5) << std::setprecision(3) << ratio << ", ";
+        file << std::fixed << std::setw(5) << std::setprecision(3) << percent << ", ";
+        file << std::defaultfloat << std::setprecision(16) << std::setw(2) << ver << ", ";
+        file << std::setw(2) << ed << ", ";
+        file << std::setw(2) << ver270 << ", ";
         for(auto pos : bd.get_nodes()) {
             file << pos << " | ";
         }
-        file << ", ";
-        file << area << ", ";
-        file << ratio << ", ";
-        file << percent << std::endl;
+        file << endl;
     }
+    file << this->rectilinear_wirelength << endl;
+    file << total_vertexes << endl;
+    file << total_edges << endl;
+    file << total_vertexes270 << endl;
+    file.close();
 
         
 
