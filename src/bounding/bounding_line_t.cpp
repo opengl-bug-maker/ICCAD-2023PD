@@ -102,7 +102,7 @@ void bounding_line_t::plot(std::string plot_name) const {
 }
 
 bool bounding_line_t::rough_collision(const bounding_line_t &bounding_line) const {
-    return this->get_bounding_rect().is_collision(bounding_line.get_bounding_rect());
+    return this->get_bounding_rect().is_touch(bounding_line.get_bounding_rect());
 }
 
 bool bounding_line_t::collision(const bounding_line_t &bounding_line) const {
@@ -128,6 +128,11 @@ bool bounding_line_t::collision(const bounding_line_t &bounding_line) const {
 }
 
 bounding_line_interect_result_t bounding_line_t::merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
+    if(!bounding_line0.collision(bounding_line1)) {
+        bounding_line0.update();
+        bounding_line1.update();
+        return {{}, {}, {bounding_line0}, {bounding_line1}};
+    }
     auto it0 = bounding_line0.lines.begin();
     while(it0 != bounding_line0.lines.end()) {
         auto it1 = bounding_line1.lines.begin();

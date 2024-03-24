@@ -58,6 +58,15 @@ bool rect_t::is_collision(const rect_t &rect) const {
     );
 }
 
+bool rect_t::is_touch(const rect_t &rect) const {
+    return (
+            rect.get_left_lower().get_x() <= this->get_right_upper().get_x() &&
+            rect.get_right_upper().get_y() >= this->get_left_lower().get_y() &&
+            rect.get_right_upper().get_x() >= this->get_left_lower().get_x() &&
+            rect.get_left_lower().get_y() <= this->get_right_upper().get_y()
+    );
+}
+
 bool rect_t::is_contain(const rect_t &rect) const {
     return (
             this->get_right_upper().get_x() >= rect.get_right_upper().get_x() &&
