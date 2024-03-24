@@ -65,7 +65,7 @@ void tester_t::test_sp(){
             cout<<"Unable to initialize"<<endl;
         }
         double z = SP.update_wirelength(true, true);
-        SP.print_result();
+        // SP.print_result();
         SP.to_rectilinear_and_plot();
         //SP.sequence_pair_validation();
     }

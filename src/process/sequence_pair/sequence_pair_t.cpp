@@ -703,7 +703,6 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     std::fstream file(PROJ_HOME_DIR"/outputpng/" + test_version + "/check_txt/" + chip_t::get_file_name() + ".txt", std::fstream::out);
     int soft = chip_t::get_soft_modules().size();
     int n = chip_t::get_total_module_n();
-    std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     int total_vertexes = 0;
     int total_edges = 0;
     int total_vertexes270 = 0;
@@ -1490,9 +1489,9 @@ void sequence_pair_t::mark_transitive_edge(){
         }
         //this->constraint_graph_h = simplified;
     }
-    for(auto& e:this->constraint_graph_v){
-        cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
-    }
+    // for(auto& e:this->constraint_graph_v){
+    //     cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
+    // }
 }
 
 vector<int> sequence_pair_t::get_correct_area() {
