@@ -63,25 +63,19 @@ public:
 
     bounding_line_t operator=(const bounding_line_t& bounding_line);
 
-    bool rough_collision(const bounding_line_t& bounding_line) const;
-
-    bool collision(const bounding_line_t& bounding_line) const;
-
     void update();
-
-    std::vector<vec2d_t> get_nodes() const;
-
-    double get_area() const;
-
-    bool get_clockwise() const;
-
-    const rect_t get_bounding_rect() const;
-
-    void plot(std::string plot_name = "") const;
 
     void print() const;
 
     void print_reverse() const;
+
+    void plot(std::string plot_name = "") const;
+
+    bool rough_collision(const bounding_line_t& bounding_line) const;
+
+    bool collision(const bounding_line_t& bounding_line) const;
+
+    static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 
     bool vaild_for_80percent() const;
 
@@ -91,7 +85,13 @@ public:
 
     int get_vertex270_count() const;
 
-    static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
+    std::vector<vec2d_t> get_nodes() const;
+
+    double get_area() const;
+
+    bool get_clockwise() const;
+
+    const rect_t get_bounding_rect() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const bounding_line_t& bounding_line);

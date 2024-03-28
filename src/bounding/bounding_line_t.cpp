@@ -30,27 +30,10 @@ bool bounding_line_element_t::operator!=(const bounding_line_element_t &bounding
 
 #pragma region bounding_line
 
+#pragma region basic
+
 bounding_line_t::bounding_line_t() {
     this->lines = circular_T_list_t<bounding_line_element_t>();
-}
-
-void bounding_line_t::reduce_line() {
-    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
-    std::optional<line_t> line = std::nullopt;
-    while(cur->get_next() != this->lines.get_tail()) {
-        if((line = cur->get_data().merge(cur->get_next()->get_data()))) {
-            this->lines.delete_node(cur->get_next());
-            cur = this->lines.delete_node_get_prev(cur);
-            this->lines.concat_next(cur, bounding_line_element_t(line.value()));
-            line = std::nullopt;
-        }
-        cur = cur->get_next();
-    }
-    if((line = this->lines.get_tail()->get_prev()->get_data().merge(this->lines.begin()->get_data()))) {
-        this->lines.delete_node(this->lines.get_tail()->get_prev());
-        this->lines.delete_node(this->lines.begin());
-        this->lines.add_at_head(line.value());
-    }
 }
 
 bounding_line_t::bounding_line_t(circular_T_list_t<bounding_line_element_t> circular_list, bool clockwise) : clockwise(clockwise) {
@@ -93,13 +76,113 @@ bounding_line_t bounding_line_t::operator=(const bounding_line_t &bounding_line)
     return *this;
 }
 
-const rect_t bounding_line_t::get_bounding_rect() const {
-    return this->bounding_rect;
+#pragma endregion
+
+#pragma region basic_func
+
+void bounding_line_t::print() const {
+    this->lines.print();
+}
+
+void bounding_line_t::print_reverse() const {
+    this->lines.print_reverse();
 }
 
 void bounding_line_t::plot(std::string plot_name) const {
     visualizer_t::polygon_detail(this->get_nodes(), plot_name);
 }
+
+std::ostream &operator<<(std::ostream &os, const bounding_line_t &bounding_line) {
+    for(auto vec2d : bounding_line.get_nodes()){
+        os << vec2d << ", ";
+    }
+    return os;
+}
+
+#pragma endregion
+
+#pragma region updating
+
+void bounding_line_t::reduce_line() {
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
+    std::optional<line_t> line = std::nullopt;
+    while(cur->get_next() != this->lines.get_tail()) {
+        if((line = cur->get_data().merge(cur->get_next()->get_data()))) {
+            this->lines.delete_node(cur->get_next());
+            cur = this->lines.delete_node_get_prev(cur);
+            this->lines.concat_next(cur, bounding_line_element_t(line.value()));
+            line = std::nullopt;
+        }
+        cur = cur->get_next();
+    }
+    if((line = this->lines.get_tail()->get_prev()->get_data().merge(this->lines.begin()->get_data()))) {
+        this->lines.delete_node(this->lines.get_tail()->get_prev());
+        this->lines.delete_node(this->lines.begin());
+        this->lines.add_at_head(line.value());
+    }
+}
+
+void bounding_line_t::update_area() {
+    double area = 0;
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        area += cur->get_data().ori_dot_area();
+    }
+    this->area = area / 2.0;
+}
+
+void bounding_line_t::update_clockwise() {
+    if(area < 0) {
+        this->clockwise = true;
+    } else {
+        this->clockwise = false;
+    }
+}
+
+void bounding_line_t::update_bounding() {
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
+    vec2d_t left_lower(1e9);
+    vec2d_t right_upper(-1e9);
+    while(cur != this->lines.get_tail()) {
+        left_lower.set_x(std::min(left_lower.get_x(), cur->get_data().get_little_x()));
+        left_lower.set_y(std::min(left_lower.get_y(), cur->get_data().get_little_y()));
+        right_upper.set_x(std::max(right_upper.get_x(), cur->get_data().get_large_x()));
+        right_upper.set_y(std::max(right_upper.get_y(), cur->get_data().get_large_y()));
+        cur = cur->get_next();
+    }
+    this->bounding_rect = rect_t(left_lower, right_upper - left_lower);
+}
+
+void bounding_line_t::update_root() {
+    circular_T_node_t<bounding_line_element_t>* lower_left = this->lines.begin();
+    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        if(cur->get_data().get_start().get_y() < lower_left->get_data().get_start().get_y()) {
+            lower_left = cur;
+        } else if (cur->get_data().get_start().get_y() == lower_left->get_data().get_start().get_y()) {
+            if(cur->get_data().get_start().get_x() < lower_left->get_data().get_start().get_x()) {
+                lower_left = cur;
+            }
+        }
+    }
+    this->lines.drop();
+    this->lines.get_tail()->set_prev(lower_left->get_prev());
+    lower_left->get_prev()->set_next(this->lines.get_tail());
+    lower_left->set_prev(this->lines.get_head());
+    this->lines.get_head()->set_next(lower_left);
+}
+
+void bounding_line_t::update() {
+    this->reduce_line();
+    this->update_area();
+    this->update_clockwise();
+    this->update_bounding();
+    this->update_root();
+}
+
+#pragma endregion
+
+#pragma region primary_func
 
 bool bounding_line_t::rough_collision(const bounding_line_t &bounding_line) const {
     return this->get_bounding_rect().is_collision(bounding_line.get_bounding_rect());
@@ -257,9 +340,9 @@ bounding_line_interect_result_t bounding_line_t::merge(bounding_line_t bounding_
     return bdire;
 }
 
-void bounding_line_t::print_reverse() const {
-    this->lines.print_reverse();
-}
+#pragma endregion
+
+#pragma region secondary_func
 
 bool bounding_line_t::vaild_for_80percent() const {
     return this->get_area() * 5 >= this->get_bounding_rect().get_area();
@@ -297,9 +380,9 @@ int bounding_line_t::get_vertex270_count() const {
     return vertex270_count;
 }
 
-void bounding_line_t::print() const {
-    this->lines.print();
-}
+#pragma endregion
+
+#pragma region getter
 
 std::vector<vec2d_t> bounding_line_t::get_nodes() const {
     std::vector<vec2d_t> vec;
@@ -307,64 +390,6 @@ std::vector<vec2d_t> bounding_line_t::get_nodes() const {
         vec.push_back(l.get_start());
     }
     return vec;
-}
-
-void bounding_line_t::update_area() {
-    double area = 0;
-    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
-    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
-        area += cur->get_data().ori_dot_area();
-    }
-    this->area = area / 2.0;
-}
-
-void bounding_line_t::update_clockwise() {
-    if(area < 0) {
-        this->clockwise = true;
-    } else {
-        this->clockwise = false;
-    }
-}
-
-void bounding_line_t::update_bounding() {
-    circular_T_node_t<bounding_line_element_t>* cur = this->lines.begin();
-    vec2d_t left_lower(1e9);
-    vec2d_t right_upper(-1e9);
-    while(cur != this->lines.get_tail()) {
-        left_lower.set_x(std::min(left_lower.get_x(), cur->get_data().get_little_x()));
-        left_lower.set_y(std::min(left_lower.get_y(), cur->get_data().get_little_y()));
-        right_upper.set_x(std::max(right_upper.get_x(), cur->get_data().get_large_x()));
-        right_upper.set_y(std::max(right_upper.get_y(), cur->get_data().get_large_y()));
-        cur = cur->get_next();
-    }
-    this->bounding_rect = rect_t(left_lower, right_upper - left_lower);
-}
-
-void bounding_line_t::update_root() {
-    circular_T_node_t<bounding_line_element_t>* lower_left = this->lines.begin();
-    circular_T_node_t<bounding_line_element_t>* cur = this->lines.get_head();
-    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
-        if(cur->get_data().get_start().get_y() < lower_left->get_data().get_start().get_y()) {
-            lower_left = cur;
-        } else if (cur->get_data().get_start().get_y() == lower_left->get_data().get_start().get_y()) {
-            if(cur->get_data().get_start().get_x() < lower_left->get_data().get_start().get_x()) {
-                lower_left = cur;
-            }
-        }
-    }
-    this->lines.drop();
-    this->lines.get_tail()->set_prev(lower_left->get_prev());
-    lower_left->get_prev()->set_next(this->lines.get_tail());
-    lower_left->set_prev(this->lines.get_head());
-    this->lines.get_head()->set_next(lower_left);
-}
-
-void bounding_line_t::update() {
-    this->reduce_line();
-    this->update_area();
-    this->update_clockwise();
-    this->update_bounding();
-    this->update_root();
 }
 
 double bounding_line_t::get_area() const {
@@ -375,11 +400,10 @@ bool bounding_line_t::get_clockwise() const {
     return this->clockwise;
 }
 
-std::ostream &operator<<(std::ostream &os, const bounding_line_t &bounding_line) {
-    for(auto vec2d : bounding_line.get_nodes()){
-        os << vec2d << ", ";
-    }
-    return os;
+const rect_t bounding_line_t::get_bounding_rect() const {
+    return this->bounding_rect;
 }
+
+#pragma endregion
 
 #pragma endregion
