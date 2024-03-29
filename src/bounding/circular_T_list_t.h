@@ -114,6 +114,8 @@ public:
 
     bool operator==(const circular_T_list_t& circular_T_list) const;
 
+    bool operator!=(const circular_T_list_t& circular_T_list) const;
+
     circular_T_list_t<T> operator=(const circular_T_list_t<T>& circular_T_list);
 
     void drop();
@@ -201,6 +203,11 @@ bool circular_T_list_t<T>::operator==(const circular_T_list_t<T> &circular_T_lis
         neighbor_node = neighbor_node->get_next();
     }
     return true;
+}
+
+template <class T>
+inline bool circular_T_list_t<T>::operator!=(const circular_T_list_t &circular_T_list) const {
+    return !this->operator==(circular_T_list);
 }
 
 template <class T>

@@ -4,6 +4,27 @@
 
 #include "bounding_line_t.h"
 #include <cassert>
+
+#pragma region bounding_line_interect_result
+
+bool bounding_line_interect_result_t::operator==(const bounding_line_interect_result_t &bounding_line_interect_result) {
+    if(this->difference_pos_line.size() != bounding_line_interect_result.difference_pos_line.size()) return false;
+    if(this->difference_neg_line.size() != bounding_line_interect_result.difference_neg_line.size()) return false;
+    if(this->intersect_line.size() != bounding_line_interect_result.intersect_line.size()) return false;
+    if(this->union_line.size() != bounding_line_interect_result.union_line.size()) return false;
+    for(int i = 0; i < this->difference_pos_line.size(); ++i) if(this->difference_pos_line[i] != bounding_line_interect_result.difference_pos_line[i]) return false;
+    for(int i = 0; i < this->difference_neg_line.size(); ++i) if(this->difference_neg_line[i] != bounding_line_interect_result.difference_neg_line[i]) return false;
+    for(int i = 0; i < this->intersect_line.size(); ++i) if(this->intersect_line[i] != bounding_line_interect_result.intersect_line[i]) return false;
+    for(int i = 0; i < this->union_line.size(); ++i) if(this->union_line[i] != bounding_line_interect_result.union_line[i]) return false;
+    return true;
+}
+
+bool bounding_line_interect_result_t::operator!=(const bounding_line_interect_result_t &bounding_line_interect_result) {
+    return !this->operator==(bounding_line_interect_result);
+}
+
+#pragma endregion
+
 #pragma region bounding_line_element
 
 bounding_line_element_t::bounding_line_element_t() : line_t() {
@@ -74,6 +95,18 @@ bounding_line_t bounding_line_t::operator=(const bounding_line_t &bounding_line)
     this->area = bounding_line.area;
     this->lines = bounding_line.lines;
     return *this;
+}
+
+bool bounding_line_t::operator==(const bounding_line_t &bounding_line) {
+    if(this->get_clockwise() != bounding_line.get_clockwise()) return false;
+    if(this->get_area() != bounding_line.get_area()) return false;
+    if(this->get_bounding_rect() != bounding_line.get_bounding_rect()) return false;
+    if(this->lines != bounding_line.lines) return false;
+    return true;
+}
+
+bool bounding_line_t::operator!=(const bounding_line_t &bounding_line) {
+    return !this->operator==(bounding_line);
 }
 
 #pragma endregion

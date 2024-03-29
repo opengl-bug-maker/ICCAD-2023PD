@@ -21,6 +21,9 @@ public:
     bounding_line_interect_result_t() {};
     bounding_line_interect_result_t(std::vector<bounding_line_t> union_line, std::vector<bounding_line_t> intersect_line, std::vector<bounding_line_t> difference_pos_line, std::vector<bounding_line_t> difference_neg_line) :
         union_line(union_line), intersect_line(intersect_line), difference_pos_line(difference_pos_line), difference_neg_line(difference_neg_line) {};
+
+    bool operator==(const bounding_line_interect_result_t& bounding_line_interect_result);
+    bool operator!=(const bounding_line_interect_result_t& bounding_line_interect_result);
 };
 
 class bounding_line_element_t : public line_t {
@@ -62,6 +65,8 @@ public:
     explicit bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise = true);
 
     bounding_line_t operator=(const bounding_line_t& bounding_line);
+    bool operator==(const bounding_line_t& bounding_line);
+    bool operator!=(const bounding_line_t& bounding_line);
 
     void update();
 
