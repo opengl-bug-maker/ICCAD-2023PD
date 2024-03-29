@@ -80,6 +80,18 @@ class unit_tester {
 
     bool bounding_line_t_merge5();
 
+    bool bounding_line_t_merge6();
+
+    bool bounding_line_t_merge7();
+
+    bool bounding_line_t_merge8();
+
+    bool bounding_line_t_merge9();
+
+    bool bounding_line_t_merge10();
+
+    bool bounding_line_t_merge11();
+
     //endregion
 
     //region circular_base_list_t
