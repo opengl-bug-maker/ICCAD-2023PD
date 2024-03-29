@@ -36,6 +36,8 @@ public:
 
     bool is_collision(const rect_t& rect) const;
 
+    bool is_touch(const rect_t& rect) const;
+
     bool is_contain(const rect_t& rect) const;
 
     bool is_wrap(const rect_t& rect) const;
