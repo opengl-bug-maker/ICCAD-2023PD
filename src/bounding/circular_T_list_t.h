@@ -136,6 +136,9 @@ public:
 
     void for_each(void (*func)(circular_T_node_t<T>* node)) const;
 
+    template<class T1>
+    void for_each_tuple(const T1 tins, void (*func)(circular_T_node_t<T>* node, const T1 t)) const;
+
     void for_each_pair(void (*func)(circular_T_node_t<T>* node0, circular_T_node_t<T>* node1)) const;
 
     template<class T1>
@@ -386,6 +389,15 @@ std::vector<T> circular_T_list_t<T>::to_vector_multi_round(int round) const {
         }
     }
     return vec;
+}
+
+template <class T>
+template <class T1>
+inline void circular_T_list_t<T>::for_each_tuple(const T1 tins, void (*func)(circular_T_node_t<T> *node, const T1 t)) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur != this->get_tail()) {
+        func(cur, tins);
+    }
 }
 
 template <class T>
