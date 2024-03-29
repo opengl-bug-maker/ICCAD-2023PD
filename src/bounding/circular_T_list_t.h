@@ -108,6 +108,10 @@ public:
 
     circular_T_node_t<T>* get_tail() const;
 
+    circular_T_node_t<T>* get_prev(circular_T_node_t<T> *node) const;
+
+    circular_T_node_t<T>* get_next(circular_T_node_t<T> *node) const;
+
     circular_T_list_t();
 
     circular_T_list_t(const circular_T_list_t& circular_T_list);
@@ -180,6 +184,16 @@ inline circular_T_node_t<T> *circular_T_list_t<T>::get_head() const {
 template <class T>
 inline circular_T_node_t<T> *circular_T_list_t<T>::get_tail() const {
     return static_cast<circular_T_node_t<T>*>(circular_base_list_t::tail);
+}
+
+template <class T>
+inline circular_T_node_t<T> *circular_T_list_t<T>::get_prev(circular_T_node_t<T> *node) const {
+    return static_cast<circular_T_node_t<T>*>(circular_base_list_t::get_prev(node));
+}
+
+template <class T>
+inline circular_T_node_t<T> *circular_T_list_t<T>::get_next(circular_T_node_t<T> *node) const {
+    return static_cast<circular_T_node_t<T>*>(circular_base_list_t::get_next(node));
 }
 
 template <class T>
