@@ -131,6 +131,10 @@ public:
 
     int get_vertex270_count() const;
 
+    void get_anchor() const;
+
+    bool check_rounded_rect() const;
+
     std::vector<vec2d_t> get_nodes() const;
 
     double get_area() const;

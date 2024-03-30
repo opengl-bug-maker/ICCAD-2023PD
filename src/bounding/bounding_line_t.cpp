@@ -475,6 +475,44 @@ int bounding_line_t::get_vertex270_count() const {
     return vertex270_count;
 }
 
+void bounding_line_t::get_anchor() const {
+    bounding_line_anchor_points bdap;
+    bounding_node_t* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        bdap.update_anchor(cur);
+    }
+}
+
+bool bounding_line_t::check_rounded_rect() const {
+    double shape_limit = 1 / 3.0;
+    bounding_line_anchor_points bdap;
+    bounding_node_t* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        bdap.update_anchor(cur);
+    }
+    for(int i = 0; i < 4; ++i) {
+        bounding_node_t* start = bdap.get_anchor_lines()[i * 2];
+        bounding_node_t* end = bdap.get_anchor_lines()[i * 2 + 1];
+        for(auto s = start; s != end; s = s->get_next()) {
+            bounding_node_t* prev = this->lines.get_prev(s);
+            bounding_node_t* next = this->lines.get_next(s);
+            auto type0 = prev->get_data().get_line_turn_direction_type(s->get_data());
+            auto type1 = s->get_data().get_line_turn_direction_type(next->get_data());
+            if(type0 != type1 || type0 != line_t::line_turn_direction_type::turn_direction_type_right) continue;
+            double ratio = s->get_data().get_vec().get_length();
+            if(s->get_data().dot(prev->get_data()) < next->get_data().dot(s->get_data())) {
+                ratio /= prev->get_data().get_vec().get_length();
+            } else {
+                ratio /= next->get_data().get_vec().get_length();
+            }
+            if(ratio < shape_limit) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 #pragma endregion
 
 #pragma region getter
