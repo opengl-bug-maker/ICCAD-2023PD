@@ -37,6 +37,47 @@ public:
     bool operator!=(const bounding_line_element_t& bounding_line_element) const;
 };
 
+using bounding_node_t = circular_T_node_t<bounding_line_element_t>;
+
+class bounding_line_anchor_points {
+public:
+    enum anchor_type {
+        left_lower,
+        left_upper,
+        upper_left,
+        upper_right,
+        right_upper,
+        right_lower,
+        lower_right,
+        lower_left
+    };
+    std::vector<vec2d_t> anchors;
+    std::vector<bounding_node_t*> anchor_lines;
+
+    bounding_line_anchor_points() : anchor_lines(std::vector<bounding_node_t*>(8)) {
+        this->anchors = {
+            {1e9, 1e9},
+            {1e9, -1e9},
+            {1e9, -1e9},
+            {-1e9, -1e9},
+            {-1e9, -1e9},
+            {-1e9, 1e9},
+            {-1e9, 1e9},
+            {1e9, 1e9}
+        };
+    }
+
+    void update_anchor(bounding_node_t*& bounding_node);
+
+    void set_anchor_line(bounding_line_anchor_points::anchor_type anchor, bounding_node_t*& bounding_node);
+
+    const bounding_node_t* get_anchor_line(bounding_line_anchor_points::anchor_type anchor) const;
+    
+    const std::vector<bounding_node_t*> get_anchor_lines() const;
+
+    const vec2d_t& get_anchor_point(bounding_line_anchor_points::anchor_type anchor) const;
+};
+
 class bounding_line_t {
     bool clockwise = false;
 

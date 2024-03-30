@@ -49,6 +49,63 @@ bool bounding_line_element_t::operator!=(const bounding_line_element_t &bounding
 
 #pragma endregion
 
+#pragma region bounding_line_anchor_points
+
+void bounding_line_anchor_points::update_anchor(bounding_node_t* &bounding_node) {
+    const vec2d_t& p = bounding_node->get_data().get_start();
+    if(p.get_x() < this->anchors[anchor_type::left_lower].get_x() || (p.get_x() == this->anchors[anchor_type::left_lower].get_x() && p.get_y() < this->anchors[anchor_type::left_lower].get_y())) {
+        this->anchors[anchor_type::left_lower] = p;
+        this->anchor_lines[anchor_type::left_lower] = bounding_node;
+    }
+    if(p.get_x() < this->anchors[anchor_type::left_upper].get_x() || (p.get_x() == this->anchors[anchor_type::left_upper].get_x() && p.get_y() > this->anchors[anchor_type::left_upper].get_y())) {
+        this->anchors[anchor_type::left_upper] = p;
+        this->anchor_lines[anchor_type::left_upper] = bounding_node;
+    }
+    if(p.get_y() > this->anchors[anchor_type::upper_left].get_y() || (p.get_y() == this->anchors[anchor_type::upper_left].get_y() && p.get_x() < this->anchors[anchor_type::upper_left].get_x())) {
+        this->anchors[anchor_type::upper_left] = p;
+        this->anchor_lines[anchor_type::upper_left] = bounding_node;
+    }
+    if(p.get_y() > this->anchors[anchor_type::upper_right].get_y() || (p.get_y() == this->anchors[anchor_type::upper_right].get_y() && p.get_x() > this->anchors[anchor_type::upper_right].get_x())) {
+        this->anchors[anchor_type::upper_right] = p;
+        this->anchor_lines[anchor_type::upper_right] = bounding_node;
+    }
+    if(p.get_x() > this->anchors[anchor_type::right_upper].get_x() || (p.get_x() == this->anchors[anchor_type::right_upper].get_x() && p.get_y() > this->anchors[anchor_type::right_upper].get_y())) {
+        this->anchors[anchor_type::right_upper] = p;
+        this->anchor_lines[anchor_type::right_upper] = bounding_node;
+    }
+    if(p.get_x() > this->anchors[anchor_type::right_lower].get_x() || (p.get_x() == this->anchors[anchor_type::right_lower].get_x() && p.get_y() < this->anchors[anchor_type::right_lower].get_y())) {
+        this->anchors[anchor_type::right_lower] = p;
+        this->anchor_lines[anchor_type::right_lower] = bounding_node;
+    }
+    if(p.get_y() < this->anchors[anchor_type::lower_right].get_y() || (p.get_y() == this->anchors[anchor_type::lower_right].get_y() && p.get_x() > this->anchors[anchor_type::lower_right].get_x())) {
+        this->anchors[anchor_type::lower_right] = p;
+        this->anchor_lines[anchor_type::lower_right] = bounding_node;
+    }
+    if(p.get_y() < this->anchors[anchor_type::lower_left].get_y() || (p.get_y() == this->anchors[anchor_type::lower_left].get_y() && p.get_x() < this->anchors[anchor_type::lower_left].get_x())) {
+        this->anchors[anchor_type::lower_left] = p;
+        this->anchor_lines[anchor_type::lower_left] = bounding_node;
+    }
+}
+
+void bounding_line_anchor_points::set_anchor_line(bounding_line_anchor_points::anchor_type anchor, bounding_node_t* &bounding_node) {
+    this->anchor_lines[anchor] = bounding_node;
+    this->anchors[anchor] = bounding_node->get_data().get_start();
+}
+
+const bounding_node_t* bounding_line_anchor_points::get_anchor_line(bounding_line_anchor_points::anchor_type anchor) const {
+    return this->anchor_lines[anchor];
+}
+
+const std::vector<bounding_node_t*> bounding_line_anchor_points::get_anchor_lines() const {
+    return this->anchor_lines;
+}
+
+const vec2d_t &bounding_line_anchor_points::get_anchor_point(bounding_line_anchor_points::anchor_type anchor) const {
+    return this->anchors[anchor];
+}
+
+#pragma endregion
+
 #pragma region bounding_line
 
 #pragma region basic
