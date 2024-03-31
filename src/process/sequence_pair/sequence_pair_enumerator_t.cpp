@@ -105,7 +105,7 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
     if(this->current_sp_n >= this->target_sp_n){
         return false;
     }
-    cout<<i<<endl;
+    cout<<"Initializing-placing "<<i<<"-th module"<<endl;
     if(i>=this->seed_SP.fix_start_idx){
         //this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
         this->res_SP = this->seed_SP;

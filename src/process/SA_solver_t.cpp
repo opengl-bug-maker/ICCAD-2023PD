@@ -151,10 +151,13 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool ove
     vector<int> rand_j = random_helper::rand_list(sequence_pair_t::sequence_n);
     double thread_n;
     if(this->t>=0.1){
-        thread_n = 2;
+        thread_n = 3;
     }
     else{
-        thread_n = 4;
+        thread_n = 6;
+    }
+    if(overlap){
+        thread_n = 1;
     }
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
@@ -179,8 +182,8 @@ double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after, boo
     // double after_wirelength = after.update_wirelength(true, false);
     bool a, b;
     if(overlap){
-        a = ori.find_position_allow_illegal(true, true, 0, 0);   
-        b = after.find_position_allow_illegal(true, true, 0, 0);   
+        a = ori.z;   
+        b = after.z;   
     }
     else{
         a = ori.find_position(true, true, 0, 0);   

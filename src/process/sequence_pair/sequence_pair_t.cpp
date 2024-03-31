@@ -938,11 +938,11 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
             this->modules_positions.resize(result_pos.size());
             for(int i = 0; i<sequence_pair_t::soft_n; ++i){
                 this->modules_wh[i] = {static_cast<int>(result_wh[i].get_x()), static_cast<int>(result_wh[i].get_y())};
-                this->modules_positions[i] = {static_cast<int>(result_pos[i].get_x()), static_cast<int>(result_pos[i].get_y())};
             }
             this->modules_wh_i = result_wh_i;
             for(int i = 0; i < sequence_pair_t::sequence_n; ++i){
                 //cout<< i<<" "<<seq_is_fix[i]<<", "<<"{"<<ILP_result.var_values[i+this->x_overlap]<<", "<<ILP_result.var_values[i+this->y_overlap]<<"}"<<endl;
+                this->modules_positions[i] = {static_cast<int>(result_pos[i].get_x()), static_cast<int>(result_pos[i].get_y())};
                 if(ILP_result.var_values[i+this->x_overlap]||ILP_result.var_values[i+this->y_overlap]){
                     this->allow_to_overlap[i] = 1;
                 }
@@ -1485,9 +1485,9 @@ void sequence_pair_t::mark_transitive_edge(){
         }
         //this->constraint_graph_h = simplified;
     }
-    for(auto& e:this->constraint_graph_v){
-        cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
-    }
+    // for(auto& e:this->constraint_graph_v){
+    //     cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
+    // }
 }
 
 vector<int> sequence_pair_t::get_correct_area() {
