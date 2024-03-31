@@ -156,9 +156,6 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool ove
     else{
         thread_n = 6;
     }
-    if(overlap){
-        thread_n = 1;
-    }
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
     double x = sequence_pair_t::sequence_n/thread_n;

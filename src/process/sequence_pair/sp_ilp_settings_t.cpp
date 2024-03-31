@@ -20,7 +20,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_h()
             double area = this->sp->modules_area[from];
             vector<double> w(5);
             for(int j = 0; j<5; ++j){
-                w[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_x();
+                w[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_x();
             }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 7,
                                   {from+this->sp->x_module_offset, to+this->sp->x_module_offset,
@@ -58,7 +58,7 @@ void sp_ilp_settings_find_position_t::  set_constraints_modules_allow_overlap_h(
             double area = this->sp->modules_area[from];
             vector<double> w(5);
             for(int j = 0; j<5; ++j){
-                w[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_x();
+                w[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_x();
             }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 8,
                                   {from+this->sp->x_module_offset, to+this->sp->x_module_offset, i+this->sp->x_overlap,
@@ -74,8 +74,8 @@ void sp_ilp_settings_find_position_t::  set_constraints_modules_allow_overlap_h(
             vector<double> w_from(5), w_to(5); 
             vector<double> vars = {1, -1};
             for(int j = 0; j<5; ++j){
-                w_from[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_x();
-                w_to[j] = sequence_pair_t::soft_area_to_w_h_m_5[to][j].get_x();
+                w_from[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_x();
+                w_to[j] = this->sp->soft_area_to_w_h_m_5[to][j].get_x();
             }
             for(int j = 0; j<5; ++j){
                 vars.push_back(w_from[j]);
@@ -131,7 +131,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
             double area = this->sp->modules_area[from];
             vector<double> h(5);
             for(int j = 0; j<5; ++j){
-                h[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_y();    
+                h[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_y();    
             }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 8,
                               {from+this->sp->y_module_offset, to+this->sp->y_module_offset, i+this->sp->y_overlap,
@@ -146,8 +146,8 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
                 vector<double> w_from(5), w_to(5); 
                 vector<double> vars = {1, -1};
                 for(int j = 0; j<5; ++j){
-                    w_from[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_y();
-                    w_to[j] = sequence_pair_t::soft_area_to_w_h_m_5[to][j].get_y();
+                    w_from[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_y();
+                    w_to[j] = this->sp->soft_area_to_w_h_m_5[to][j].get_y();
                 }
                 for(int j = 0; j<5; ++j){
                     vars.push_back(w_from[j]);
@@ -194,7 +194,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_v()
             double area = this->sp->modules_area[from];
             vector<double> h(5);
             for(int j = 0; j<5; ++j){
-                h[j] = sequence_pair_t::soft_area_to_w_h_m_5[from][j].get_y();    
+                h[j] = this->sp->soft_area_to_w_h_m_5[from][j].get_y();    
             }
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 7,
                               {from+this->sp->y_module_offset, to+this->sp->y_module_offset,
@@ -260,8 +260,8 @@ void sp_ilp_settings_find_position_t::set_constraints_net(){
             else{
                 vector<double> b_w(5), b_h(5);
                 for(int k = 0; k<5; ++k){
-                    b_w[k] = sequence_pair_t::soft_area_to_w_h_m_5[b][k].get_half_x();
-                    b_h[k] = sequence_pair_t::soft_area_to_w_h_m_5[b][k].get_half_y();
+                    b_w[k] = this->sp->soft_area_to_w_h_m_5[b][k].get_half_x();
+                    b_h[k] = this->sp->soft_area_to_w_h_m_5[b][k].get_half_y();
                 }
                 this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 7,
                                             {this->sp->x_edge_offset_l+i,b+this->sp->x_module_offset,b+this->sp->shape_types[0], b+this->sp->shape_types[1], b+this->sp->shape_types[2], b+this->sp->shape_types[3], b+this->sp->shape_types[4]},
@@ -298,8 +298,8 @@ void sp_ilp_settings_find_position_t::set_constraints_boundaries(){
         string  constraint_name2 = "y_bound"+ std::to_string(i);
         vector<double> w(5), h(5);
         for(int j = 0; j<5; ++j){
-            w[j] = sequence_pair_t::soft_area_to_w_h_m_5[i][j].get_x();
-            h[j] = sequence_pair_t::soft_area_to_w_h_m_5[i][j].get_y();
+            w[j] = this->sp->soft_area_to_w_h_m_5[i][j].get_x();
+            h[j] = this->sp->soft_area_to_w_h_m_5[i][j].get_y();
         }
 
 

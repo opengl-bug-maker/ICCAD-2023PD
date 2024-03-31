@@ -23,8 +23,6 @@ int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
 int sequence_pair_t::soft_n;
 int sequence_pair_t::connection_graph_deg;
-vector<std::vector<vec2d_t>> sequence_pair_t::soft_area_to_w_h_m_5;
-vector<std::vector<vec2d_t>> sequence_pair_t::soft_area_to_w_h_m_9;
 vector<bool> sequence_pair_t::seq_is_fix;
 vector<soft_module_t*> sequence_pair_t::seq_soft_map;
 vector<fixed_module_t*> sequence_pair_t::seq_fixed_map;
@@ -45,8 +43,7 @@ void sequence_pair_t::init() {
     sequence_pair_t::sequence_n = static_cast<int>(chip_t::get_total_module_n());
     sequence_pair_t::fix_start_idx = static_cast<int>(chip_t::get_soft_modules().size());
 
-    soft_area_to_w_h_m_5.resize(soft_modules.size());
-    soft_area_to_w_h_m_9.resize(soft_modules.size());
+
     sequence_pair_t::seq_soft_map.resize(chip_t::get_total_module_n());
     sequence_pair_t::seq_fixed_map.resize(chip_t::get_total_module_n());
     sequence_pair_t::seq_is_fix.resize(chip_t::get_total_module_n());
@@ -63,8 +60,8 @@ void sequence_pair_t::init() {
     int j = 0;
     for(int i = 0; i<soft_modules.size(); ++i){
         sequence_pair_t::seq_soft_map[j] = soft_modules[i];
-        sequence_pair_t::soft_area_to_w_h_m_5[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 5);
-        sequence_pair_t::soft_area_to_w_h_m_9[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 9);
+        // sequence_pair_t::soft_area_to_w_h_m_5[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 5);
+        // sequence_pair_t::soft_area_to_w_h_m_9[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 9);
         sequence_pair_t::modules_area[j] = soft_modules[i]->get_area();
         sequence_pair_t::seq_fixed_map[j] = nullptr;
         sequence_pair_t::seq_is_fix[j] = false;
@@ -86,6 +83,16 @@ void sequence_pair_t::init() {
 }
 
 sequence_pair_t::sequence_pair_t() {
+    const std::vector<soft_module_t*>& soft_modules = chip_t::get_soft_modules();
+
+    this->soft_area_to_w_h_m_5.resize(soft_modules.size());
+    this->soft_area_to_w_h_m_9.resize(soft_modules.size());
+    int j = 0;
+    for(int i = 0; i<soft_modules.size(); ++i){
+        this->soft_area_to_w_h_m_5[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 5);
+        this->soft_area_to_w_h_m_9[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 9);
+        j++;
+    }
     init_modules_size();
     set_is_in_seq();
     set_only_fix();
@@ -187,8 +194,8 @@ pair<vector<vec2d_t>, vector<int>> sequence_pair_t::get_LP_res_wh(){
             }
             double x = 0, y = 0;
             for(int j = 0; j<5; ++j){
-                x+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m_5[i][j].get_x();
-                y+=shapes[j]*sequence_pair_t::soft_area_to_w_h_m_5[i][j].get_y();
+                x+=shapes[j]*this->soft_area_to_w_h_m_5[i][j].get_x();
+                y+=shapes[j]*this->soft_area_to_w_h_m_5[i][j].get_y();
             }
             x = floor(x);
             y = floor(y);
@@ -470,7 +477,7 @@ void sequence_pair_t::change_size(int i) {
     }
 }
 void sequence_pair_t::set_module_size(int i, int j){
-    this->modules_wh[i] = sequence_pair_t::soft_area_to_w_h_m_5[i][j];
+    this->modules_wh[i] = this->soft_area_to_w_h_m_5[i][j];
     this->modules_wh_i[i] = j;
 }
 
@@ -972,15 +979,15 @@ bool sequence_pair_t::find_position_allow_illegal(bool minimize_wirelength, bool
     //to adjust area here
     //this->sequence_pair_validation(1);
     vector<int> area_compensation = this->get_correct_compensation();
-    vector<vector<vec2d_t>> ori_wh = sequence_pair_t::soft_area_to_w_h_m_5;
+    vector<vector<vec2d_t>> ori_wh = this->soft_area_to_w_h_m_5;
     vector<vector<vec2d_t>> new_shape_5;
     for(int i = 0; i<sequence_n; ++i){
         new_shape_5.push_back(sequence_pair_t::find_w_h(this->modules_area[i]+area_compensation[i], 5));
     }
     //cout<<endl;
-    sequence_pair_t::soft_area_to_w_h_m_5 = new_shape_5;
+    this->soft_area_to_w_h_m_5 = new_shape_5;
     bool second_attempt = this->find_position_allow_illegal_fill(minimize_wirelength, load_result, overlap_h, overlap_v);
-    sequence_pair_t::soft_area_to_w_h_m_5 = ori_wh;
+    this->soft_area_to_w_h_m_5 = ori_wh;
     vector<int> area_compensation_after = this->get_correct_area();
     if(second_attempt==false){
         return this->find_position(true, true, 0, 0);

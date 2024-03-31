@@ -80,8 +80,8 @@ public:
     static vector<vector<int>> connections_VE; //VE graph
     static vector<pair<int, int>> deg_w;
     static vector<bool> seq_is_fix; //if the module is a fixed module (so the array should be [0,0,...,0,1,...1]
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m_5; //area -> (w, h)
-    static vector<vector<vec2d_t>> soft_area_to_w_h_m_9; //area -> (w, h)
+    vector<vector<vec2d_t>> soft_area_to_w_h_m_5; //area -> (w, h)
+    vector<vector<vec2d_t>> soft_area_to_w_h_m_9; //area -> (w, h)
     static vector<soft_module_t*> seq_soft_map; // an array with size equal to # of modules
     static vector<fixed_module_t*> seq_fixed_map; // an array with size equal to # of modules
     static vector<double> modules_area;
