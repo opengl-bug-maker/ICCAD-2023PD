@@ -32,6 +32,7 @@ public:
 
 
     vector<int> swap_enable;
+    const bool need_practical = false;
     double t = 1, r = 0.999, end_t = 0.005;
     double time_limit = 0, it_average_time = 0;
     const int load_back_it = 100;

@@ -34,7 +34,7 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_overlap_h()
         this->sp->constraint_i++;
     }
 }
-void sp_ilp_settings_find_position_t::  set_constraints_modules_allow_overlap_h(){
+void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_h(){
     for(int i = 0; i<this->sp->constraint_graph_h.size(); ++i){
         int from = this->sp->constraint_graph_h[i].from, to = this->sp->constraint_graph_h[i].to,w = this->sp->constraint_graph_h[i].w;
         double overlap_var = 0.0;
@@ -96,13 +96,13 @@ void sp_ilp_settings_find_position_t::  set_constraints_modules_allow_overlap_h(
                                            this->sp->shape_types[3] + to,
                                            this->sp->shape_types[4] + to
                                     },
-                                      vars, constraint_name, -1e-5);
+                                      vars, constraint_name, -1);
             this->sp->constraint_i++;
 
             this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2,
                 {from+this->sp->x_module_offset, to+this->sp->x_module_offset},
                 {1, -1},
-                constraint_name, -1e-5);
+                constraint_name, -1);
             this->sp->constraint_i++;
         } 
     }
@@ -168,13 +168,13 @@ void sp_ilp_settings_find_position_t::set_constraints_modules_allow_overlap_v(){
                                             this->sp->shape_types[3] + to,
                                             this->sp->shape_types[4] + to
                                         },
-                                        vars, constraint_name, -1e-5);
+                                        vars, constraint_name, -1);
                 this->sp->constraint_i++;
 
                 this->sp->ILP_solver.set_constraint_upb(this->sp->constraint_i, 2,
                     {from+this->sp->y_module_offset, to+this->sp->y_module_offset},
                     {1, -1},
-                    constraint_name, -1e-5);
+                    constraint_name, -1);
                 this->sp->constraint_i++;
             } 
         }

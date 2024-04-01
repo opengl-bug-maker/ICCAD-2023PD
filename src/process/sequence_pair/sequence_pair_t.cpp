@@ -18,6 +18,8 @@
 #include "sp_ilp_settings_t.h"
 #include "bounding/bounding_line_t.h"
 #include <fstream>
+#include "bounding/bounding_line_handler_t.h"
+
 int sequence_pair_t::sequence_n;
 int sequence_pair_t::fix_start_idx;
 int sequence_pair_t::fix_n;
@@ -707,6 +709,11 @@ void sequence_pair_t::to_rectilinear_and_plot(){
 
     int soft = chip_t::get_soft_modules().size();
     int n = chip_t::get_total_module_n();
+
+    bool valid = bounding_line_handler_t::check_sequence_pair(*this);
+
+    int ul = 1;
+
     std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     int total_vertexes = 0;
     int total_edges = 0;
@@ -1292,6 +1299,7 @@ void sequence_pair_t::deal_bounding_line() {
         bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
         for(int j = soft; j < n; ++j) {
             bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
+            if(!bd0.collision(bd1)){continue;}
             auto bds = bounding_line_t::merge(bd0, bd1);
             if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
         }

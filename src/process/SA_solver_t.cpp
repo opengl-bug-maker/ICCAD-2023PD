@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <cmath>
 #include "process/components/timer.h"
+#include "bounding/bounding_line_handler_t.h"
 #include <thread>
 #include <stack>
 #include <mutex>
@@ -234,6 +235,20 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                     if(overlap){
                         success = neighbor.find_position_allow_illegal_process(); //6ms at most  (the shapes of the neighbor SP were calculated)
                         //success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
+                        if(success){
+                            if(SA->need_practical){
+                                neighbor.bouding_lines.resize(sequence_pair_t::sequence_n);
+                                neighbor.carved = vector<int>(sequence_pair_t::sequence_n, false);
+                                neighbor.set_bounding_lines();
+                                neighbor.deal_bounding_line();
+                                bool practical_check = bounding_line_handler_t::check_sequence_pair(neighbor);
+                                
+                                if(practical_check==false){
+                                    success = false;
+                                }
+                            }
+
+                        }
                     }
                     else{
                         success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
