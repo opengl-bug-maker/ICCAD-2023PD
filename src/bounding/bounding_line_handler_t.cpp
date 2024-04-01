@@ -4,8 +4,11 @@
 
 #include "bounding_line_handler_t.h"
 #include "bounding_line_t.h"
+#include "process/sequence_pair/sequence_pair_t.h"
 
-bounding_line_handler_t::bounding_line_handler_t(const vec2d_t &size) {
+
+bounding_line_handler_t::bounding_line_handler_t(const vec2d_t &size)
+{
     this->bounding_lines.push_back(bounding_line_t({
         vec2d_t(0, 0),
         vec2d_t(0, size.get_y()),
@@ -33,4 +36,13 @@ void bounding_line_handler_t::add_bounding_line(const bounding_line_t &bounding_
         *it = result.difference_pos_line[0];
         it++;
     }
+}
+
+bool bounding_line_handler_t::check_sequence_pair(const sequence_pair_t &sequence_pair) {
+    int soft = chip_t::get_soft_modules().size();
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd = bounding_line_t(sequence_pair.bouding_lines[i].first);
+        if(!bd.check_rounded_rect()) return false;
+    }
+    return true;
 }
