@@ -108,11 +108,17 @@ public:
 
     circular_T_node_t<T>* get_tail() const;
 
+    circular_T_node_t<T>* get_prev(circular_T_node_t<T> *node) const;
+
+    circular_T_node_t<T>* get_next(circular_T_node_t<T> *node) const;
+
     circular_T_list_t();
 
     circular_T_list_t(const circular_T_list_t& circular_T_list);
 
     bool operator==(const circular_T_list_t& circular_T_list) const;
+
+    bool operator!=(const circular_T_list_t& circular_T_list) const;
 
     circular_T_list_t<T> operator=(const circular_T_list_t<T>& circular_T_list);
 
@@ -131,6 +137,19 @@ public:
     void concat_next(circular_T_node_t<T>* node, const T& data);
 
     void delete_node(circular_T_node_t<T>* node);
+
+    void for_each(void (*func)(circular_T_node_t<T>* node)) const;
+
+    template<class T1>
+    void for_each_tuple(const T1 tins, void (*func)(circular_T_node_t<T>* node, const T1 t)) const;
+
+    void for_each_pair(void (*func)(circular_T_node_t<T>* node0, circular_T_node_t<T>* node1)) const;
+
+    template<class T1>
+    T1 for_each_iterate(T1 (*func)(circular_T_node_t<T>* node), T1 t = T1()) const;
+
+    template<class T1>
+    T1 for_each_pair_iterate(T1 (*func)(circular_T_node_t<T>* node, circular_T_node_t<T>* node1), T1 t = T1()) const;
 
     circular_T_node_t<T>* delete_node_get_prev(circular_T_node_t<T>* node);
 
@@ -168,6 +187,16 @@ inline circular_T_node_t<T> *circular_T_list_t<T>::get_tail() const {
 }
 
 template <class T>
+inline circular_T_node_t<T> *circular_T_list_t<T>::get_prev(circular_T_node_t<T> *node) const {
+    return static_cast<circular_T_node_t<T>*>(circular_base_list_t::get_prev(node));
+}
+
+template <class T>
+inline circular_T_node_t<T> *circular_T_list_t<T>::get_next(circular_T_node_t<T> *node) const {
+    return static_cast<circular_T_node_t<T>*>(circular_base_list_t::get_next(node));
+}
+
+template <class T>
 circular_T_list_t<T>::circular_T_list_t() : circular_base_list_t() {
 }
 template <class T>
@@ -191,6 +220,11 @@ bool circular_T_list_t<T>::operator==(const circular_T_list_t<T> &circular_T_lis
         neighbor_node = neighbor_node->get_next();
     }
     return true;
+}
+
+template <class T>
+inline bool circular_T_list_t<T>::operator!=(const circular_T_list_t &circular_T_list) const {
+    return !this->operator==(circular_T_list);
 }
 
 template <class T>
@@ -245,6 +279,23 @@ void circular_T_list_t<T>::concat_next(circular_T_node_t<T> *node, const T &data
 template<class T>
 void circular_T_list_t<T>::delete_node(circular_T_node_t<T> *node) {
     circular_base_list_t::delete_node(node);
+}
+
+template <class T>
+inline void circular_T_list_t<T>::for_each(void (*func)(circular_T_node_t<T> *node)) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur != this->get_tail()) {
+        func(cur);
+    }
+}
+
+template <class T>
+inline void circular_T_list_t<T>::for_each_pair(void (*func)(circular_T_node_t<T> *node0, circular_T_node_t<T> *node1)) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur->get_next() != this->get_tail()) {
+        func(cur, cur->get_next());
+    }
+    func(this->get_tail()->get_prev(), this->begin());
 }
 
 template<class T>
@@ -354,6 +405,35 @@ std::vector<T> circular_T_list_t<T>::to_vector_multi_round(int round) const {
     return vec;
 }
 
+template <class T>
+template <class T1>
+inline void circular_T_list_t<T>::for_each_tuple(const T1 tins, void (*func)(circular_T_node_t<T> *node, const T1 t)) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur != this->get_tail()) {
+        func(cur, tins);
+    }
+}
+
+template <class T>
+template <class T1>
+inline T1 circular_T_list_t<T>::for_each_iterate(T1 (*func)(circular_T_node_t<T> *node), T1 t) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur != this->get_tail()) {
+        t += func(cur);
+    }
+    return t;
+}
+
+template <class T>
+template <class T1>
+inline T1 circular_T_list_t<T>::for_each_pair_iterate(T1 (*func)(circular_T_node_t<T> *node, circular_T_node_t<T> *node1), T1 t) const {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur->get_next() != this->get_tail()) {
+        t += func(cur, cur->get_next());
+    }
+    t += func(this->get_tail()->get_prev(), this->begin());
+    return t;
+}
 #pragma endregion
 
 #endif //BOUNDINGLINE_CIRCULAR_T_LIST_T_H

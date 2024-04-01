@@ -21,6 +21,9 @@ public:
     bounding_line_interect_result_t() {};
     bounding_line_interect_result_t(std::vector<bounding_line_t> union_line, std::vector<bounding_line_t> intersect_line, std::vector<bounding_line_t> difference_pos_line, std::vector<bounding_line_t> difference_neg_line) :
         union_line(union_line), intersect_line(intersect_line), difference_pos_line(difference_pos_line), difference_neg_line(difference_neg_line) {};
+
+    bool operator==(const bounding_line_interect_result_t& bounding_line_interect_result);
+    bool operator!=(const bounding_line_interect_result_t& bounding_line_interect_result);
 };
 
 class bounding_line_element_t : public line_t {
@@ -32,6 +35,47 @@ public:
     bool operator==(const bounding_line_element_t& bounding_line_element) const;
 
     bool operator!=(const bounding_line_element_t& bounding_line_element) const;
+};
+
+using bounding_node_t = circular_T_node_t<bounding_line_element_t>;
+
+class bounding_line_anchor_points {
+public:
+    enum anchor_type {
+        left_lower,
+        left_upper,
+        upper_left,
+        upper_right,
+        right_upper,
+        right_lower,
+        lower_right,
+        lower_left
+    };
+    std::vector<vec2d_t> anchors;
+    std::vector<bounding_node_t*> anchor_lines;
+
+    bounding_line_anchor_points() : anchor_lines(std::vector<bounding_node_t*>(8)) {
+        this->anchors = {
+            {1e9, 1e9},
+            {1e9, -1e9},
+            {1e9, -1e9},
+            {-1e9, -1e9},
+            {-1e9, -1e9},
+            {-1e9, 1e9},
+            {-1e9, 1e9},
+            {1e9, 1e9}
+        };
+    }
+
+    void update_anchor(bounding_node_t*& bounding_node);
+
+    void set_anchor_line(bounding_line_anchor_points::anchor_type anchor, bounding_node_t*& bounding_node);
+
+    const bounding_node_t* get_anchor_line(bounding_line_anchor_points::anchor_type anchor) const;
+    
+    const std::vector<bounding_node_t*> get_anchor_lines() const;
+
+    const vec2d_t& get_anchor_point(bounding_line_anchor_points::anchor_type anchor) const;
 };
 
 class bounding_line_t {
@@ -62,26 +106,22 @@ public:
     explicit bounding_line_t(const std::vector<vec2d_t>& points, bool clockwise = true);
 
     bounding_line_t operator=(const bounding_line_t& bounding_line);
+    bool operator==(const bounding_line_t& bounding_line);
+    bool operator!=(const bounding_line_t& bounding_line);
+
+    void update();
+
+    void print() const;
+
+    void print_reverse() const;
+
+    void plot(std::string plot_name = "") const;
 
     bool rough_collision(const bounding_line_t& bounding_line) const;
 
     bool collision(const bounding_line_t& bounding_line) const;
 
-    void update();
-
-    std::vector<vec2d_t> get_nodes() const;
-
-    double get_area() const;
-
-    bool get_clockwise() const;
-
-    const rect_t get_bounding_rect() const;
-
-    void plot(std::string plot_name = "") const;
-
-    void print() const;
-
-    void print_reverse() const;
+    static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 
     bool vaild_for_80percent() const;
 
@@ -91,7 +131,17 @@ public:
 
     int get_vertex270_count() const;
 
-    static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
+    void get_anchor() const;
+
+    bool check_rounded_rect() const;
+
+    std::vector<vec2d_t> get_nodes() const;
+
+    double get_area() const;
+
+    bool get_clockwise() const;
+
+    const rect_t get_bounding_rect() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const bounding_line_t& bounding_line);

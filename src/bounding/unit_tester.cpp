@@ -201,162 +201,173 @@ bool unit_tester::line_t_parallel_cut_reverse3() {
 
 //region bounding_line_t
 
-// bool unit_tester::bounding_line_t_merge0() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(0, 0),
-//                                                             vec2d_t(3, 0),
-//                                                             vec2d_t(3, 3),
-//                                                             vec2d_t(0, 3),
-//                                                             vec2d_t(0, 2),
-//                                                             vec2d_t(-1, 2),
-//                                                             vec2d_t(-1, 1),
-//                                                             vec2d_t(0, 1)
-//                                                     }, false);
+bool unit_tester::bounding_line_t_merge0() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({500, 500}, {500, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t(rect_t({1000, 1000}, {500, 500}))
+    }, {
+        bounding_line_t(rect_t({500, 500}, {500, 500}))
+    });
+    return result == ans;
+}
 
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(-1, 1),
-//                                                             vec2d_t(-1, 2),
-//                                                             vec2d_t(3, 2),
-//                                                             vec2d_t(3, 1)
-//                                                     });
-// //    std::cout << "want ";
-// //    boundingLine0.print();
-// //    boundingLine1.print();
-// //    boundingLine0.print_reverse();
-// //    std::cout << "want ";
-// //    boundingLine1.print_reverse();
-//     std::cout << boundingLine0.merge(boundingLine1);
-// //    std::cout << boundingLine0.merge(boundingLine1);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge1() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({750, 500}, {500, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t(std::vector<vec2d_t>{
+            vec2d_t({750, 500}),
+            vec2d_t({750, 1000}),
+            vec2d_t({1000, 1000}),
+            vec2d_t({1000, 1500}),
+            vec2d_t({1500, 1500}),
+            vec2d_t({1500, 1000}),
+            vec2d_t({1250, 1000}),
+            vec2d_t({1250, 500})
+        })
+    }, { });
+    return result == ans;
+}
 
-// bool unit_tester::bounding_line_t_merge1() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(3, 1),
-//                                                             vec2d_t(3, 2),
-//                                                             vec2d_t(-1, 2),
-//                                                             vec2d_t(-1, 1)
-//                                                     }, false);
+bool unit_tester::bounding_line_t_merge2() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1000, 500}, {250, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1000, 500},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 1000},
+            {1250, 1000},
+            {1250, 500}
+        })
+    }, { });
+    return result == ans;
+}
 
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(-1, 1),
-//                                                             vec2d_t(-1, 2),
-//                                                             vec2d_t(3, 2),
-//                                                             vec2d_t(3, 1)
-//                                                     });
-//     std::cout << boundingLine0.merge(boundingLine1);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge3() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1000, 500}, {500, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1000, 500},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 500}
+        })
+    }, { });
+    return result == ans;
+}
 
-// bool unit_tester::bounding_line_t_merge2() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(30, 10),
-//                                                             vec2d_t(30, 20),
-//                                                             vec2d_t(10, 20),
-//                                                             vec2d_t(10, 10)
-//                                                     }, false);
+bool unit_tester::bounding_line_t_merge4() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1250, 500}, {250, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1250, 500},
+            {1250, 1000},
+            {1000, 1000},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 500}
+        })
+    }, { });
+    return result == ans;
+}
 
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(-1, 1),
-//                                                             vec2d_t(-1, 2),
-//                                                             vec2d_t(3, 2),
-//                                                             vec2d_t(3, 1)
-//                                                     });
-//     std::cout << boundingLine0.merge(boundingLine1);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge5() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1250, 500}, {500, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1250, 500},
+            {1250, 1000},
+            {1000, 1000},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 1000},
+            {1750, 1000},
+            {1750, 500}
+        })
+    }, { });
+    return result == ans;
+}
 
-// bool unit_tester::bounding_line_t_merge3() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(0, 0),
-//                                                             vec2d_t(3, 0),
-//                                                             vec2d_t(3, 3),
-//                                                             vec2d_t(0, 3)
-//                                                     }, false);
+bool unit_tester::bounding_line_t_merge6() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1500, 500}, {500, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1000, 1000},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 1000}
+        })
+    }, {
+        bounding_line_t({
+            {1500, 500},
+            {1500, 1000},
+            {2000, 1000},
+            {2000, 500}
+        })
+    });
+    return result == ans;
+}
 
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(0, 0),
-//                                                             vec2d_t(0, 3),
-//                                                             vec2d_t(3, 3),
-//                                                             vec2d_t(3, 0)
-//                                                     });
-//     std::cout << boundingLine0.merge(boundingLine1);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge7() {
+    std::cout << __func__ << " ";
+    bounding_line_t boundingLine0(rect_t({1000, 1000}, {500, 500}));
+    bounding_line_t boundingLine1(rect_t({1200, 500}, {250, 500}));
+    auto result = bounding_line_t::merge(boundingLine0, boundingLine1);
+    bounding_line_interect_result_t ans({}, {}, {
+        bounding_line_t({
+            {1200, 500},
+            {1200, 1000},
+            {1000, 1000},
+            {1000, 1500},
+            {1500, 1500},
+            {1500, 1000},
+            {1450, 1000},
+            {1450, 500}
+        })
+    }, { });
+    return result == ans;
+}
 
-// bool unit_tester::bounding_line_t_merge4() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(0, 0),
-//                                                             vec2d_t(2, 0),
-//                                                             vec2d_t(2, 1),
-//                                                             vec2d_t(5, 1),
-//                                                             vec2d_t(5, 2),
-//                                                             vec2d_t(4, 2),
-//                                                             vec2d_t(4, 3),
-//                                                             vec2d_t(5, 3),
-//                                                             vec2d_t(5, 4),
-//                                                             vec2d_t(4, 4),
-//                                                             vec2d_t(4, 5),
-//                                                             vec2d_t(3, 5),
-//                                                             vec2d_t(3, 4),
-//                                                             vec2d_t(1, 4),
-//                                                             vec2d_t(1, 3),
-//                                                             vec2d_t(0, 3)
-//                                                     }, false);
+bool unit_tester::bounding_line_t_merge8() {
+    std::cout << __func__ << " ";
+    return false;
+}
 
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(1, 1),
-//                                                             vec2d_t(1, 4),
-//                                                             vec2d_t(4, 4),
-//                                                             vec2d_t(4, 1)
-//                                                     });
-//     auto origin = boundingLine0.get_nodes();
-//     auto module = boundingLine1.get_nodes();
-//     auto ans = boundingLine0.merge(boundingLine1);
-//     std::cout << ans;
-// //    auto vectors = std::vector<std::pair<std::vector<vec2d_t>,std::string>>();
-//     auto vectors = {
-//             std::make_pair(ans[0].get_nodes(), std::string("A")),
-//             std::make_pair(ans[1].get_nodes(), std::string("B")),
-//             std::make_pair(ans[2].get_nodes(), std::string("C")),
-// //            std::make_pair(origin, std::string("origin")),
-// //            std::make_pair(module, std::string("module"))
+bool unit_tester::bounding_line_t_merge9() {
+    std::cout << __func__ << " ";
+    return false;
+}
 
-//     };
-//     visualizer_t::draw_bounding_line(vectors);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge10() {
+    std::cout << __func__ << " ";
+    return false;
+}
 
-// bool unit_tester::bounding_line_t_merge5() {
-//     bounding_line_t boundingLine0 = bounding_line_t({
-//                                                             vec2d_t(0, 1),
-//                                                             vec2d_t(4, 1),
-//                                                             vec2d_t(4, 4),
-//                                                             vec2d_t(0, 4)
-//                                                     }, false);
-
-//     bounding_line_t boundingLine1 = bounding_line_t({
-//                                                             vec2d_t(1, 0),
-//                                                             vec2d_t(1, 5),
-//                                                             vec2d_t(3, 5),
-//                                                             vec2d_t(3, 0)
-//                                                     });
-//     auto origin = boundingLine0.get_nodes();
-//     auto module = boundingLine1.get_nodes();
-//     auto ans = boundingLine0.merge(boundingLine1);
-//     std::cout << ans;
-// //    auto vectors = std::vector<std::pair<std::vector<vec2d_t>,std::string>>();
-//     auto vectors = {
-//             std::make_pair(ans[0].get_nodes(), std::string("A")),
-//             std::make_pair(ans[1].get_nodes(), std::string("B")),
-// //            std::make_pair(ans[2].get_nodes(), std::string("C")),
-// //            std::make_pair(origin, std::string("origin")),
-// //            std::make_pair(module, std::string("module"))
-
-//     };
-//     visualizer_t::draw_bounding_line(vectors);
-//     return false;
-// }
+bool unit_tester::bounding_line_t_merge11() {
+    std::cout << __func__ << " ";
+    return false;
+}
 
 //endregion
 
@@ -759,58 +770,60 @@ bool unit_tester::circular_base_list_t_memory_control() {
 //endregion
 
 void unit_tester::runner() {
-    auto funcs = {
-//            &unit_tester::vec2d_t_add0,
-//            &unit_tester::vec2d_t_add1,
-//            &unit_tester::vec2d_t_add_equal,
-//            &unit_tester::line_t_constructor0,
-//            &unit_tester::line_t_constructor1,
-//            &unit_tester::line_t_constructor2,
-//            &unit_tester::line_t_constructor3,
-//            &unit_tester::line_t_constructor4,
-//            &unit_tester::line_t_constructor5,
-//            &unit_tester::line_t_is_vertical0,
-//            &unit_tester::line_t_is_vertical1,
-//            &unit_tester::line_t_is_parallel0,
-//            &unit_tester::line_t_is_parallel1,
-//            &unit_tester::line_t_is_intersect0,
-//            &unit_tester::line_t_is_intersect1,
-//            &unit_tester::line_t_is_touch0,
-//            &unit_tester::line_t_is_touch1,
-//            &unit_tester::line_t_parallel_cut_reverse0,
-//            &unit_tester::line_t_parallel_cut_reverse1,
-//            &unit_tester::line_t_parallel_cut_reverse2,
-//            &unit_tester::bounding_line_t_merge0,
-//            &unit_tester::bounding_line_t_merge1,
-//            &unit_tester::bounding_line_t_merge2,
-//            &unit_tester::bounding_line_t_merge3,
-            &unit_tester::bounding_line_t_merge4,
-//            &unit_tester::bounding_line_t_merge5,
-//            &unit_tester::circular_base_list_t_concat_next0,
-//            &unit_tester::circular_base_list_t_concat_next1,
-//            &unit_tester::circular_base_list_t_concat_next2,
-//            &unit_tester::circular_base_list_t_concat_next3,
-//            &unit_tester::circular_base_list_t_concat_next4,
-//            &unit_tester::circular_base_list_t_concat_next5,
-//            &unit_tester::circular_base_list_t_to_vector_reverse0,
-//            &unit_tester::circular_base_list_t_to_vector_reverse1,
-//            &unit_tester::circular_base_list_t_to_vector_reverse2,
-//            &unit_tester::circular_base_list_t_to_vector0,
-//            &unit_tester::circular_base_list_t_to_vector1,
-//            &unit_tester::circular_base_list_t_to_vector2,
-//            &unit_tester::circular_base_list_t_to_vector_multi_round0,
-//            &unit_tester::circular_base_list_t_to_vector_multi_round1,
-//            &unit_tester::circular_base_list_t_to_vector_multi_round2,
-//            &unit_tester::circular_base_list_t_delete_node_get_next0,
-//            &unit_tester::circular_base_list_t_delete_node_get_next1,
-//            &unit_tester::circular_base_list_t_delete_node_get_next2,
-//            &unit_tester::circular_base_list_t_delete_node_get_next3,
-//            &unit_tester::circular_base_list_t_add_at_tail0,
+    auto funcs = {        
+        // &unit_tester::vec2d_t_add0,
+        // &unit_tester::vec2d_t_add1,
+        // &unit_tester::vec2d_t_add_equal,
+        // &unit_tester::line_t_constructor0,
+        // &unit_tester::line_t_constructor1,
+        // &unit_tester::line_t_constructor2,
+        // &unit_tester::line_t_constructor3,
+        // &unit_tester::line_t_constructor4,
+        // &unit_tester::line_t_constructor5,
+        // &unit_tester::line_t_is_vertical0,
+        // &unit_tester::line_t_is_vertical1,
+        // &unit_tester::line_t_is_parallel0,
+        // &unit_tester::line_t_is_parallel1,
+        // &unit_tester::line_t_is_intersect0,
+        // &unit_tester::line_t_is_intersect1,
+        // &unit_tester::line_t_is_touch0,
+        // &unit_tester::line_t_is_touch1,
+        // &unit_tester::line_t_parallel_cut_reverse0,
+        // &unit_tester::line_t_parallel_cut_reverse1,
+        // &unit_tester::line_t_parallel_cut_reverse2,
+        &unit_tester::bounding_line_t_merge0,
+        &unit_tester::bounding_line_t_merge1,
+        &unit_tester::bounding_line_t_merge2,
+        &unit_tester::bounding_line_t_merge3,
+        &unit_tester::bounding_line_t_merge4,
+        &unit_tester::bounding_line_t_merge5,
+        &unit_tester::bounding_line_t_merge6,
+        &unit_tester::bounding_line_t_merge7,
+        // &unit_tester::circular_base_list_t_concat_next0,
+        // &unit_tester::circular_base_list_t_concat_next1,
+        // &unit_tester::circular_base_list_t_concat_next2,
+        // &unit_tester::circular_base_list_t_concat_next3,
+        // &unit_tester::circular_base_list_t_concat_next4,
+        // &unit_tester::circular_base_list_t_concat_next5,
+        // &unit_tester::circular_base_list_t_to_vector_reverse0,
+        // &unit_tester::circular_base_list_t_to_vector_reverse1,
+        // &unit_tester::circular_base_list_t_to_vector_reverse2,
+        // &unit_tester::circular_base_list_t_to_vector0,
+        // &unit_tester::circular_base_list_t_to_vector1,
+        // &unit_tester::circular_base_list_t_to_vector2,
+        // &unit_tester::circular_base_list_t_to_vector_multi_round0,
+        // &unit_tester::circular_base_list_t_to_vector_multi_round1,
+        // &unit_tester::circular_base_list_t_to_vector_multi_round2,
+        // &unit_tester::circular_base_list_t_delete_node_get_next0,
+        // &unit_tester::circular_base_list_t_delete_node_get_next1,
+        // &unit_tester::circular_base_list_t_delete_node_get_next2,
+        // &unit_tester::circular_base_list_t_delete_node_get_next3,
+        // &unit_tester::circular_base_list_t_add_at_tail0,
 
-//            &unit_tester::circular_base_list_t_add_at_tail1,
-//            &unit_tester::circular_base_list_t_add_at_head0
-//            &unit_tester::circular_base_list_t_add_at_head1,
-//            &unit_tester::circular_base_list_t_memory_control
+        // &unit_tester::circular_base_list_t_add_at_tail1,
+        // &unit_tester::circular_base_list_t_add_at_head0
+        // &unit_tester::circular_base_list_t_add_at_head1,
+        // &unit_tester::circular_base_list_t_memory_control
     };
 
     for(auto func : funcs){
