@@ -135,6 +135,8 @@ public:
 
     bool check_rounded_rect() const;
 
+    bool erode_vaild(const vec2d_t& length) const;
+
     std::vector<vec2d_t> get_nodes() const;
 
     double get_area() const;
