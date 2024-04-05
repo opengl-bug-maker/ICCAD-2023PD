@@ -1192,26 +1192,37 @@ void sequence_pair_t::carve(){
         this->carved[from] = this->carved[to] = true;
         vector<vec2d_t> from_4_points = this->get_4_points(ll_from, from_wh);
         vector<vec2d_t> to_4_points = this->get_4_points(ll_to, to_wh);
-        vec2d_t c1 = vec2d_t(ll_from.get_x()+from_wh.get_x(), car_top_y);
-        vec2d_t c2 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_top_y);
-        vec2d_t c3 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_mid_y);
-        vec2d_t c4 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_mid_y);
-        vec2d_t c5 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_bot_y);
-        vec2d_t c6 = vec2d_t(ll_from.get_x()+from_wh.get_x(), car_bot_y);
-        vec2d_t c7 = vec2d_t(ll_from.get_x()+from_wh.get_x(), car_mid_y);
-        // bouding_lines[from] = {{from_4_points[0], from_4_points[1], from_4_points[2], c1, c2,c3,c4, c5, c6, from_4_points[3]}, "s"+std::to_string(from)};
-        // bouding_lines[to] = {{to_4_points[0], c6, c5, c4, c3,c2,c1,to_4_points[1], to_4_points[2], to_4_points[3]}, "s"+std::to_string(to)};
+        vec2d_t c1 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_top_y);
+        vec2d_t c2 = vec2d_t(ll_from.get_x()+from_wh.get_x(),   car_top_y);
+        vec2d_t c3 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_top_y);
+        vec2d_t c4 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_mid_y);
+        vec2d_t c5 = vec2d_t(ll_from.get_x()+from_wh.get_x()  , car_mid_y);
+        vec2d_t c6 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_mid_y);
+        vec2d_t c7 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_bot_y);
+        vec2d_t c8 = vec2d_t(ll_from.get_x()+from_wh.get_x()  , car_bot_y);
+        vec2d_t c9 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_bot_y);
 
         bounding_line_t bd_from = bounding_line_t(rect_t(this->modules_positions[from], this->modules_wh[from]).get_bounding_rect());
-        bounding_line_t bd_from_add = bounding_line_t({c4, c5, c6, c7});
-        bounding_line_t bd_from_minus = bounding_line_t({c7, c3, c2, c1}, false);
-        bd_from = bounding_line_t::merge(bd_from, bd_from_add).difference_pos_line[0];
-        bd_from = bounding_line_t::merge(bd_from, bd_from_minus).difference_pos_line[0];
         bounding_line_t bd_to   = bounding_line_t(rect_t(this->modules_positions[to]  , this->modules_wh[to]  ).get_bounding_rect());
-        bounding_line_t bd_to_add = bounding_line_t({c7, c3, c2, c1});
-        bounding_line_t bd_to_minus = bounding_line_t({c4, c5, c6, c7}, false);
-        bd_to = bounding_line_t::merge(bd_to, bd_to_add).difference_pos_line[0];
-        bd_to = bounding_line_t::merge(bd_to, bd_to_minus).difference_pos_line[0];
+        if(ll_from.get_y() + from_wh.get_y() > ll_to.get_y() + to_wh.get_y()) {
+            bounding_line_t bd_upper_add = bounding_line_t({c5, c2, c3, c6});
+            bounding_line_t bd_upper_minus = bounding_line_t({c7, c4, c5, c8}, false);
+            bounding_line_t bd_lower_add = bounding_line_t({c7, c4, c5, c8});
+            bounding_line_t bd_lower_minus = bounding_line_t({c5, c2, c3, c6}, false);
+            bd_from = bounding_line_t::merge(bd_from, bd_upper_add).difference_pos_line[0];
+            bd_from = bounding_line_t::merge(bd_from, bd_upper_minus).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_lower_add).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_lower_minus).difference_pos_line[0];
+        } else {
+            bounding_line_t bd_upper_add = bounding_line_t({c8, c5, c6, c9});
+            bounding_line_t bd_upper_minus = bounding_line_t({c4, c1, c2, c5}, false);
+            bounding_line_t bd_lower_add = bounding_line_t({c4, c1, c2, c5});
+            bounding_line_t bd_lower_minus = bounding_line_t({c8, c5, c6, c9}, false);
+            bd_from = bounding_line_t::merge(bd_from, bd_upper_add).difference_pos_line[0];
+            bd_from = bounding_line_t::merge(bd_from, bd_upper_minus).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_lower_add).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_lower_minus).difference_pos_line[0];
+        }
         this->bouding_lines[from] = {bd_from.get_nodes(), "s"+std::to_string(from)};
         this->bouding_lines[to] = {bd_to.get_nodes(), "s"+std::to_string(to)};
     }
@@ -1233,26 +1244,38 @@ void sequence_pair_t::carve(){
         this->carved[from] = this->carved[to] = true;
         vector<vec2d_t> from_4_points = this->get_4_points(ll_from, from_wh);
         vector<vec2d_t> to_4_points = this->get_4_points(ll_to, to_wh);
-        vec2d_t c1 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y());
-        vec2d_t c2 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y()+h);
-        vec2d_t c3 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y()+h);
+        vec2d_t c1 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y()-h);
+        vec2d_t c2 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y());
+        vec2d_t c3 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y()+h);
         vec2d_t c4 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y()-h);
-        vec2d_t c5 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y()-h);
-        vec2d_t c6 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y());
-        vec2d_t c7 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y());
-        // bouding_lines[from] = {{from_4_points[0], from_4_points[1], c1,c2,c3,c4,c5, c6, from_4_points[2], from_4_points[3]}, "s"+std::to_string(from)};
-        // bouding_lines[to] = {{to_4_points[0], to_4_points[1], to_4_points[2],to_4_points[3], c6,c5,c4,c3,c2,c1}, "s"+std::to_string(to)};
+        vec2d_t c5 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y());
+        vec2d_t c6 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y()+h);
+        vec2d_t c7 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y()-h);
+        vec2d_t c8 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y());
+        vec2d_t c9 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y()+h);
 
         bounding_line_t bd_from = bounding_line_t(rect_t(this->modules_positions[from], this->modules_wh[from]).get_bounding_rect());
-        bounding_line_t bd_from_add = bounding_line_t({c1, c2, c3, c7});
-        bounding_line_t bd_from_minus = bounding_line_t({c7, c6, c5, c4}, false);
-        bd_from = bounding_line_t::merge(bd_from, bd_from_add).difference_pos_line[0];
-        bd_from = bounding_line_t::merge(bd_from, bd_from_minus).difference_pos_line[0];
         bounding_line_t bd_to   = bounding_line_t(rect_t(this->modules_positions[to]  , this->modules_wh[to]  ).get_bounding_rect());
-        bounding_line_t bd_to_add = bounding_line_t({c7, c6, c5, c4});
-        bounding_line_t bd_to_minus = bounding_line_t({c1, c2, c3, c7}, false);
-        bd_to = bounding_line_t::merge(bd_to, bd_to_add).difference_pos_line[0];
-        bd_to = bounding_line_t::merge(bd_to, bd_to_minus).difference_pos_line[0];
+        std::cout << std::setprecision(16);
+        if(ll_from.get_x() + from_wh.get_x() > ll_to.get_x() + to_wh.get_x()) {
+            bounding_line_t bd_right_add = bounding_line_t({c8, c5, c6, c9});
+            bounding_line_t bd_right_minus = bounding_line_t({c4, c1, c2, c5}, false);
+            bounding_line_t bd_left_add = bounding_line_t({c4, c1, c2, c5});
+            bounding_line_t bd_left_minus = bounding_line_t({c8, c5, c6, c9}, false);
+            bd_from = bounding_line_t::merge(bd_from, bd_right_add).difference_pos_line[0];
+            bd_from = bounding_line_t::merge(bd_from, bd_right_minus).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_left_add).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_left_minus).difference_pos_line[0];
+        } else {
+            bounding_line_t bd_right_add = bounding_line_t({c5, c2, c3, c6});
+            bounding_line_t bd_right_minus = bounding_line_t({c7, c4, c5, c8}, false);
+            bounding_line_t bd_left_add = bounding_line_t({c7, c4, c5, c8});
+            bounding_line_t bd_left_minus = bounding_line_t({c5, c2, c3, c6}, false);
+            bd_from = bounding_line_t::merge(bd_from, bd_right_add).difference_pos_line[0];
+            bd_from = bounding_line_t::merge(bd_from, bd_right_minus).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_left_add).difference_pos_line[0];
+            bd_to = bounding_line_t::merge(bd_to, bd_left_minus).difference_pos_line[0];
+        }
         this->bouding_lines[from] = {bd_from.get_nodes(), "s"+std::to_string(from)};
         this->bouding_lines[to] = {bd_to.get_nodes(), "s"+std::to_string(to)};
     }
