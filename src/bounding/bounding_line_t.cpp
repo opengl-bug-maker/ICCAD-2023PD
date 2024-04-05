@@ -513,6 +513,72 @@ bool bounding_line_t::check_rounded_rect() const {
     return true;
 }
 
+bool bounding_line_t::erode_vaild(const vec2d_t &length) const {
+    double width_reject_rate = length.get_x();
+    double height_reject_rate = length.get_y();
+    double reject_length = std::min(this->get_bounding_rect().get_size().get_x() * width_reject_rate, this->get_bounding_rect().get_size().get_y() * height_reject_rate);
+    bounding_line_t bd = *this;
+    std::vector<bounding_line_t> erodes;
+    bounding_node_t* cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        line_t new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
+        vec2d_t left_lower = cur->get_data().get_start();
+        vec2d_t new_point = cur->get_data().get_vec() + new_line.get_vec() * reject_length;
+        if(new_point.get_x() < 0) {
+            left_lower.set_x(left_lower.get_x() + new_point.get_x());
+            new_point.set_x(new_point.get_x() * -1);
+        }
+        if(new_point.get_y() < 0) {
+            left_lower.set_y(left_lower.get_y() + new_point.get_y());
+            new_point.set_y(new_point.get_y() * -1);
+        }
+        rect_t new_rect = rect_t(left_lower, new_point);
+        erodes.push_back(bounding_line_t(new_rect, false));
+
+        bounding_node_t* next = this->lines.get_next(cur);
+        if(cur->get_data().get_line_turn_direction_type(next->get_data()) != line_t::turn_direction_type_left) {
+            continue;
+        }
+        new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
+        left_lower = cur->get_data().get_end();
+        new_point = (line_t::normal_line(cur->get_data().get_line_direction_type()).get_vec() + new_line.get_vec()) * reject_length;
+        if(new_point.get_x() < 0) {
+            left_lower.set_x(left_lower.get_x() + new_point.get_x());
+            new_point.set_x(new_point.get_x() * -1);
+        }
+        if(new_point.get_y() < 0) {
+            left_lower.set_y(left_lower.get_y() + new_point.get_y());
+            new_point.set_y(new_point.get_y() * -1);
+        }
+        new_rect = rect_t(left_lower, new_point);
+        erodes.push_back(bounding_line_t(new_rect, false));
+    }
+    bounding_line_t erode = *this;
+    for(auto bd : erodes) {
+        auto mer = bounding_line_t::merge(erode, bd);
+        if(mer.difference_pos_line.size() == 0) return true;
+        if(mer.difference_pos_line.size() > 1) return false;
+        erode = mer.difference_pos_line[0];
+    }
+    // std::vector<bounding_line_t> eroodes;
+    // eroodes.push_back(*this);
+    // for(auto bd : erodes) {
+    //     for(auto& er : eroodes) {
+    //         auto mer = bounding_line_t::merge(er, bd);
+    //         if(mer.difference_pos_line.size() == 0) return true;
+    //         er = mer.difference_pos_line[0];
+    //         if(mer.difference_pos_line.size() > 1)
+    //             eroodes.push_back(mer.difference_pos_line[1]);
+    //     }
+    // }
+    // std::vector<std::pair<std::vector<vec2d_t>, std::string>> tmp;
+    // tmp.push_back({this->get_nodes(), "origin"});
+    // for(auto er : eroodes) 
+    //     tmp.push_back({er.get_nodes(), "erode"});
+    // visualizer_t::draw_bounding_line(tmp);
+    return true;
+}
+
 #pragma endregion
 
 #pragma region getter

@@ -36,6 +36,54 @@ bool line_t::operator!=(const line_t &line) const {
     return this->get_start() != line.get_start() || this->get_end() != line.get_end();
 }
 
+line_t line_t::turn(line_turn_direction_type turn_direction) const {
+    switch(turn_direction) {
+        case line_turn_direction_type::turn_direction_type_straight:
+            return *this;
+        case line_turn_direction_type::turn_direction_type_left:
+            return line_t(this->get_start(), this->get_start() + this->get_vec().turn_right90());
+        case line_turn_direction_type::turn_direction_type_around:
+            return line_t(this->get_start(), this->get_start() + this->get_vec().turn_right90());
+        case line_turn_direction_type::turn_direction_type_right:
+            return line_t(this->get_start(), this->get_start() - this->get_vec());
+        case line_turn_direction_type::turn_direction_type_none:
+            return line_t();
+    }
+    return line_t();
+}
+
+line_t::line_direction_type line_t::turn(line_t::line_direction_type line_direction, line_t::line_turn_direction_type turn_direction) {
+    switch(turn_direction) {
+        case line_turn_direction_type::turn_direction_type_straight:
+            return line_direction;
+        case line_turn_direction_type::turn_direction_type_left:
+            return line_direction_type((line_direction + 1) & 3);
+        case line_turn_direction_type::turn_direction_type_around:
+            return line_direction_type((line_direction + 2) & 3);
+        case line_turn_direction_type::turn_direction_type_right:
+            return line_direction_type((line_direction + 3) & 3);
+        case line_turn_direction_type::turn_direction_type_none:
+            return line_direction_type::direction_type_none;
+    }
+    return line_direction_type::direction_type_none;
+}
+
+line_t line_t::normal_line(line_t::line_direction_type line_direction) {
+    switch(line_direction) {
+        case line_direction_type::direction_type_east:
+            return line_t({0, 0}, {1, 0});
+        case line_direction_type::direction_type_north:
+            return line_t({0, 0}, {0, 1});
+        case line_direction_type::direction_type_west:
+            return line_t({0, 0}, {-1, 0});
+        case line_direction_type::direction_type_south:
+            return line_t({0, 0}, {0, -1});
+        case line_direction_type::direction_type_none:
+            return line_t();
+    }
+    return line_t();
+}
+
 const vec2d_t &line_t::get_start() const {
     return this->_start;
 }

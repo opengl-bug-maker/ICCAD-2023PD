@@ -46,6 +46,10 @@ public:
 
     double get_area() const;
 
+    vec2d_t turn_left90() const;
+
+    vec2d_t turn_right90() const;
+
     vec2d_t operator+(const vec2d_t& vec2D) const;
 
     vec2d_t& operator+=(const vec2d_t& vec2D);

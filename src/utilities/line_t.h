@@ -46,17 +46,11 @@ public:
 
     bool operator!=(const line_t& line) const;
 
-//     line_t(const vec2d_t &start, const vec2d_t &anEnd);
+    line_t turn(line_turn_direction_type turn_direction) const;
 
-//     line_type getType() const;
+    static line_t::line_direction_type turn(line_t::line_direction_type line_direction, line_t::line_turn_direction_type turn_direction);
 
-//     const vec2d_t &getStart() const;
-
-//     void setStart(const vec2d_t &start);
-
-//     const vec2d_t &getAnEnd() const;
-
-//     void setAnEnd(const vec2d_t &anEnd);
+    static line_t normal_line(line_t::line_direction_type line_direction);
 
     bool overlap(const line_t line) const;
 
