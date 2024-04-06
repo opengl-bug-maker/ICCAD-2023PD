@@ -51,7 +51,7 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     cout<<"---------------Stage 1----------------"<<endl;
     SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.33, false);
     SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.66, false);
-    SA_solver.run(SPEN, 0.6*time_left, 0.05, 0.01, false, 0, 1, false);
+    SA_solver.run(SPEN, 0.6*time_left, 0.05, 0.008, false, 0, 1, false);
     SA_solver.run(SPEN, 0.2*time_left, 0.05, 0.008, false, 0, 1, true);
     SPEN.updated_best_SP();
     SPEN.valid_sequence_pairs[0].print_inline();

@@ -1024,7 +1024,6 @@ bool sequence_pair_t::find_position_allow_illegal_process()
         bool a = this->find_position(true, true, 0, 0);
         bool b = this->find_position_with_area(true, true, 0, 0);
         int x = this->z;
-        int y = 3;
     }
     return true;
 }
@@ -1199,7 +1198,11 @@ void sequence_pair_t::carve(){
         int car_top_y = std::min(ll_from.get_y()+from_wh.get_y(), ll_to.get_y()+to_wh.get_y());
         int car_bot_y = std::max(ll_from.get_y(), ll_to.get_y());
         int car_mid_y = (car_top_y+car_bot_y)/2;
+
         if(car_top_y - car_bot_y < 2){
+            continue;
+        }
+        if( h/(car_top_y-car_mid_y)>3){
             continue;
         }
         this->result_carving_x_enable[i] = true;
@@ -1251,7 +1254,11 @@ void sequence_pair_t::carve(){
         int car_right_x = std::min(ll_from.get_x()+from_wh.get_x(), ll_to.get_x()+to_wh.get_x());
         int car_left_x = std::max(ll_from.get_x(), ll_to.get_x());
         int car_mid_x = (car_right_x+car_left_x)/2;
+        
         if(car_right_x - car_left_x < 2){
+            continue;
+        }
+        if( h/(car_right_x-car_mid_x)>3){
             continue;
         }
         this->result_carving_y_enable[i] = true;

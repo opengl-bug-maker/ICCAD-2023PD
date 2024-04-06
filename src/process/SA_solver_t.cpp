@@ -241,7 +241,7 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                                 neighbor.carved = vector<int>(sequence_pair_t::sequence_n, false);
                                 neighbor.set_bounding_lines();
                                 neighbor.deal_bounding_line();
-                                bool practical_check = bounding_line_handler_t::check_sequence_pair(neighbor);
+                                bool practical_check = bounding_line_handler_t::check_sequence_pair(neighbor); //SA
                                 
                                 if(practical_check==false){
                                     success = false;
