@@ -121,6 +121,8 @@ public:
 
     bool collision(const bounding_line_t& bounding_line) const;
 
+    bool collision(const line_t& line) const;
+
     static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 
     static std::vector<bounding_line_t> erode(bounding_line_t bounding_line, const vec2d_t& erode_length);

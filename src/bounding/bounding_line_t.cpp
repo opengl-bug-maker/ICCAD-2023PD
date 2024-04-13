@@ -300,6 +300,14 @@ bool bounding_line_t::collision(const bounding_line_t &bounding_line) const {
     return false;
 }
 
+bool bounding_line_t::collision(const line_t &line) const {
+    auto cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        if(cur->get_data().collision(line)) return true;
+    }
+    return false;
+}
+
 bounding_line_interect_result_t bounding_line_t::merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1) {
     if(!bounding_line0.collision(bounding_line1)) {
         bounding_line0.update();
