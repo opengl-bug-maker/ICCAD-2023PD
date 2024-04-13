@@ -52,7 +52,7 @@ bool bounding_line_handler_t::check_sequence_pair_final(const sequence_pair_t &s
     for(int i = 0; i < soft; ++i) {
         bounding_line_t bd = bounding_line_t(sequence_pair.bouding_lines[i].first);
         if(!bd.check_rounded_rect()) return false;
-        if(!bd.erode_vaild({0.015, 0.015})) return false;
+        if(!bd.check_rents()) return false;
     }
     return true;
 }

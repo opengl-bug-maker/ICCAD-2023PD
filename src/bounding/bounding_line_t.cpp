@@ -518,6 +518,7 @@ bool bounding_line_t::check_rents() {
             double p = 0.5;
 
             if(rents < k * pow(area0, p) && rents < k * pow(area1, p)) {
+                return false;
                 invalid.push_back({cur, cur_next, rents / pow(area0, p), rents / pow(area1, p)});
             }
 
