@@ -8,6 +8,20 @@ rect_t::rect_t(const vec2d_t &left_lower, const vec2d_t &size) : Center(left_low
                                                                  RightUpper(left_lower + size) {
 }
 
+rect_t rect_t::safe_construct(const vec2d_t &left_lower, const vec2d_t &size) {
+    rect_t rect(left_lower, size);
+    if(rect.get_size().get_x() < 0) {
+        rect.LeftLower.set_x(rect.LeftLower.get_x() + rect.Size.get_x());
+        rect.Size.set_x(-rect.Size.get_x());
+    }
+    if(rect.get_size().get_y() < 0) {
+        rect.LeftLower.set_x(rect.LeftLower.get_y() + rect.Size.get_y());
+        rect.Size.set_y(-rect.Size.get_y());
+    }
+    rect.RightUpper = rect.LeftLower + rect.Size;
+    return rect;
+}
+
 rect_t::rect_t(const rect_t & rect) : Center(rect.Center), Size(rect.Size),
                                       LeftLower(rect.LeftLower), RightUpper(rect.RightUpper) {
 

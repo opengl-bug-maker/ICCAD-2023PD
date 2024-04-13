@@ -20,6 +20,8 @@ public:
 
     rect_t(const vec2d_t &left_lower, const vec2d_t &size);
 
+    static rect_t safe_construct(const vec2d_t &left_lower, const vec2d_t &size);
+
     rect_t(const rect_t&);
 
     rect_t() = default;
