@@ -540,7 +540,7 @@ bool bounding_line_t::check_rounded_rect() const {
             auto type1 = s->get_data().get_line_turn_direction_type(next->get_data());
             if(type0 != type1 || type0 != line_t::line_turn_direction_type::turn_direction_type_right) continue;
             double ratio = s->get_data().get_vec().get_length();
-            if(s->get_data().dot(prev->get_data()) < next->get_data().dot(s->get_data())) {
+            if(s->get_data().cross(prev->get_data()) < next->get_data().cross(s->get_data())) {
                 ratio /= prev->get_data().get_vec().get_length();
             } else {
                 ratio /= next->get_data().get_vec().get_length();
@@ -564,15 +564,7 @@ bool bounding_line_t::erode_vaild(const vec2d_t &length) const {
         line_t new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
         vec2d_t left_lower = cur->get_data().get_start();
         vec2d_t new_point = cur->get_data().get_vec() + new_line.get_vec() * reject_length;
-        if(new_point.get_x() < 0) {
-            left_lower.set_x(left_lower.get_x() + new_point.get_x());
-            new_point.set_x(new_point.get_x() * -1);
-        }
-        if(new_point.get_y() < 0) {
-            left_lower.set_y(left_lower.get_y() + new_point.get_y());
-            new_point.set_y(new_point.get_y() * -1);
-        }
-        rect_t new_rect = rect_t(left_lower, new_point);
+        rect_t new_rect = rect_t::safe_construct(left_lower, new_point);
         erodes.push_back(bounding_line_t(new_rect, false));
 
         bounding_node_t* next = this->lines.get_next(cur);
@@ -582,15 +574,7 @@ bool bounding_line_t::erode_vaild(const vec2d_t &length) const {
         new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
         left_lower = cur->get_data().get_end();
         new_point = (line_t::normal_line(cur->get_data().get_line_direction_type()).get_vec() + new_line.get_vec()) * reject_length;
-        if(new_point.get_x() < 0) {
-            left_lower.set_x(left_lower.get_x() + new_point.get_x());
-            new_point.set_x(new_point.get_x() * -1);
-        }
-        if(new_point.get_y() < 0) {
-            left_lower.set_y(left_lower.get_y() + new_point.get_y());
-            new_point.set_y(new_point.get_y() * -1);
-        }
-        new_rect = rect_t(left_lower, new_point);
+        new_rect = rect_t::safe_construct(left_lower, new_point);
         erodes.push_back(bounding_line_t(new_rect, false));
     }
     bounding_line_t erode = *this;
