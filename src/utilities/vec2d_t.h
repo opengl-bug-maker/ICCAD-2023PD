@@ -74,6 +74,10 @@ public:
 
     vec2d_t normal_divide(const vec2d_t& vec2D) const;
 
+    double dot(const vec2d_t& vec2D) const;
+    
+    double cross(const vec2d_t& vec2D) const;
+
     bool operator==(const vec2d_t& vec2D) const;
 
     bool operator!=(const vec2d_t& vec2D) const;

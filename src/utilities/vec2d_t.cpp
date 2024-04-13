@@ -123,6 +123,14 @@ vec2d_t vec2d_t::normal_divide(const vec2d_t &vec2D) const {
     return {this->get_x() / vec2D.get_x(), this->get_y() / vec2D.get_y()};
 }
 
+double vec2d_t::dot(const vec2d_t &vec2D) const {
+    return this->get_x() * vec2D.get_x() + this->get_y() * vec2D.get_y();
+}
+
+double vec2d_t::cross(const vec2d_t &vec2D) const {
+    return this->get_x() * vec2D.get_y() - this->get_y() * vec2D.get_x();
+}
+
 bool vec2d_t::operator==(const vec2d_t &vec2D) const {
     return fabs(this->get_x() - vec2D.get_x()) <= 1E-6 && fabs(this->get_y() - vec2D.get_y()) <= 1E-6;
 }
