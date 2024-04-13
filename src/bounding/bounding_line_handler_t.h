@@ -21,6 +21,8 @@ public:
 
     static bool check_sequence_pair(const sequence_pair_t& sequence_pair);
 
+    static bool check_sequence_pair_final(const sequence_pair_t& sequence_pair);
+
     //std::vector<rect_t> get_dead_space_each_line();
 };
 

@@ -46,3 +46,13 @@ bool bounding_line_handler_t::check_sequence_pair(const sequence_pair_t &sequenc
     }
     return true;
 }
+
+bool bounding_line_handler_t::check_sequence_pair_final(const sequence_pair_t &sequence_pair) {
+    int soft = chip_t::get_soft_modules().size();
+    for(int i = 0; i < soft; ++i) {
+        bounding_line_t bd = bounding_line_t(sequence_pair.bouding_lines[i].first);
+        if(!bd.check_rounded_rect()) return false;
+        if(!bd.erode_vaild({0.015, 0.015})) return false;
+    }
+    return true;
+}
