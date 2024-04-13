@@ -148,6 +148,9 @@ public:
     template<class T1>
     T1 for_each_iterate(T1 (*func)(circular_T_node_t<T>* node), T1 t = T1()) const;
 
+    template<class T1, class T2>
+    T1 for_each_iterate(T2 (*func)(circular_T_node_t<T>* node), void (*t_func)(T1& t1, T2 t2), T1 t = T1());
+
     template<class T1>
     T1 for_each_pair_iterate(T1 (*func)(circular_T_node_t<T>* node, circular_T_node_t<T>* node1), T1 t = T1()) const;
 
@@ -420,6 +423,16 @@ inline T1 circular_T_list_t<T>::for_each_iterate(T1 (*func)(circular_T_node_t<T>
     circular_T_node_t<T>* cur = this->get_head();
     while(cur = cur->get_next(), cur != this->get_tail()) {
         t += func(cur);
+    }
+    return t;
+}
+
+template <class T>
+template <class T1, class T2>
+inline T1 circular_T_list_t<T>::for_each_iterate(T2 (*func)(circular_T_node_t<T> *node), void (*t_func)(T1 &t1, T2 t2), T1 t) {
+    circular_T_node_t<T>* cur = this->get_head();
+    while(cur = cur->get_next(), cur != this->get_tail()) {
+        t_func(t, func(cur));
     }
     return t;
 }
