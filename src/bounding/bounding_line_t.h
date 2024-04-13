@@ -123,6 +123,8 @@ public:
 
     static bounding_line_interect_result_t merge(bounding_line_t bounding_line0, bounding_line_t bounding_line1);
 
+    static std::vector<bounding_line_t> erode(bounding_line_t bounding_line, const vec2d_t& erode_length);
+
     bool vaild_for_80percent() const;
 
     int get_edge_count() const;
