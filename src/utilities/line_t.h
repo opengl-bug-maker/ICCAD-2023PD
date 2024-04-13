@@ -76,7 +76,9 @@ public:
 
     vec2d_t get_vec() const;
 
-    double dot(const line_t& line) const;
+    double cross_with_start(const vec2d_t& vec) const;
+
+    double cross(const line_t& line) const;
 
     double ori_dot_area() const;
 
@@ -87,6 +89,8 @@ public:
     bool is_same_line(const line_t& line) const;
     
     vec2d_t intersect_point(const line_t& line) const;
+
+    bool collision(const line_t& line) const;
 
     std::optional<line_t> merge(const line_t& line) const;
 

@@ -125,10 +125,16 @@ vec2d_t line_t::get_vec() const {
     return this->_end - this->_start;
 }
 
-double line_t::dot(const line_t &line) const {
+double line_t::cross_with_start(const vec2d_t &vec) const {
+    auto vec0 = this->get_vec();
+    auto vec1 = vec - this->get_start();
+    return vec0.cross(vec1);
+}
+
+double line_t::cross(const line_t &line) const {
     auto vec0 = this->get_vec();
     auto vec1 = line.get_vec();
-    return vec0.get_x() * vec1.get_y() - vec0.get_y() * vec1.get_x();
+    return vec0.cross(vec1);
 }
 
 double line_t::ori_dot_area() const {
@@ -156,6 +162,20 @@ vec2d_t line_t::intersect_point(const line_t &line) const {
         return {this->get_large_x(), line.get_large_y()};
     }
     return {line.get_large_x(), this->get_large_y()};
+}
+
+bool line_t::collision(const line_t &line) const {
+    auto st = this->cross_with_start(line.get_start());
+    auto en = this->cross_with_start(line.get_end());
+    if((st < 0 && en > 0) || (st > 0 && en < 0)) {
+        auto st1 = line.cross_with_start(this->get_start());
+        auto en1 = line.cross_with_start(this->get_end());
+        return (st1 < 0 && en1 > 0) || (st1 > 0 && en1 < 0);
+    }
+    if(st == en && st == 0) {
+        if(this->is_intersect(line) != line_t::line_collision_type::collision_type_none) return true;
+    }
+    return false;
 }
 
 std::optional<line_t> line_t::merge(const line_t &line) const {
