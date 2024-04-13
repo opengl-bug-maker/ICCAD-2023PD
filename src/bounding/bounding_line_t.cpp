@@ -435,6 +435,46 @@ bounding_line_interect_result_t bounding_line_t::merge(bounding_line_t bounding_
     return bdire;
 }
 
+std::vector<bounding_line_t> bounding_line_t::erode(bounding_line_t bounding_line, const vec2d_t& erode_length) {
+    double reject_length = std::min(bounding_line.get_bounding_rect().get_size().get_x() * erode_length.get_x(), bounding_line.get_bounding_rect().get_size().get_y() * erode_length.get_y());
+    std::vector<bounding_line_t> erodes;
+    bounding_node_t* cur = bounding_line.lines.get_head();
+    while(cur = cur->get_next(), cur != bounding_line.lines.get_tail()) {
+        line_t new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
+        vec2d_t left_lower = cur->get_data().get_start();
+        vec2d_t new_point = cur->get_data().get_vec() + new_line.get_vec() * reject_length;
+        rect_t new_rect = rect_t::safe_construct(left_lower, new_point);
+        erodes.push_back(bounding_line_t(new_rect, false));
+
+        bounding_node_t* next = bounding_line.lines.get_next(cur);
+        if(cur->get_data().get_line_turn_direction_type(next->get_data()) != line_t::turn_direction_type_left) {
+            continue;
+        }
+        new_line = line_t::normal_line(line_t::turn(cur->get_data().get_line_direction_type(), line_t::turn_direction_type_right));
+        left_lower = cur->get_data().get_end();
+        new_point = (line_t::normal_line(cur->get_data().get_line_direction_type()).get_vec() + new_line.get_vec()) * reject_length;
+        new_rect = rect_t::safe_construct(left_lower, new_point);
+        erodes.push_back(bounding_line_t(new_rect, false));
+    }
+    std::vector<bounding_line_t> eroodes;
+    eroodes.push_back(bounding_line);
+    for(auto bd : erodes) {
+        for(auto& er : eroodes) {
+            auto mer = bounding_line_t::merge(er, bd);
+            if(mer.difference_pos_line.size() == 0) continue;;
+            er = mer.difference_pos_line[0];
+            if(mer.difference_pos_line.size() > 1)
+                eroodes.push_back(mer.difference_pos_line[1]);
+        }
+    }
+    // std::vector<std::pair<std::vector<vec2d_t>, std::string>> tmp;
+    // tmp.push_back({this->get_nodes(), "origin"});
+    // for(auto er : eroodes) 
+    //     tmp.push_back({er.get_nodes(), "erode"});
+    // visualizer_t::draw_bounding_line(tmp);
+    return eroodes;
+}
+
 #pragma endregion
 
 #pragma region secondary_func
@@ -560,22 +600,6 @@ bool bounding_line_t::erode_vaild(const vec2d_t &length) const {
         if(mer.difference_pos_line.size() > 1) return false;
         erode = mer.difference_pos_line[0];
     }
-    // std::vector<bounding_line_t> eroodes;
-    // eroodes.push_back(*this);
-    // for(auto bd : erodes) {
-    //     for(auto& er : eroodes) {
-    //         auto mer = bounding_line_t::merge(er, bd);
-    //         if(mer.difference_pos_line.size() == 0) return true;
-    //         er = mer.difference_pos_line[0];
-    //         if(mer.difference_pos_line.size() > 1)
-    //             eroodes.push_back(mer.difference_pos_line[1]);
-    //     }
-    // }
-    // std::vector<std::pair<std::vector<vec2d_t>, std::string>> tmp;
-    // tmp.push_back({this->get_nodes(), "origin"});
-    // for(auto er : eroodes) 
-    //     tmp.push_back({er.get_nodes(), "erode"});
-    // visualizer_t::draw_bounding_line(tmp);
     return true;
 }
 
