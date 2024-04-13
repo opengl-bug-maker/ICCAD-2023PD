@@ -127,6 +127,8 @@ public:
 
     static std::vector<bounding_line_t> erode(bounding_line_t bounding_line, const vec2d_t& erode_length);
 
+    bool check_rents();
+
     bool vaild_for_80percent() const;
 
     int get_edge_count() const;

@@ -4,6 +4,8 @@
 
 #include "bounding_line_t.h"
 #include <cassert>
+#include <tuple>
+#include "plugin/visual_process_t.h"
 
 #pragma region bounding_line_interect_result
 
@@ -481,6 +483,82 @@ std::vector<bounding_line_t> bounding_line_t::erode(bounding_line_t bounding_lin
     //     tmp.push_back({er.get_nodes(), "erode"});
     // visualizer_t::draw_bounding_line(tmp);
     return eroodes;
+}
+
+bool bounding_line_t::check_rents() {
+    // std::vector<std::tuple<double, double, double, double, double, line_t>> result;
+    std::vector<std::tuple<bounding_node_t*, bounding_node_t*, double, double>> invalid;
+    auto cur = this->lines.get_head();
+    while(cur = cur->get_next(), cur != this->lines.get_tail()) {
+        auto cur_next = cur;
+        while(cur_next = cur_next->get_next(), cur_next != this->lines.get_tail()) {
+            line_t new_line = line_t(cur->get_data().get_start(), cur_next->get_data().get_start());
+            if(this->collision(new_line)) continue;
+
+            double rents = new_line.get_vec().get_length();
+
+            double area0 = 0;
+            auto area_cur = cur;
+            while(area_cur != cur_next) {
+                area0 -= area_cur->get_data().ori_dot_area();
+                area_cur = this->lines.get_next(area_cur);
+            }
+            area0 += new_line.ori_dot_area();
+            double area1 = 0;
+            area_cur = cur_next;
+            while(area_cur != cur) {
+                area1 -= area_cur->get_data().ori_dot_area();
+                area_cur = this->lines.get_next(area_cur);
+            }
+            area1 -= new_line.ori_dot_area();
+
+            if(area0 < 0 || area1 < 0) continue;
+
+            double k = 0.6;
+            double p = 0.5;
+
+            if(rents < k * pow(area0, p) && rents < k * pow(area1, p)) {
+                invalid.push_back({cur, cur_next, rents / pow(area0, p), rents / pow(area1, p)});
+            }
+
+            // result.push_back({rents, area0, area1, rents / pow(area0, p), rents / pow(area1, p), new_line});
+        }
+    }
+
+    visual_process_t vp;
+    // vp.push_unit(new visual_unit_polygon_t(this->get_nodes(), true));
+
+    if(!invalid.empty()) {
+        std::sort(invalid.begin(), invalid.end(), [](const auto& a, const auto& b) {
+            return std::max(std::get<2>(a), std::get<3>(a)) < std::max(std::get<2>(b), std::get<3>(b));
+        });
+        // vp.push_unit(new visual_unit_line_t(line_t(std::get<0>(invalid.front())->get_data().get_start(), std::get<1>(invalid.front())->get_data().get_start())));
+    }
+
+    this->lines.drop();
+
+    circular_T_list_t<bounding_line_element_t> l0, l1;
+    auto p0 = std::get<0>(invalid.front());
+    auto p1 = std::get<1>(invalid.front());
+    l0.get_head()->set_next(p0);
+    l0.get_tail()->set_prev(p1->get_prev());
+    l1.get_head()->set_next(p1);
+    l1.get_tail()->set_prev(p0->get_prev());
+    l0.get_head()->get_next()->set_prev(l0.get_head());
+    l1.get_head()->get_next()->set_prev(l1.get_head());
+    l0.get_tail()->get_prev()->set_next(l0.get_tail());
+    l1.get_tail()->get_prev()->set_next(l1.get_tail());
+    line_t line = line_t(std::get<0>(invalid.front())->get_data().get_start(), std::get<1>(invalid.front())->get_data().get_start());
+    l0.add_at_head(line_t(std::get<1>(invalid.front())->get_data().get_start(), std::get<0>(invalid.front())->get_data().get_start()));
+    l1.add_at_head(line);
+
+    bounding_line_t bd0(l0), bd1(l1);
+    
+    vp.push_unit(new visual_unit_polygon_t(bd0.get_nodes()));
+    vp.push_unit(new visual_unit_polygon_t(bd1.get_nodes()));
+
+    vp.plot();
+    return true;
 }
 
 #pragma endregion
