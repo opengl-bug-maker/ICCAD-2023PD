@@ -128,6 +128,18 @@ void chip_t::mcnc_file_input(std::string fileName) {
         }
         chip_t::multi_nets.push_back(multi_net);
     }
+
+    if(chip_t::file_name == "ami33.yal") {
+        chip_t::similar_case_num = 10;
+    } else if(chip_t::file_name == "ami49.yal") {
+        chip_t::similar_case_num = 11;
+    } else if(chip_t::file_name == "apte.yal") {
+        chip_t::similar_case_num = 12;
+    } else if(chip_t::file_name == "hp.yal") {
+        chip_t::similar_case_num = 13;
+    } else if(chip_t::file_name == "xerox.yal") {
+        chip_t::similar_case_num = 14;
+    }
 }
 
 void chip_t::pd_file_input(std::string fileName) {

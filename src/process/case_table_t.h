@@ -10,6 +10,7 @@ using std::vector;
 class case_table_t {
 public:
     vector<vector<vector<int>>> cases;
+    vector<vector<vector<int>>> init_cases;
     case_table_t();
 };
 
