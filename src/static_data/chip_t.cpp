@@ -74,17 +74,47 @@ void chip_t::mcnc_file_input(std::string fileName) {
                 soft_module->pins.push_back(soft_pin);
             }
             soft_module->rect = rect_t(vec2d_t(0, 0), soft_module->rect.get_size());
-            chip_t::moduleNameToIndex[soft_module->getName()] = i;
+            chip_t::moduleNameToIndex[soft_module->getName()] = chip_t::modules.size();
             chip_t::softCount++;
             chip_t::soft_modules.push_back(soft_module);
             chip_t::modules.push_back(soft_module);
-        }else{
+        } else if (yal_reader.modules[i].module_type == mcnc_module_t::module_type_e::PAD) {
+            // fix
+        } else{
             std::cout << yal_reader.modules[i].module_type << " : ";
             std::cout << "ERROROROROROROR" << __FILE__ << " " << __LINE__ << "\n";
         }
     }
 
     //fix_module
+    for (int i = 0; i < yal_reader.modules.size() - 1; ++i) {
+        if(yal_reader.modules[i].module_type == mcnc_module_t::module_type_e::PAD){
+            fixed_module_t* fix_module = new fixed_module_t();
+            fix_module->name = yal_reader.modules[i].name;
+            fix_module->xCoord = yal_reader.modules[i].rect.get_left_lower().get_x();
+            fix_module->yCoord = yal_reader.modules[i].rect.get_left_lower().get_y();
+            fix_module->width = yal_reader.modules[i].rect.get_size().get_x();
+            fix_module->height = yal_reader.modules[i].rect.get_size().get_y();
+            fix_module->rect = new rect_t(yal_reader.modules[i].rect);
+            for (auto pin : yal_reader.modules[i].signals){
+                pin_t* soft_pin = new pin_t();
+                soft_pin->name = pin.name;
+                soft_pin->module_index = i;
+                soft_pin->belong_module = fix_module;
+                soft_pin->relative_position = pin.position - fix_module->get_left_lower();
+                fix_module->pins.push_back(soft_pin);
+            }
+            chip_t::moduleNameToIndex[fix_module->getName()] = chip_t::modules.size();
+            chip_t::fixedCount++;
+            chip_t::fixed_modules.push_back(fix_module);
+            chip_t::modules.push_back(fix_module);
+        } else if (yal_reader.modules[i].module_type == mcnc_module_t::module_type_e::GENERAL) {
+            // soft
+        } else{
+            std::cout << yal_reader.modules[i].module_type << " : ";
+            std::cout << "ERROROROROROROR" << __FILE__ << " " << __LINE__ << "\n";
+        }
+    }
 
     //board
     auto chip = yal_reader.modules.back();
@@ -112,11 +142,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
     std::map<std::string, std::set<pin_t*>> all_nets;
     for (int i = 0; i < chip.network.size(); ++i) {
         for (int j = 0; j < chip.network[i].signals.size(); ++j) {
-            auto find = std::find_if(fixed_module->pins.begin(), fixed_module->pins.end(), [&chip, &i, &j](const pin_t* sign){return sign->name == chip.network[i].signals[j];});
-            if(find != fixed_module->pins.end()){
-                //all_nets[chip.network[i].signals[j]].insert(*find);
-            }
-            all_nets[chip.network[i].signals[j]].insert(chip_t::soft_modules[chip_t::moduleNameToIndex.at(chip.network[i].module_name)]->pins[j]);
+            all_nets[chip.network[i].signals[j]].insert(chip_t::modules[chip_t::moduleNameToIndex.at(chip.network[i].module_name)]->pins[j]);
         }
     }
     for(auto net : all_nets){
