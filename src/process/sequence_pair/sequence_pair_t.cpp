@@ -1066,6 +1066,7 @@ void sequence_pair_t::fill_near()
         if(area_comp[i]){continue;}
         for(int j = 0; j< this->sequence_n; ++j){
             if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
+            if(area_comp[j]){continue;}
             if( (modules_positions[i]+modules_wh[i]).get_x() == modules_positions[j].get_x()){
                 int lower_y_i = modules_positions[i].get_y();
                 int upper_y_i = modules_positions[i].get_y()+modules_wh[i].get_y();
@@ -1096,7 +1097,7 @@ void sequence_pair_t::fill_near()
         if(area_comp[i]){continue;}
         for(int j = 0; j< this->sequence_n; ++j){
             if(i==j || seq_is_fix[i]||seq_is_fix[j]){continue;}
-            
+            if(area_comp[j]){continue;}
             if( (modules_positions[i]+modules_wh[i]).get_y() == modules_positions[j].get_y()){
                 int lower_x_i = modules_positions[i].get_x();
                 int upper_x_i = modules_positions[i].get_x()+modules_wh[i].get_x();
