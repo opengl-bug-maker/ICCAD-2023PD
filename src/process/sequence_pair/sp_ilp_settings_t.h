@@ -26,7 +26,7 @@ public:
     void set_constraints_opt_nets();
     void set_constraints_opt_modules();
     void set_constraints_only_one_hand();
-    double area_overlap_contraint = 7;
+    double area_overlap_contraint = 5;
     
 };
 

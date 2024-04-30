@@ -74,6 +74,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
             cout<<"It : "<<it<<", t = "<<this->t<<endl;
             this->it_timer.timer_end();
             this->it_timer.print_time_elapsed();
+            best_sp.print_inline();
             cout<<"current best wirelength : "<<std::setprecision(16)<<best_wirelength<<endl;
             cout<<"current wirelength : "<<std::setprecision(16)<<SP_wirelength<<endl;
             cout<<"------------------------------"<<endl;

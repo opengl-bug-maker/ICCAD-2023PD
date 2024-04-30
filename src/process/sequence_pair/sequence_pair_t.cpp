@@ -334,6 +334,10 @@ void sequence_pair_t::sequence_pair_validation(int t) {
 }
 
 void sequence_pair_t::set_bounding_lines(){
+    if(carved.size()<sequence_n){
+        carved = vector<int>(sequence_n, 0);
+         this->bouding_lines.resize(sequence_n);
+    }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(this->carved[i]){continue;}
         else{
@@ -683,7 +687,7 @@ void sequence_pair_t::to_rectilinear(){
     this->find_position_with_area(true, true, 0, 0);
     this->fill_near();
     this->overlap_optimization();
-    //this->carve();
+    this->carve();
     //this->set_bounding_lines();
     //visualizer_t::draw_bounding_line(SP.bouding_lines);
     //visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
@@ -701,8 +705,8 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     //this->sequence_pair_validation(2);
     for(auto& e:this->is_in_seq){e = 1;}
     this->fill_near();
-    this->overlap_optimization();
-    this->carve();
+    //this->overlap_optimization();
+    //this->carve();
     this->set_bounding_lines();
     this->update_wirelength_rectilinear();
     this->deal_bounding_line();
@@ -869,7 +873,7 @@ bool sequence_pair_t::find_position_allow_illegal_fill(bool minimize_wirelength,
 
     build_constraint_graph();
     mark_transitive_edge();
-    //simplify_constraint_graph();
+    simplify_constraint_graph();
     constraint_n = 3*this->constraint_graph_h.size() + 3*this->constraint_graph_v.size() + chip_t::get_fixed_modules().size()*2 + 5*soft_n + 2*sequence_pair_t::sequence_n;
     constraint_i = 1; //constraint_counter
     variable_n = 2*sequence_n + 5*soft_n + 2*this->constraint_graph_h.size()+this->constraint_graph_v.size();
