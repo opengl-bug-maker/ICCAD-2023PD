@@ -37,6 +37,7 @@ public:
 
 class chip_t {
     friend class similar_chip_t;
+    friend class testcase_changer_t;
     static std::string file_name;
     static uint32_t width, height;
     static int width_bias, height_bias;
