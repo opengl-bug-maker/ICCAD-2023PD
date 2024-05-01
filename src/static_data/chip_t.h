@@ -19,6 +19,7 @@
 class module_t;
 class soft_module_t;
 class fixed_module_t;
+class yal_reader_t;
 
 class similar_chip_t {
 public:
@@ -57,6 +58,8 @@ class chip_t {
 
     static void pd_file_input(std::string fileName);
 
+    static yal_reader_t yal_reader;
+
     static void mcnc_file_input(std::string fileName);
 public:
     enum file_type_t{
@@ -68,6 +71,8 @@ public:
     static std::string get_file_name();
 
     static void file_input(std::string fileName, file_type_t);
+
+    static void file_save(std::string fileName, file_type_t);
 
     static int get_similar_case_num();
 

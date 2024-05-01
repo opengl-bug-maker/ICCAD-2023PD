@@ -13,6 +13,7 @@ class yal_reader_t {
 public:
     std::vector<mcnc_module_t> modules;
     void file_input(std::fstream& file);
+    void file_saver(std::string fileName);
 };
 
 

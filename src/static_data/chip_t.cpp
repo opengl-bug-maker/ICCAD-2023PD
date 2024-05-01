@@ -24,6 +24,7 @@ std::vector<soft_module_t*> chip_t::soft_modules;
 std::vector<fixed_module_t*> chip_t::fixed_modules;
 std::vector<std::vector<uint_fast32_t>> chip_t::connectionTable;
 std::vector<multi_net_t*> chip_t::multi_nets;
+yal_reader_t chip_t::yal_reader;
 double chip_t::module_minimum_length = 1e100;
 int chip_t::similar_case_num = -1;
 std::unordered_map<module_t*, int> module_to_id_m;
@@ -45,6 +46,15 @@ void chip_t::file_input(std::string fileName, file_type_t file_type) {
     }
 }
 
+void chip_t::file_save(std::string fileName, file_type_t file_type) {
+    if(file_type==chip_t::file_type_t::iccad_pd){
+        std::cout << "iccad file save not supported yet.\n";
+    }
+    else if(file_type==chip_t::file_type_t::mcnc){
+        chip_t::yal_reader.file_saver(fileName);
+    }
+}
+
 void chip_t::mcnc_file_input(std::string fileName) {
     std::fstream file;
     file.open(fileName);
@@ -55,7 +65,6 @@ void chip_t::mcnc_file_input(std::string fileName) {
         return;
     }
 
-    yal_reader_t yal_reader;
     yal_reader.file_input(file);
 
     //soft_module
@@ -142,6 +151,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
     std::map<std::string, std::set<pin_t*>> all_nets;
     for (int i = 0; i < chip.network.size(); ++i) {
         for (int j = 0; j < chip.network[i].signals.size(); ++j) {
+            if(chip.network[i].signals[j] == "") continue;
             all_nets[chip.network[i].signals[j]].insert(chip_t::modules[chip_t::moduleNameToIndex.at(chip.network[i].module_name)]->pins[j]);
         }
     }
