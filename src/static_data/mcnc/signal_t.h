@@ -24,6 +24,7 @@ public:
         GND,
         ERROR
     };
+    std::string terminal_type_str[10] = {"I", "O", "B", "PI", "PO", "PB", "F", "PWR", "GND", "ERROR"};
     std::string name;
     terminal_type_e terminal_type = terminal_type_e::ERROR;
     vec2d_t position;
