@@ -22,6 +22,7 @@ public:
         PARENT,
         ERROR
     };
+    std::string module_type_str[5] = {"STANDARD", "PAD", "GENERAL", "PARENT", "ERROR"};
     std::string name;
     module_type_e module_type = module_type_e::ERROR;
     std::vector<vec2d_t> dimensions;

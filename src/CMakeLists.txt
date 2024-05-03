@@ -1,6 +1,11 @@
 set(CMAKE_CXX_STANDARD 17)
 #SET(CMAKE_CXX_FLAGS "-O3")
 
+if (APPLE) 
+       include_directories("/opt/homebrew/Cellar/glpk/5.0/include")
+endif ()
+
+add_subdirectory(bounding)
 add_subdirectory(output_data)
 add_subdirectory(plugin)
 add_subdirectory(polygon)
@@ -22,6 +27,7 @@ add_executable(iccad2023PD main.cpp)
 target_link_libraries(iccad2023PD
         output_data
         process
+        bounding
         quadratic
         polygon
         plugin

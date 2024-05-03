@@ -3,7 +3,7 @@
 //
 
 #include "soft_module_t.h"
-
+#include "static_data/fp_rule_t.h"
 soft_module_t soft_module_t::void_module = soft_module_t(0);
 
 soft_module_t::soft_module_t() : minArea(0) {
@@ -39,7 +39,7 @@ bounding_rectangle_t soft_module_t::make_bd() {
 std::pair<bounding_rectangle_t, bool> soft_module_t::make_bd(const rect_t &rect) const {
     if(rect.get_size().get_area() < this->minArea)
         return {{(module_t*)this, rect}, false};
-    if(std::min(rect.get_size().get_x(), rect.get_size().get_y()) * 2 < std::max(rect.get_size().get_x(), rect.get_size().get_y()))
+    if(std::min(rect.get_size().get_x(), rect.get_size().get_y()) *  fp_rule_t::get_upper_ratio() < std::max(rect.get_size().get_x(), rect.get_size().get_y()))
         return {{(module_t*)this, rect}, false};
     return {{(module_t*)this, rect}, true};
 }

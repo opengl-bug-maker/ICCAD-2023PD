@@ -1,7 +1,9 @@
 //
 // Created by RayChang on 2023/4/27.
 //
-#include "fp_evaluator_t.h"
+#include "process/floorplan/fp_evaluator_t.h"
+#include <iostream>
+
 using std::cout;
 using std::endl;
 uint32_t fp_evaluator_t::get_score(floorplan_t& fp) {

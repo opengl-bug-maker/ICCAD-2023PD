@@ -6,14 +6,15 @@
 //for debug
 #include "iostream"
 #include <thread>
-#include "genetic_solver_t.h"
 #include <iomanip>
 #include "SA_solver_t.h"
-#include "sequence_pair_enumerator_t.h"
-#include "LCS_helper_t.h"
-#include "random_helper.h"
+#include "sequence_pair/sequence_pair_enumerator_t.h"
+#include "process/functional/random_helper.h"
 #include "case_table_t.h"
 #include <iomanip>
+
+#include "quad_sequence/quad_sequence_t.h"
+
 using std::cout;
 using std::endl;
 using std::setw;
@@ -48,23 +49,27 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
     cout<<"---------------Stage 1----------------"<<endl;
-    SA_solver.run(SPEN, 0.3 * time_left, 0.5, 0.01, false, 0, 0.33);
-    cout<<"---------------Stage 2----------------"<<endl;
-    SA_solver.run(SPEN, 0.5 * time_left, 0.1, 0.01, true, 0, 0.66);
-    cout<<"---------------Stage 3----------------"<<endl;
-    SA_solver.run(SPEN, 0.2 * time_left, 0.03, 0.008, true, 0, 1);
+    // SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.33, false);
+    // SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.66, false);
+    SA_solver.run(SPEN, 0.6*time_left, 0.05, 0.008, false, 0, 1, false);
+    SA_solver.run(SPEN, 0.4*time_left, 0.05, 0.008, false, 0, 1, false);
     SPEN.updated_best_SP();
+    SPEN.valid_sequence_pairs[0].print_inline();
 
-    SPEN.best_SP.find_position(true, true, 0, 0, 9);
-    SPEN.best_SP.find_position_with_area(true, true, 0, 0);
+    SPEN.valid_sequence_pairs[0].sequence_pair_validation(1);
+    SPEN.valid_sequence_pairs[0].update_wirelength(true, true);
+    //SPEN.valid_sequence_pairs[0].to_rectilinear_and_plot();
+    //best_sp.print_inline();
+    // best_sp.to_rectilinear();
+    // best_sp.to_rectilinear_and_plot();
+    //SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
 
-    SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
-
-    SPEN.best_SP.write_inline();
-    SPEN.best_SP.print_inline();
-    this->best_fp = SPEN.best_SP.to_fp();
+    // SPEN.best_SP.write_inline();
+    // SPEN.best_SP.print_inline();
+    //this->best_fp = SPEN.best_SP.to_fp();
+    //SPEN.best_SP.to_rectilinear_and_plot();
     //this->best_fp.GUI_validation();
-    cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
+    //cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {
@@ -78,17 +83,31 @@ void solver_t::run() {
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = this->init_timeout;
     SPEN.generate_sequence_pairs(1);
-    for(auto& e:SPEN.valid_sequence_pairs){double useless = e.get_wirelength(true, true);}
+
+    // case_table_t case_table;
+    // int case_id = chip_t::get_similar_case_num();
+    // sequence_pair_t SP;
+    // bool fnd_cases = false;
+
+    // fnd_cases = true;
+    // SP.v_sequence = case_table.init_cases[11][0];
+    // SP.h_sequence = case_table.init_cases[11][1];
+    // for(auto& e:SP.is_in_seq){e = 1;}
+    // bool a = SP.find_position(true, true, 0, 0);
+    // SPEN.valid_sequence_pairs.push_back(SP);
+    SPEN.valid_sequence_pairs[0].sequence_pair_validation();
+    SPEN.valid_sequence_pairs[0].print_inline();
+    for(auto& e:SPEN.valid_sequence_pairs){double useless = e.update_wirelength(true, true);}
 
     cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
     cout<<"--------------------------------------"<<endl;
     this->SA_process(SPEN);
-    cout<<"----------------"<<endl;
-    cout<<"Load specific sequence pair"<<endl;
-    this->load_specific_best();
-    cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
-    this->runtime_timer.timer_end();
-    this->runtime_timer.print_time_elapsed();
+    // cout<<"----------------"<<endl;
+    // cout<<"Load specific sequence pair"<<endl;
+    // this->load_specific_best();
+    // cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
+    // this->runtime_timer.timer_end();
+    // this->runtime_timer.print_time_elapsed();
 }
 
 void solver_t::set_timer_start() {
@@ -114,7 +133,7 @@ void solver_t::load_specific_best() {
         for(auto& e:SP.is_in_seq){e = 1;}
     }
     if(fnd_cases){
-        SP.find_position(true, true, 0, 0,9);
+        SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
         SP = SA_solver.post_process(SP);
         floorplan_t loaded_fp = SP.to_fp();
@@ -131,30 +150,18 @@ void solver_t::load_specific_without_cmp() {
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
-    bool fnd_cases = false;
     if(case_id!=-1){
-        fnd_cases = true;
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
-    }
-    if(fnd_cases){
-        SP.find_position(true, true, 0, 0, 9);
+        SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
         SP = SA_solver.post_process(SP);
         SP.print_inline();
         //t1.print_time_elapsed();
+        SP.sequence_pair_validation();
         floorplan_t loaded_fp = SP.to_fp();
         this->best_fp = loaded_fp;
         cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
 }
-
-void solver_t::test() {
-    for(auto& e:sequence_pair_t::deg_w){
-        cout<<e.first<<" "<<e.second<<endl;
-    }
-}
-
-
-

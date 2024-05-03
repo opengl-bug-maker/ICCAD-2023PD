@@ -10,7 +10,7 @@
 #include <fstream>
 #include <exception>
 #include <unordered_map>
-#include "utilities/vec2d_t.h"
+#include "../utilities/vec2d_t.h"
 #include "static_data/mcnc/multi_net_t.h"
 //#include "static_data/module_t.h"
 //#include "static_data/soft_module_t.h"
@@ -19,6 +19,7 @@
 class module_t;
 class soft_module_t;
 class fixed_module_t;
+class yal_reader_t;
 
 class similar_chip_t {
 public:
@@ -28,15 +29,22 @@ public:
     static bool case4();
     static bool case5();
     static bool case6();
+    static bool case7();
+    static bool case8();
+    static bool case9();
+    static bool case10();
 };
 
 class chip_t {
     friend class similar_chip_t;
+    friend class testcase_changer_t;
+    static std::string file_name;
     static uint32_t width, height;
     static int width_bias, height_bias;
     static uint32_t softCount, fixedCount;
     static size_t total_modules_count;
     static std::unordered_map<std::string, size_t> moduleNameToIndex;
+    static std::unordered_map<module_t*, int> module_to_id_m;
 
     static std::vector<module_t*> modules;
     static std::vector<soft_module_t*> soft_modules;
@@ -51,9 +59,21 @@ class chip_t {
 
     static void pd_file_input(std::string fileName);
 
+    static yal_reader_t yal_reader;
+
     static void mcnc_file_input(std::string fileName);
 public:
-    static void file_input(std::string fileName);
+    enum file_type_t{
+        mcnc,
+        iccad_pd
+    };
+    static std::string set_file_name(std::string file_name);
+
+    static std::string get_file_name();
+
+    static void file_input(std::string fileName, file_type_t);
+
+    static void file_save(std::string fileName, file_type_t);
 
     static int get_similar_case_num();
 

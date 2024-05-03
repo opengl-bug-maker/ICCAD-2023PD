@@ -4,17 +4,17 @@
 
 #ifndef ICCAD2023PD_SA_SOLVER_T_H
 #define ICCAD2023PD_SA_SOLVER_T_H
-#include "sequence_pair_t.h"
-#include "sequence_pair_enumerator_t.h"
+#include "sequence_pair/sequence_pair_t.h"
+#include "sequence_pair/sequence_pair_enumerator_t.h"
 class SA_solver_t {
 public:
     SA_solver_t();
 
     bool sample_p(double delta_c);
 
-    void run(sequence_pair_enumerator_t&,double, double, double,bool, double, double);
+    void run(sequence_pair_enumerator_t&,double, double, double,bool, double, double, bool rectilinear);
 
-    double get_delta(sequence_pair_t&, sequence_pair_t&);
+    double get_delta(sequence_pair_t&, sequence_pair_t&, bool);
 
     void parameters_init(double, double);
 
@@ -26,12 +26,13 @@ public:
 
 //    void find_greater(sequence_pair_t&, double timeout);
 
-    sequence_pair_t find_neighbor_parallel(sequence_pair_t);
+    sequence_pair_t find_neighbor_parallel(sequence_pair_t, bool);
 
     sequence_pair_t find_neighbor_sequential(sequence_pair_t);
 
 
     vector<int> swap_enable;
+    const bool need_practical = false;
     double t = 1, r = 0.999, end_t = 0.005;
     double time_limit = 0, it_average_time = 0;
     const int load_back_it = 100;

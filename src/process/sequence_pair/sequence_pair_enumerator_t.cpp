@@ -2,10 +2,10 @@
 // Created by RayChang on 2023/6/26.
 //
 
-#include "sequence_pair_enumerator_t.h"
+#include "process/sequence_pair/sequence_pair_enumerator_t.h"
 #include <iostream>
 #include <iomanip>
-#include "random_helper.h"
+#include "process/functional/random_helper.h"
 using std::cout;
 using std::endl;
 sequence_pair_enumerator_t::sequence_pair_enumerator_t(){
@@ -18,6 +18,9 @@ void sequence_pair_enumerator_t::generate_sequence_pairs(int n) {
     this->current_sp_n = 0;
     if(sequence_pair_t::soft_n!=0){
         bool result  = this->add_soft_process_cont(0, false, 5, 0, 0);
+        if(result==false){
+            cout<<"Failed in initialization"<<endl;
+        }
     }
     this->init_timer.timer_end();
     this->init_timer.print_time_elapsed();
@@ -105,12 +108,13 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
     if(this->current_sp_n >= this->target_sp_n){
         return false;
     }
+    cout<<"Initializing-placing "<<i<<"-th module"<<endl;
     if(i>=this->seed_SP.fix_start_idx){
-        this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
+        //this->seed_SP.predict_wirelength(true, false); //minimize wirelength at last
         this->res_SP = this->seed_SP;
-        if(this->seed_SP.predicted_wirelength!=-1){
+        //if(this->seed_SP.predicted_wirelength!=-1){
             this->valid_sequence_pairs.push_back(this->seed_SP);
-        }
+        //}
         this->current_sp_n++;
         //this->seed_SP.print_inline();
         return true;
@@ -137,6 +141,8 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
         seed_SP.h_sequence.pop_back();
         return fnd;
     }
+    vector<pair<double,vector<int>>> legal_pos;
+
     for(int j = 0; j <= seed_SP.v_sequence.size(); ++j){
         for(int k = 0; k <= seed_SP.h_sequence.size(); ++k){
             int jj = (j+start_j)%(seed_SP.v_sequence.size()+1);
@@ -151,11 +157,15 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
                 success = this->seed_SP.find_position_with_area(false, false, 0, 0);
             }
             else{
-                success = this->seed_SP.find_position(false, false, 0, 0);
+                //success = this->seed_SP.find_position_allow_illegal(true, true, 0, 0);
+                success = this->seed_SP.find_position(true, true, 0, 0);
             }
             if(success){
+                double wl = this->seed_SP.z;
+                //legal_pos.push_back({wl, {jj, kk}});
+                //break;
                 if(this->add_soft_process_cont(i+1, with_area, cutoff, jj, kk)){
-                    fnd|=1;
+                    return true;
                 }
             }
             this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
@@ -168,7 +178,27 @@ bool sequence_pair_enumerator_t::add_soft_process_cont(int i,bool with_area, int
                 return false;
             }
         }
+        //if(legal_pos.size()){break;}
     }
+    // sort(legal_pos.begin(), legal_pos.end()); //open this line to get an illegal initialization
+    // cout<<i<<endl;
+    // for(auto& pos:legal_pos){
+    //     int j = pos.second[0], k = pos.second[1];
+    //     seed_SP.v_sequence.insert(seed_SP.v_sequence.begin() + j, this->seed_SP.add_soft_order[i]);
+    //     seed_SP.h_sequence.insert(seed_SP.h_sequence.begin() + k, this->seed_SP.add_soft_order[i]);
+    //     this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 1;
+    //     bool ok = this->add_soft_process_cont(i+1, with_area, cutoff, j, k);
+    //     if(ok==false){
+    //         cout<<"BT"<<endl;
+    //     }
+    //     this->seed_SP.is_in_seq[this->seed_SP.add_soft_order[i]] = 0;
+    //     seed_SP.v_sequence.erase(seed_SP.v_sequence.begin() + j);
+    //     seed_SP.h_sequence.erase(seed_SP.h_sequence.begin() + k);
+    //     if(ok){
+    //         return true;
+    //     }
+    // }
+    //cout<<i<<" : success n  = "<<success_n<<endl;
     return false;
 }
 void sequence_pair_enumerator_t::validate_all_SP() {
@@ -179,7 +209,7 @@ void sequence_pair_enumerator_t::validate_all_SP() {
             cout<<"invalid SP"<<endl;
         }
         else{
-            double wirelength = this->valid_sequence_pairs[i].get_wirelength(true, true);
+            double wirelength = this->valid_sequence_pairs[i].update_wirelength(true, true);
             cout<<"valid SP : "<<std::setprecision(16)<<wirelength<<endl;
 
         }
@@ -204,10 +234,10 @@ void sequence_pair_enumerator_t::updated_best_SP() {
     if(this->valid_sequence_pairs.size()<1){
         return;
     }
-    double current_best_wirelength = this->valid_sequence_pairs[0].get_wirelength(true, true);
+    double current_best_wirelength = this->valid_sequence_pairs[0].update_wirelength(true, true);
     this->best_SP = this->valid_sequence_pairs[0];
     for(auto SP:this->valid_sequence_pairs){
-        double v = SP.get_wirelength(true, true);
+        double v = SP.update_wirelength(true, true);
         if(v < current_best_wirelength){
             this->best_SP = SP;
             current_best_wirelength = v;

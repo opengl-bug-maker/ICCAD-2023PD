@@ -7,13 +7,13 @@
 #include <glpk.h>
 #include <string>
 #include <vector>
-#include "edge_t.h"
+#include "process/components/edge_t.h"
 using std::string;
 using std::vector;
 class ILP_result_t{
 public:
     bool legal;
-    int z;
+    double z;
     vector<double> var_values;
     ILP_result_t(){
         var_values.resize(1);
