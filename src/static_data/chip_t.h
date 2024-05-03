@@ -66,7 +66,7 @@ class chip_t {
 
     static mcnc_old_reader_t mcnc_old_reader;
 
-    static void mcnc_old_file_input(std::string fileName, std::string fileName1);
+    static void mcnc_old_file_input(std::string blocks_file_name, std::string nets_file_name, std::string fixeds_file_name);
 public:
     enum file_type_t{
         mcnc,
@@ -77,9 +77,9 @@ public:
 
     static std::string get_file_name();
 
-    static void file_input(std::string fileName, file_type_t file_type, std::string fileName1 = "");
+    static void file_input(std::string fileName, file_type_t file_type, std::string fileName1 = "", std::string fileName2 = "");
 
-    static void file_save(std::string fileName, file_type_t file_type, std::string fileName1 = "");
+    static void file_save(std::string fileName, file_type_t file_type, std::string fileName1 = "", std::string fileName2 = "");
 
     static int get_similar_case_num();
 

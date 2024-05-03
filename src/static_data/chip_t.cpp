@@ -39,17 +39,17 @@ std::string chip_t::get_file_name() {
     return chip_t::file_name;
 }
 
-void chip_t::file_input(std::string fileName, file_type_t file_type, std::string fileName1) {
+void chip_t::file_input(std::string fileName, file_type_t file_type, std::string fileName1, std::string fileName2) {
     if(file_type==chip_t::file_type_t::iccad_pd){
         pd_file_input(fileName);
     } else if(file_type==chip_t::file_type_t::mcnc){
         mcnc_file_input(fileName);
     } else if(file_type == chip_t::file_type_t::old_mcnc) {
-        chip_t::mcnc_old_file_input(fileName, fileName1);
+        chip_t::mcnc_old_file_input(fileName, fileName1, fileName2);
     }
 }
 
-void chip_t::file_save(std::string fileName, file_type_t file_type, std::string fileName1) {
+void chip_t::file_save(std::string fileName, file_type_t file_type, std::string fileName1, std::string fileName2) {
     if(file_type==chip_t::file_type_t::iccad_pd){
         std::cout << "iccad file save not supported yet.\n";
     } else if (file_type==chip_t::file_type_t::mcnc){
@@ -182,26 +182,35 @@ void chip_t::mcnc_file_input(std::string fileName) {
     }
 }
 
-void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
+void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_file_name, std::string fixeds_file_name) {
     std::fstream blocks_file;
-    blocks_file.open(fileName);
+    blocks_file.open(blocks_file_name);
 
     if(blocks_file.fail()){
         blocks_file.close();
-        std::cout << "failed to open \"" << fileName << "\"" << std::endl;
+        std::cout << "failed to open \"" << blocks_file_name << "\"" << std::endl;
         return;
     }
 
     std::fstream nets_file;
-    nets_file.open(fileName1);
+    nets_file.open(nets_file_name);
 
     if(nets_file.fail()){
         nets_file.close();
-        std::cout << "failed to open \"" << fileName1 << "\"" << std::endl;
+        std::cout << "failed to open \"" << nets_file_name << "\"" << std::endl;
         return;
     }
 
-    chip_t::mcnc_old_reader.file_input(blocks_file, nets_file);
+    std::fstream fixeds_file;
+    fixeds_file.open(fixeds_file_name);
+
+    if(fixeds_file.fail()){
+        fixeds_file.close();
+        std::cout << "failed to open \"" << fixeds_file_name << "\"" << std::endl;
+        return;
+    }
+
+    chip_t::mcnc_old_reader.file_input(blocks_file, nets_file, fixeds_file);
     // mcnc_old_reader_t mor;
     // mor.file_input(blocks_file, nets_file);
 
@@ -224,6 +233,29 @@ void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
         chip_t::modules.push_back(soft_module);
     }
 
+    //fix_module
+    for (int i = 0; i < chip_t::mcnc_old_reader.fix_modules.size(); ++i) {
+        fixed_module_t* fix_module = new fixed_module_t();
+        fix_module->name = chip_t::mcnc_old_reader.fix_modules[i]->name;
+        fix_module->xCoord = chip_t::mcnc_old_reader.fix_modules[i]->rect.get_left_lower().get_x();
+        fix_module->yCoord = chip_t::mcnc_old_reader.fix_modules[i]->rect.get_left_lower().get_y();
+        fix_module->width = chip_t::mcnc_old_reader.fix_modules[i]->rect.get_size().get_x();
+        fix_module->height = chip_t::mcnc_old_reader.fix_modules[i]->rect.get_size().get_y();
+        fix_module->rect = new rect_t(chip_t::mcnc_old_reader.fix_modules[i]->rect);
+        for (auto pin : chip_t::mcnc_old_reader.fix_modules[i]->pins){
+            pin_t* fix_pin = new pin_t();
+            fix_pin->name = pin;
+            fix_pin->module_index = i;
+            fix_pin->belong_module = fix_module;
+            fix_pin->relative_position = {0, 0};
+            fix_module->pins.push_back(fix_pin);
+        }
+        chip_t::moduleNameToIndex[fix_module->getName()] = chip_t::modules.size();
+        chip_t::fixedCount++;
+        chip_t::fixed_modules.push_back(fix_module);
+        chip_t::modules.push_back(fix_module);
+    }
+
     chip_t::total_modules_count = chip_t::get_soft_modules().size() + chip_t::get_fixed_modules().size();
 
     //connection
@@ -244,8 +276,8 @@ void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
         }
         chip_t::multi_nets.push_back(multi_net);
     }
-    chip_t::width = 1400;
-    chip_t::height = 1400;
+    chip_t::width = chip_t::mcnc_old_reader.chipw;
+    chip_t::height = chip_t::mcnc_old_reader.chiph;
 
     blocks_file.close();
     nets_file.close();

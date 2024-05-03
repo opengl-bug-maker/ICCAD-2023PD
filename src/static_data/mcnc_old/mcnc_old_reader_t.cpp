@@ -7,8 +7,7 @@ mcnc_old_moudle_t *mcnc_old_reader_t::get_module_from_name(std::string name) {
     return nullptr;
 }
 
-void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets_file)
-{
+void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets_file, std::fstream &fixeds_file) {
     this->modules.clear();
     this->connections.clear();
 
@@ -41,7 +40,7 @@ void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets
                 mcnc_old_moudle_t *m = new mcnc_old_moudle_t();
                 m->name = word;
                 m->min_area = area;
-                 m->pins.push_back(word + "pin");
+                m->pins.push_back(word + "pin");
                 this->modules.push_back(m);
             }else {
                 perror("Error: Invalid type_word");
@@ -84,4 +83,17 @@ void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets
             this->connections.push_back(connection);
         }
     }
+
+    //fixed file
+    fixeds_file >> this->chipw >> this->chiph;
+    while(fixeds_file.eof() == 0) {
+        mcnc_old_fixed_module_t* fm = new mcnc_old_fixed_module_t();
+        int llx, lly, w, h;
+        fixeds_file >> fm->name >> llx >> lly >> w >> h;
+        fm->rect = rect_t({llx, lly}, {w, h});
+        fm->pins.push_back(fm->name + "pin");
+        mcnc_old_moudle_t* m = this->get_module_from_name(fm->name);
+        if(m != nullptr) this->modules.erase(std::find(this->modules.begin(), this->modules.end(), m));
+    }
+
 }
