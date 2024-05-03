@@ -37,10 +37,11 @@ void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets
             if(type_word == "softrectangular"){
                 int area = 0;
                 blocks_file >> area;
+                std::getline(blocks_file, line);
                 mcnc_old_moudle_t *m = new mcnc_old_moudle_t();
                 m->name = word;
                 m->min_area = area;
-                m->pins.push_back(word + "pin");
+                 m->pins.push_back(word + "pin");
                 this->modules.push_back(m);
             }else {
                 perror("Error: Invalid type_word");
@@ -80,6 +81,7 @@ void mcnc_old_reader_t::file_input(std::fstream &blocks_file, std::fstream &nets
                 connection->modules.push_back(this->get_module_from_name(word));
                 std::getline(nets_file, line);
             }
+            this->connections.push_back(connection);
         }
     }
 }

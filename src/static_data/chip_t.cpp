@@ -202,8 +202,8 @@ void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
     }
 
     chip_t::mcnc_old_reader.file_input(blocks_file, nets_file);
-
-
+    // mcnc_old_reader_t mor;
+    // mor.file_input(blocks_file, nets_file);
 
     //soft_module
     for (int i = 0; i < chip_t::mcnc_old_reader.modules.size(); ++i) {
@@ -224,7 +224,7 @@ void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
         chip_t::modules.push_back(soft_module);
     }
 
-
+    chip_t::total_modules_count = chip_t::get_soft_modules().size() + chip_t::get_fixed_modules().size();
 
     //connection
     int netI = 0;
@@ -244,9 +244,25 @@ void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
         }
         chip_t::multi_nets.push_back(multi_net);
     }
+    chip_t::width = 1400;
+    chip_t::height = 1400;
 
     blocks_file.close();
     nets_file.close();
+
+
+    if(chip_t::file_name == "ami33") {
+        chip_t::similar_case_num = 15;
+    } else if(chip_t::file_name == "ami49") {
+        chip_t::similar_case_num = 16;
+    } else if(chip_t::file_name == "apte") {
+        chip_t::similar_case_num = 17;
+    } else if(chip_t::file_name == "hp") {
+        chip_t::similar_case_num = 18;
+    } else if(chip_t::file_name == "xerox") {
+        chip_t::similar_case_num = 19;
+    }
+
 }
 
 void chip_t::pd_file_input(std::string fileName) {

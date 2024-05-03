@@ -5,6 +5,7 @@
 #include <exception>
 #include <iostream>
 #include "yal_reader_t.h"
+#include <iomanip>
 
 void yal_reader_t::file_input(std::fstream &file) {
     std::string str;
