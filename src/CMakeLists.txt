@@ -33,6 +33,7 @@ target_link_libraries(iccad2023PD
         plugin
         static_data
         mcnc
+        mcnc_old
         utilities
         )
 

@@ -12,6 +12,7 @@
 #include "soft_module_t.h"
 #include "fixed_module_t.h"
 #include "mcnc/yal_reader_t.h"
+#include "mcnc_old/mcnc_old_reader_t.h"
 
 std::string chip_t::file_name;
 uint32_t chip_t::width, chip_t::height;
@@ -25,6 +26,7 @@ std::vector<fixed_module_t*> chip_t::fixed_modules;
 std::vector<std::vector<uint_fast32_t>> chip_t::connectionTable;
 std::vector<multi_net_t*> chip_t::multi_nets;
 yal_reader_t chip_t::yal_reader;
+mcnc_old_reader_t chip_t::mcnc_old_reader;
 double chip_t::module_minimum_length = 1e100;
 int chip_t::similar_case_num = -1;
 std::unordered_map<module_t*, int> module_to_id_m;
@@ -37,21 +39,23 @@ std::string chip_t::get_file_name() {
     return chip_t::file_name;
 }
 
-void chip_t::file_input(std::string fileName, file_type_t file_type) {
+void chip_t::file_input(std::string fileName, file_type_t file_type, std::string fileName1) {
     if(file_type==chip_t::file_type_t::iccad_pd){
         pd_file_input(fileName);
-    }
-    else if(file_type==chip_t::file_type_t::mcnc){
+    } else if(file_type==chip_t::file_type_t::mcnc){
         mcnc_file_input(fileName);
+    } else if(file_type == chip_t::file_type_t::old_mcnc) {
+        chip_t::mcnc_old_file_input(fileName, fileName1);
     }
 }
 
-void chip_t::file_save(std::string fileName, file_type_t file_type) {
+void chip_t::file_save(std::string fileName, file_type_t file_type, std::string fileName1) {
     if(file_type==chip_t::file_type_t::iccad_pd){
         std::cout << "iccad file save not supported yet.\n";
-    }
-    else if(file_type==chip_t::file_type_t::mcnc){
+    } else if (file_type==chip_t::file_type_t::mcnc){
         chip_t::yal_reader.file_saver(fileName);
+    } else if (file_type == chip_t::file_type_t::old_mcnc) {
+        std::cout << "old_mcnc file save not supported yet.\n";
     }
 }
 
@@ -176,6 +180,73 @@ void chip_t::mcnc_file_input(std::string fileName) {
     } else if(chip_t::file_name == "xerox.yal") {
         chip_t::similar_case_num = 14;
     }
+}
+
+void chip_t::mcnc_old_file_input(std::string fileName, std::string fileName1) {
+    std::fstream blocks_file;
+    blocks_file.open(fileName);
+
+    if(blocks_file.fail()){
+        blocks_file.close();
+        std::cout << "failed to open \"" << fileName << "\"" << std::endl;
+        return;
+    }
+
+    std::fstream nets_file;
+    nets_file.open(fileName1);
+
+    if(nets_file.fail()){
+        nets_file.close();
+        std::cout << "failed to open \"" << fileName1 << "\"" << std::endl;
+        return;
+    }
+
+    chip_t::mcnc_old_reader.file_input(blocks_file, nets_file);
+
+
+
+    //soft_module
+    for (int i = 0; i < chip_t::mcnc_old_reader.modules.size(); ++i) {
+        soft_module_t* soft_module = new soft_module_t();
+        soft_module->name = chip_t::mcnc_old_reader.modules[i]->name;
+        soft_module->minArea = chip_t::mcnc_old_reader.modules[i]->min_area;
+        for (auto pin : chip_t::mcnc_old_reader.modules[i]->pins) {
+            pin_t* soft_pin = new pin_t();
+            soft_pin->name = pin;
+            soft_pin->module_index = i;
+            soft_pin->belong_module = soft_module;
+            soft_pin->relative_position = {0, 0};
+            soft_module->pins.push_back(soft_pin);
+        }
+        chip_t::moduleNameToIndex[soft_module->getName()] = chip_t::modules.size();
+        chip_t::softCount++;
+        chip_t::soft_modules.push_back(soft_module);
+        chip_t::modules.push_back(soft_module);
+    }
+
+
+
+    //connection
+    int netI = 0;
+    std::map<std::string, std::set<pin_t*>> all_nets;
+    for (auto connection : chip_t::mcnc_old_reader.connections) {
+        std::string netName = "N" + std::to_string(netI++);
+        for (auto modules : connection->modules) {
+            all_nets[netName].insert(chip_t::modules[chip_t::moduleNameToIndex.at(modules->name)]->pins[0]);
+        }
+    }
+    for(auto net : all_nets){
+        multi_net_t* multi_net = new multi_net_t();
+        multi_net->name = net.first;
+        multi_net->pins = std::vector<pin_t*>(net.second.begin(), net.second.end());
+        for (auto pin : multi_net->pins){
+            pin->connect_net = multi_net;
+        }
+        chip_t::multi_nets.push_back(multi_net);
+    }
+
+    blocks_file.close();
+    nets_file.close();
 }
 
 void chip_t::pd_file_input(std::string fileName) {

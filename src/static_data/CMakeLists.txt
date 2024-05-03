@@ -5,6 +5,7 @@ set(SRC_FILE ${SRC_FILE})
 set(HEADER_FILE ${HEADER_FILE})
 
 add_subdirectory(mcnc)
+add_subdirectory(mcnc_old)
 
 add_library(static_data ${SRC_FILE} ${HEADER_FILE})
 

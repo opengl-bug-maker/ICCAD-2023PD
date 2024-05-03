@@ -20,6 +20,7 @@ class module_t;
 class soft_module_t;
 class fixed_module_t;
 class yal_reader_t;
+class mcnc_old_reader_t;
 
 class similar_chip_t {
 public:
@@ -62,18 +63,23 @@ class chip_t {
     static yal_reader_t yal_reader;
 
     static void mcnc_file_input(std::string fileName);
+
+    static mcnc_old_reader_t mcnc_old_reader;
+
+    static void mcnc_old_file_input(std::string fileName, std::string fileName1);
 public:
     enum file_type_t{
         mcnc,
+        old_mcnc,
         iccad_pd
     };
     static std::string set_file_name(std::string file_name);
 
     static std::string get_file_name();
 
-    static void file_input(std::string fileName, file_type_t);
+    static void file_input(std::string fileName, file_type_t file_type, std::string fileName1 = "");
 
-    static void file_save(std::string fileName, file_type_t);
+    static void file_save(std::string fileName, file_type_t file_type, std::string fileName1 = "");
 
     static int get_similar_case_num();
 
