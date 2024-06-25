@@ -182,7 +182,7 @@ void chip_t::mcnc_file_input(std::string fileName) {
     }
 }
 
-void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_file_name, std::string fixeds_file_name) {
+void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_file_name, std::string pl_file_name) {
     std::fstream blocks_file;
     blocks_file.open(blocks_file_name);
 
@@ -201,16 +201,16 @@ void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_
         return;
     }
 
-    std::fstream fixeds_file;
-    fixeds_file.open(fixeds_file_name);
+    std::fstream pl_file;
+    pl_file.open(pl_file_name);
 
-    if(fixeds_file.fail()){
-        fixeds_file.close();
-        std::cout << "failed to open \"" << fixeds_file_name << "\"" << std::endl;
+    if(pl_file.fail()){
+        pl_file.close();
+        std::cout << "failed to open \"" << pl_file_name << "\"" << std::endl;
         return;
     }
 
-    chip_t::mcnc_old_reader.file_input(blocks_file, nets_file, fixeds_file);
+    chip_t::mcnc_old_reader.file_input(blocks_file, nets_file, pl_file);
     // mcnc_old_reader_t mor;
     // mor.file_input(blocks_file, nets_file);
 
@@ -221,10 +221,10 @@ void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_
         soft_module->minArea = chip_t::mcnc_old_reader.modules[i]->min_area;
         for (auto pin : chip_t::mcnc_old_reader.modules[i]->pins) {
             pin_t* soft_pin = new pin_t();
-            soft_pin->name = pin;
+            soft_pin->name = pin->name;
             soft_pin->module_index = i;
             soft_pin->belong_module = soft_module;
-            soft_pin->relative_position = {0, 0};
+            soft_pin->relative_position = {pin->x, pin->y};
             soft_module->pins.push_back(soft_pin);
         }
         chip_t::moduleNameToIndex[soft_module->getName()] = chip_t::modules.size();
@@ -244,10 +244,10 @@ void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_
         fix_module->rect = new rect_t(chip_t::mcnc_old_reader.fix_modules[i]->rect);
         for (auto pin : chip_t::mcnc_old_reader.fix_modules[i]->pins){
             pin_t* fix_pin = new pin_t();
-            fix_pin->name = pin;
+            fix_pin->name = pin->name;
             fix_pin->module_index = i;
             fix_pin->belong_module = fix_module;
-            fix_pin->relative_position = {0, 0};
+            fix_pin->relative_position = {pin->x, pin->y};
             fix_module->pins.push_back(fix_pin);
         }
         chip_t::moduleNameToIndex[fix_module->getName()] = chip_t::modules.size();
@@ -261,10 +261,26 @@ void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_
     //connection
     int netI = 0;
     std::map<std::string, std::set<pin_t*>> all_nets;
+    // for(auto m : chip_t::modules) {
+    //     std::cout << m->name << "\n";
+    // }
+    // std::cout << "\n";
+    // for(auto cm : )
     for (auto connection : chip_t::mcnc_old_reader.connections) {
         std::string netName = "N" + std::to_string(netI++);
         for (auto modules : connection->modules) {
-            all_nets[netName].insert(chip_t::modules[chip_t::moduleNameToIndex.at(modules->name)]->pins[0]);
+            if(modules->is_terminal) {
+                for(auto pin : chip_t::modules.back()->pins) {
+                    if(pin->name == modules->name) {
+                        all_nets[netName].insert(pin);
+                        // std::cout << "hi";
+                        break;
+                    }
+                }
+            } else {
+                // std::cout << modules->belong_module->name << "\n";
+                all_nets[netName].insert(chip_t::modules[chip_t::moduleNameToIndex.at(modules->belong_module->name)]->pins[0]);
+            }
         }
     }
     for(auto net : all_nets){
@@ -281,6 +297,28 @@ void chip_t::mcnc_old_file_input(std::string blocks_file_name, std::string nets_
 
     blocks_file.close();
     nets_file.close();
+
+    // std::cout << "soft\n";
+    // for(auto s : chip_t::soft_modules) {
+    //     std::cout << s->name << " " << s->minArea << " " << s->pins.size() << "\n";
+    // }
+    // std::cout << "fixed\n";
+    // for(auto f : chip_t::fixed_modules) {
+    //     std::cout << f->name << " " << *f->rect << " " << f->pins.size() << "\n";
+    //     for(auto p : f->pins) {
+    //         std::cout << p->name << " " << p->relative_position << " | ";
+    //     }
+    //     std::cout << "\n";
+    // }
+    // std::cout << "connection\n";
+    // for(auto c : chip_t::get_multi_nets()) {
+    //     std::cout << "net : " << c->name << " " << c->pins.size() << "\n";
+    //     for(auto p : c->pins) {
+    //         std::cout << p->name << " | " << p->relative_position << ", ";
+    //     }
+    //     std::cout << "\n";
+    // }
+
 
 
     if(chip_t::file_name == "ami33") {

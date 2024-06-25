@@ -3,12 +3,12 @@
 
 #include <string>
 #include <vector>
+#include "mcnc_old_terminal_t.h"
 
-class mcnc_old_moudle_t {
+class mcnc_old_module_t {
 public:
     std::string name;
-    double min_area;
-    std::vector<std::string> pins;
+    std::vector<mcnc_old_terminal_t*> pins;
 };
 
 #endif

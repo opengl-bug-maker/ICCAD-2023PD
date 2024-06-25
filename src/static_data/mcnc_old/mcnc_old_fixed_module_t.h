@@ -3,13 +3,13 @@
 
 #include <string>
 #include <vector>
+#include "mcnc_old_module_t.h"
+#include "mcnc_old_terminal_t.h"
 #include "utilities/rect_t.h"
 
-class mcnc_old_fixed_module_t {
+class mcnc_old_fixed_module_t : public mcnc_old_module_t {
 public:
-    std::string name;
     rect_t rect;
-    std::vector<std::string> pins;
 };
 
 #endif

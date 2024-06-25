@@ -1,0 +1,16 @@
+UCSC blocks 1.0
+# Created      : Thu Nov 16 02:11:51 PST 2000
+# User         : huaizhi@olympus
+# Platform     : SunOS 5.6 sparc
+
+# hardrectilinear
+# softrectangular
+
+NumSoftRectangularBlocks : 3
+NumHardRectilinearBlocks : 1
+NumTerminals : 0
+
+f01 hardrectilinear 4 (0, 0) (0, 10) (10, 10) (10, 0)
+s01 softrectangular 190 0.5 2.0
+s02 softrectangular 190 0.5 2.0
+s03 softrectangular 190 0.5 2.0
