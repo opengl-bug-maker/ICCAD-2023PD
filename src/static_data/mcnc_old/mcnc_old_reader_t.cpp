@@ -1,5 +1,5 @@
 #include "mcnc_old_reader_t.h"
-
+#include <algorithm>
 mcnc_old_moudle_t *mcnc_old_reader_t::get_module_from_name(std::string name) {
     for(auto m : this->modules) {
         if(m->name == name) return m;
