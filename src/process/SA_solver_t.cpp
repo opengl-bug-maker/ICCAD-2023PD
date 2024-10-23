@@ -178,7 +178,7 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool ove
 
 double SA_solver_t::get_delta(sequence_pair_t & ori, sequence_pair_t& after, bool overlap) {
     // double ori_wirelength = ori.predicted_wirelength;
-    // double after_wirelength = after.update_wirelength(true, false);
+    // double after_wirelength = after.get_wirelength(true, false);
     bool a, b;
     if(overlap){
         a = ori.z;   
@@ -238,7 +238,7 @@ void find_neighbor_threads_i(int i_start, int i_end, vector<int>* rand_i, vector
                         //success = neighbor.find_position(true, true, 0, 0); //6ms at most  (the shapes of the neighbor SP were calculated)
                         if(success){
                             if(SA->need_practical){
-                                neighbor.bouding_lines.resize(sequence_pair_t::sequence_n);
+                                neighbor.bounding_lines.resize(sequence_pair_t::sequence_n);
                                 neighbor.carved = vector<int>(sequence_pair_t::sequence_n, false);
                                 neighbor.set_bounding_lines();
                                 neighbor.deal_bounding_line();

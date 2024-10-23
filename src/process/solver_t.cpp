@@ -48,28 +48,12 @@ void solver_t::SA_process(sequence_pair_enumerator_t& SPEN) {
     }
     SA_solver_t SA_solver;
     double time_left = std::min(this->get_time_left(), this->SA_runtime);
-    cout<<"---------------Stage 1----------------"<<endl;
-    // SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.33, false);
-    // SA_solver.run(SPEN, 0.1*time_left, 0.3, 0.01, false, 0, 0.66, false);
     SA_solver.run(SPEN, 0.6*time_left, 0.05, 0.008, false, 0, 1, false);
     SA_solver.run(SPEN, 0.4*time_left, 0.05, 0.008, false, 0, 1, true);
     SPEN.updated_best_SP();
     SPEN.valid_sequence_pairs[0].print_inline();
-
     SPEN.valid_sequence_pairs[0].sequence_pair_validation(1);
-    SPEN.valid_sequence_pairs[0].update_wirelength(true, true);
     SPEN.valid_sequence_pairs[0].to_rectilinear_and_plot();
-    //best_sp.print_inline();
-    // best_sp.to_rectilinear();
-    // best_sp.to_rectilinear_and_plot();
-    //SPEN.best_SP = SA_solver.post_process(SPEN.best_SP);
-
-    // SPEN.best_SP.write_inline();
-    // SPEN.best_SP.print_inline();
-    //this->best_fp = SPEN.best_SP.to_fp();
-    //SPEN.best_SP.to_rectilinear_and_plot();
-    //this->best_fp.GUI_validation();
-    //cout<<"SA finally got wirelength = "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
 }
 
 void solver_t::run() {
@@ -83,31 +67,10 @@ void solver_t::run() {
     sequence_pair_enumerator_t SPEN;
     SPEN.init_timeout = this->init_timeout;
     SPEN.generate_sequence_pairs(1);
-
-    // case_table_t case_table;
-    // int case_id = chip_t::get_similar_case_num();
-    // sequence_pair_t SP;
-    // bool fnd_cases = false;
-
-    // fnd_cases = true;
-    // SP.v_sequence = case_table.init_cases[11][0];
-    // SP.h_sequence = case_table.init_cases[11][1];
-    // for(auto& e:SP.is_in_seq){e = 1;}
-    // bool a = SP.find_position(true, true, 0, 0);
-    // SPEN.valid_sequence_pairs.push_back(SP);
     SPEN.valid_sequence_pairs[0].sequence_pair_validation();
     SPEN.valid_sequence_pairs[0].print_inline();
-    for(auto& e:SPEN.valid_sequence_pairs){double useless = e.update_wirelength(true, true);}
-
-    cout<<"initial stage got = "<<SPEN.valid_sequence_pairs.size()<<" SPs"<<endl;
-    cout<<"--------------------------------------"<<endl;
+    SPEN.valid_sequence_pairs[0].get_wirelength();
     this->SA_process(SPEN);
-    // cout<<"----------------"<<endl;
-    // cout<<"Load specific sequence pair"<<endl;
-    // this->load_specific_best();
-    // cout<<"Result : "<<this->best_fp.get_wirelength()<<endl;
-    // this->runtime_timer.timer_end();
-    // this->runtime_timer.print_time_elapsed();
 }
 
 void solver_t::set_timer_start() {

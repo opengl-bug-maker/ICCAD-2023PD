@@ -34,8 +34,8 @@ public:
     bool find_position_allow_illegal(bool, bool, int, int);
     bool find_position_allow_illegal_process();
     void predict_wirelength(bool, bool);
-    void to_rectilinear();
     void to_rectilinear_and_plot();
+    void save_result();
     floorplan_t to_fp();
 
 
@@ -51,8 +51,7 @@ public:
 
     int get_vi(int);
     int get_hi(int);
-    double update_wirelength(bool minimize, bool with_area);
-    void update_wirelength_rectilinear();
+
     std::vector<int> get_v();
     std::vector<int> get_h();
 
@@ -63,7 +62,8 @@ public:
     vector<int> h_sequence, v_sequence, fix_sequence_v, fix_sequence_h;
     
     static int sequence_n; //number of sequences number
-        //static function
+
+    //static functions
     static void init();
     static void build_graph();
     static vector<vec2d_t> find_w_h(uint32_t area, int); //calculate a legal shapes for a specific area
@@ -88,10 +88,11 @@ public:
     static unordered_map<const module_t*, int> soft_module_to_id_m; //from the module to its seq# (for building the connections_VE graph)
     static unordered_map<const module_t*, int> fix_module_to_id_m;//from the module to its seq# (for building the connections_VE graph)
     double predicted_wirelength = -1;
+    double rectilinear_wirelength = 0;
     double z = -1;
     vector<int> add_soft_order;
     vector<int> is_in_seq;
-    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bouding_lines;
+    std::vector<std::pair<std::vector<vec2d_t>,std::string>> bounding_lines;
     vector<int> carved; 
     vector<int> allow_to_overlap;
     
@@ -99,6 +100,8 @@ public:
     vector<vec2d_t> get_4_points(vec2d_t, vec2d_t);
     vector<int> get_correct_area();
     vector<int> get_correct_compensation();
+    double get_wirelength();
+    double get_wirelength_rectilinear();
     void fill_near();
     void overlap_optimization();
     void carve();
@@ -112,44 +115,7 @@ public:
     void set_bounding_lines();
     bool check_area_ratio();
 
-    double rectilinear_wirelength = 0;
 private:
-
-    
-
-
-    //initialization
-    void set_only_fix();
-    void init_modules_size();
-    void set_fix_sequence();
-    void set_is_in_seq();
-    void set_add_order();
-
-    vector<vec2d_t> get_LP_res_pos();
-    pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
-
-    //subfunctions
-    bool is_completed();
-    void build_constraint_graph();
-    void simplify_constraint_graph();
-    void mark_transitive_edge();
-    void swap_seq_number(int a, int b, bool, bool);
-
-    //debug
-    void print();
-    
-    void print_v();
-    void print_h();
-    void print_logs();
-    
-    void print_shapes_i();
-    void print_fix_sequence();
-    void print_connections();
-    
-    
-    void print_wirelength(bool,bool);
-
-
 
     //properties for LP
     int constraint_n, constraint_i, variable_n;
@@ -168,6 +134,37 @@ private:
     vector<vector<int>> is_transitive_h, is_transitive_v;
     //debug properties
     vector<pair<double, double>> logs;
+
+    
+    //initialization
+    void set_only_fix();
+    void init_modules_size();
+    void set_fix_sequence();
+    void set_is_in_seq();
+    void set_add_order();
+
+    vector<vec2d_t> get_LP_res_pos();
+    pair<vector<vec2d_t>, vector<int>> get_LP_res_wh();
+
+    //subfunctions
+    bool is_completed();
+    void build_constraint_graph();
+    void simplify_constraint_graph();
+    void mark_transitive_edge();
+
+    //debug
+    void print();
+    void print_v();
+    void print_h();
+    void print_logs();
+    void print_shapes_i();
+    void print_fix_sequence();
+    void print_connections();
+    void print_wirelength();
+
+
+
+
 
 };
 

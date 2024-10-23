@@ -327,7 +327,7 @@ void sequence_pair_t::sequence_pair_validation(int t) {
 void sequence_pair_t::set_bounding_lines(){
     if(carved.size()<sequence_n){
         carved = vector<int>(sequence_n, 0);
-         this->bouding_lines.resize(sequence_n);
+         this->bounding_lines.resize(sequence_n);
     }
     for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
         if(this->carved[i]){continue;}
@@ -335,7 +335,7 @@ void sequence_pair_t::set_bounding_lines(){
             string name;
             if(seq_is_fix[i]){name = "f";}
             else{name = "s";}
-            this->bouding_lines[i] = {this->get_4_points(this->modules_positions[i], this->modules_wh[i]), name+std::to_string(i)};
+            this->bounding_lines[i] = {this->get_4_points(this->modules_positions[i], this->modules_wh[i]), name+std::to_string(i)};
         }
     }
     
@@ -429,13 +429,6 @@ void sequence_pair_t::print_inline() {
         if(i!=this->h_sequence.size()-1){cout<<", ";}
     }
     cout<<"}"<<endl;
-//    this->print_shapes_i();
-//    for(int i = 0; i<this->soft_n; ++i){
-//        for(auto& shape:sequence_pair_t::soft_area_to_w_h_m_5[i]){
-//            cout<<"{"<<shape.get_x()<<","<<shape.get_y()<<"} ";
-//        }
-//    }
-//    cout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, false)<<endl;
 }
 void sequence_pair_t::print_shapes_i() {
     cout<<"shapes of the SP : {";
@@ -639,61 +632,60 @@ bool sequence_pair_t::is_completed() {
     return false;
 }
 
-void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_area) {
-    vector<vec2d_t> pos = this->modules_positions;
-    double sum = 0;
-    for(int i = 0; i<connections.size();++i){
-        double x_min = 1e9, y_min = 1e9, x_max = -1, y_max = -1;
-        for(int j = 0; j<connections[i].nodes.size(); ++j){
-            int v = connections[i].nodes[j];
-            vec2d_t center_v = {pos[v].get_x()+this->modules_wh[v].get_half_x(), pos[v].get_y()+this->modules_wh[v].get_half_y()}; 
-            double v_x = center_v.get_x(), v_y = center_v.get_y();
-            x_min = std::min(x_min, v_x);
-            x_max = std::max(x_max, v_x);
-            y_min = std::min(y_min, v_y);
-            y_max = std::max(y_max, v_y);
-        }
-        double delta_x = x_max-x_min;
-        double delta_y = y_max-y_min;
-        sum+= (delta_x+delta_y)*connections[i].w;
-    }
-    this->predicted_wirelength = sum;
-    // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
-    // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
-}
+// void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_area) {
+//     vector<vec2d_t> pos = this->modules_positions;
+//     double sum = 0;
+//     for(int i = 0; i<connections.size();++i){
+//         double x_min = 1e9, y_min = 1e9, x_max = -1, y_max = -1;
+//         for(int j = 0; j<connections[i].nodes.size(); ++j){
+//             int v = connections[i].nodes[j];
+//             vec2d_t center_v = {pos[v].get_x()+this->modules_wh[v].get_half_x(), pos[v].get_y()+this->modules_wh[v].get_half_y()}; 
+//             double v_x = center_v.get_x(), v_y = center_v.get_y();
+//             x_min = std::min(x_min, v_x);
+//             x_max = std::max(x_max, v_x);
+//             y_min = std::min(y_min, v_y);
+//             y_max = std::max(y_max, v_y);
+//         }
+//         double delta_x = x_max-x_min;
+//         double delta_y = y_max-y_min;
+//         sum+= (delta_x+delta_y)*connections[i].w;
+//     }
+//     this->predicted_wirelength = sum;
+//     // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+//     // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
+// }
 
 
 void sequence_pair_t::to_rectilinear_and_plot(){
-
-    //this->sequence_pair_validation(2);
     for(auto& e:this->is_in_seq){e = 1;}
     this->fill_near();
-    //this->overlap_optimization();
-    //this->carve();
     this->set_bounding_lines();
-    this->update_wirelength_rectilinear();
+    this->get_wirelength();
+    this->get_wirelength_rectilinear();
     this->deal_bounding_line();
+    this->save_result();
+    visualizer_t::draw_bounding_line(this->bounding_lines);
+    cout<<"Rectangle wirelength: "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+    cout<<"Rectilinear wirelength: "<<std::setprecision(16)<<this->rectilinear_wirelength<<endl;
+    cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
+    fgetc(stdin);
+}
 
+void sequence_pair_t::save_result(){
     int soft = chip_t::get_soft_modules().size();
-    int n = chip_t::get_total_module_n();
-
-    bool valid = bounding_line_handler_t::check_sequence_pair(*this);
-
-    int ul = 1;
-
     std::fstream file("/home/jrchang/projects/ICCAD-2023PD/outputpng/vaild_check_txt/case03.txt", std::fstream::out);
     int total_vertexes = 0;
     int total_edges = 0;
     int total_vertexes270 = 0;
     for(int i = 0; i < soft; ++i) {
-        bounding_line_t bd = bounding_line_t(this->bouding_lines[i].first);
+        bounding_line_t bd = bounding_line_t(this->bounding_lines[i].first);
         double area = bd.get_area();
         double ratio = bd.get_bounding_rect().get_size().get_x() / bd.get_bounding_rect().get_size().get_y();
         double percent = bd.get_area() / bd.get_bounding_rect().get_area();
         int ver = bd.get_vertex_count(); total_vertexes += ver;
         int ed = bd.get_edge_count(); total_edges += ed;
         int ver270 = bd.get_vertex270_count(); total_vertexes270 += ver270;
-        file << std::setw(3) << this->bouding_lines[i].second << ", ";
+        file << std::setw(3) << this->bounding_lines[i].second << ", ";
         file << ((ratio <= 2 && ratio >= 0.5 && percent >= 0.8) ? "TRUE" : "FALSE") << ", ";
         file << std::setprecision(16) << std::setw(8) << area << ", ";
         file << std::fixed << std::setw(5) << std::setprecision(3) << ratio << ", ";
@@ -711,19 +703,7 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     file << total_edges << endl;
     file << total_vertexes270 << endl;
     file.close();
-
-        
-
-    visualizer_t::draw_bounding_line(this->bouding_lines);
-    fgetc(stdin);
-    //visualizer_t::draw_bounding_line_connection(this->bouding_lines);
-    //this->print_inline();
-    //this->print_result();
-    cout<<"Rectangle wirelength: "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
-    cout<<"Rectilinear wirelength: "<<std::setprecision(16)<<this->rectilinear_wirelength<<endl;
-    cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
-    //this->sequence_pair_validation();
-    //this->to_fp().GUI_validation();
+    
 }
 
 floorplan_t sequence_pair_t::to_fp() {
@@ -1144,8 +1124,8 @@ void sequence_pair_t::deal_bounding_line() {
     std::vector<bounding_line_t> ori_bounding_lines;
     std::vector<bounding_line_t> ori_neg_bounding_lines;
     for(int i = 0; i < n; ++i) {
-        ori_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first));
-        ori_neg_bounding_lines.push_back(bounding_line_t(this->bouding_lines[i].first, false));
+        ori_bounding_lines.push_back(bounding_line_t(this->bounding_lines[i].first));
+        ori_neg_bounding_lines.push_back(bounding_line_t(this->bounding_lines[i].first, false));
     }
 
     std::vector<std::vector<int>> collision_num(soft);
@@ -1161,29 +1141,45 @@ void sequence_pair_t::deal_bounding_line() {
         }
     }
     for(int i = 0; i < soft; ++i) {
-        bounding_line_t bd0 = bounding_line_t(this->bouding_lines[i].first);
+        bounding_line_t bd0 = bounding_line_t(this->bounding_lines[i].first);
         for(int j = soft; j < n; ++j) {
-            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[j].first, false);
+            bounding_line_t bd1 = bounding_line_t(this->bounding_lines[j].first, false);
             if(!bd0.collision(bd1)){continue;}
             auto bds = bounding_line_t::merge(bd0, bd1);
             if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
         }
         for(auto num : collision_num[i]) {
             if(i == num) continue;
-            bounding_line_t bd1 = bounding_line_t(this->bouding_lines[num].first, false);
+            bounding_line_t bd1 = bounding_line_t(this->bounding_lines[num].first, false);
             auto bds = bounding_line_t::merge(bd0, bd1);
             if(!bds.difference_pos_line.empty()) bd0 = bds.difference_pos_line[0];
         }
-        this->bouding_lines[i] = {bd0.get_nodes(), this->bouding_lines[i].second};        
+        this->bounding_lines[i] = {bd0.get_nodes(), this->bounding_lines[i].second};        
     }
 }
 
-double sequence_pair_t::update_wirelength(bool minimize, bool with_area) {
-    this->predict_wirelength(minimize, with_area);
-    return this->predicted_wirelength;
+double sequence_pair_t::get_wirelength() {
+    vector<vec2d_t> pos = this->modules_positions;
+    double sum = 0;
+    for(int i = 0; i<connections.size();++i){
+        double x_min = 1e9, y_min = 1e9, x_max = -1, y_max = -1;
+        for(int j = 0; j<connections[i].nodes.size(); ++j){
+            int v = connections[i].nodes[j];
+            vec2d_t center_v = {pos[v].get_x()+this->modules_wh[v].get_half_x(), pos[v].get_y()+this->modules_wh[v].get_half_y()}; 
+            double v_x = center_v.get_x(), v_y = center_v.get_y();
+            x_min = std::min(x_min, v_x);
+            x_max = std::max(x_max, v_x);
+            y_min = std::min(y_min, v_y);
+            y_max = std::max(y_max, v_y);
+        }
+        double delta_x = x_max-x_min;
+        double delta_y = y_max-y_min;
+        sum+= (delta_x+delta_y)*connections[i].w;
+    }
+    return this->predicted_wirelength = sum;
 }
 
-void sequence_pair_t::update_wirelength_rectilinear(){
+double sequence_pair_t::get_wirelength_rectilinear(){
     vector<vec2d_t> pos = this->modules_positions;
     vector<vec2d_t> centers;
     double sum = 0;
@@ -1219,13 +1215,14 @@ void sequence_pair_t::update_wirelength_rectilinear(){
         double delta_y = y_max-y_min;
         sum+= (delta_x+delta_y)*connections[i].w;
     }
-    this->rectilinear_wirelength = sum;
     cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
     cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
+    return this->rectilinear_wirelength = sum;
+    
 }
 
-void sequence_pair_t::print_wirelength(bool minimize, bool with_area) {
-    cout<<std::setprecision(16)<<this->update_wirelength(minimize,with_area)<<endl;
+void sequence_pair_t::print_wirelength() {
+    cout<<std::setprecision(16)<<this->get_wirelength()<<endl;
 }
 
 void sequence_pair_t::print_v() {
@@ -1261,7 +1258,7 @@ void sequence_pair_t::write_inline() {
     }
     fout<<"}"<<endl;
     //this->print_shapes_i();
-    fout<<"wirelength : "<<std::setprecision(16)<<this->update_wirelength(true, true)<<endl;
+    fout<<"wirelength : "<<std::setprecision(16)<<this->get_wirelength()<<endl;
     fout.close();
 }
 

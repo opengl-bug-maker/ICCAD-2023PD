@@ -41,9 +41,9 @@ int main(int argc, char** argv){
 
 
     
-    // solver_t solver;
-    // solver.run();
-    // return 0;
+    solver_t solver;
+    solver.run();
+    return 0;
     // solver.load_specific_without_cmp();
 
     // floorplan_t fp = solver.get_best_fp();
