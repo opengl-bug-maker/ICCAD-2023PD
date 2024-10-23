@@ -52,9 +52,7 @@ void tester_t::test_sp(){
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
     sequence_pair_t SP;
-    SA_solver_t SA_solver;
-    //for(auto& e:SP.modules_area){cout<<e<<" ";}cout<<endl;
-    if(1){
+    if(case_id!=-1){
         SP.v_sequence = case_table.cases[case_id][0];
         SP.h_sequence = case_table.cases[case_id][1];
         for(auto& e:SP.is_in_seq){e = 1;}
@@ -65,8 +63,8 @@ void tester_t::test_sp(){
         }
         double z = SP.update_wirelength(true, true);
         //SP.print_result();
-        SP.to_rectilinear_and_plot();
         SP.sequence_pair_validation();
+        SP.to_rectilinear_and_plot();
         SP.print_inline();
     }
 }
