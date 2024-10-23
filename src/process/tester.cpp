@@ -24,30 +24,6 @@ tester_t::tester_t(){
 void tester_t::test()
 {
 }
-
-void tester_t::test_qs()
-{
-    case_table_t case_table;
-    int case_id = chip_t::get_similar_case_num();
-    sequence_pair_t SP;
-    bool fnd_cases = false;
-    
-
-    if(case_id!=-1){
-        SP.v_sequence = case_table.cases[case_id][0];
-        SP.h_sequence = case_table.cases[case_id][1];
-    }
-    for(auto& e:SP.is_in_seq){e = 1;}
-    SP.find_position(true, true, 0, 0);
-    SP.print_inline();
-    SP.sequence_pair_validation();
-    quad_sequence_t qs;
-    qs.set_sequences(SP);
-    //qs.build_constraint_graph_from_SP(SP);
-    qs.to_polygon(SP);
-    visualizer_t::draw_bounding_line(qs.modules_res);
-}
-
 void tester_t::test_sp(){
     case_table_t case_table;
     int case_id = chip_t::get_similar_case_num();
@@ -62,23 +38,8 @@ void tester_t::test_sp(){
             cout<<"Unable to initialize"<<endl;
         }
         double z = SP.update_wirelength(true, true);
-        //SP.print_result();
         SP.sequence_pair_validation();
         SP.to_rectilinear_and_plot();
         SP.print_inline();
     }
-}
-
-void tester_t::test_init(){
-    sequence_pair_enumerator_t SPEN;
-    SPEN.init_timeout = 1e10;
-    SPEN.generate_sequence_pairs(1);
-    sequence_pair_t SP = SPEN.valid_sequence_pairs[0];
-    bool ok = SP.find_position(true, true, 0, 0);
-    if(ok){
-        cout<<std::setprecision(16)<<"Init success, got wirelength: "<<SP.z<<endl;
-        //SP.predict_wirelength(true, true);
-    }
-    SP.sequence_pair_validation();
-
 }

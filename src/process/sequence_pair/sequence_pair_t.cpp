@@ -44,8 +44,6 @@ void sequence_pair_t::init() {
     sequence_pair_t::soft_n = static_cast<int>(chip_t::get_soft_modules().size());
     sequence_pair_t::sequence_n = static_cast<int>(chip_t::get_total_module_n());
     sequence_pair_t::fix_start_idx = static_cast<int>(chip_t::get_soft_modules().size());
-
-
     sequence_pair_t::seq_soft_map.resize(chip_t::get_total_module_n());
     sequence_pair_t::seq_fixed_map.resize(chip_t::get_total_module_n());
     sequence_pair_t::seq_is_fix.resize(chip_t::get_total_module_n());
@@ -62,8 +60,6 @@ void sequence_pair_t::init() {
     int j = 0;
     for(int i = 0; i<soft_modules.size(); ++i){
         sequence_pair_t::seq_soft_map[j] = soft_modules[i];
-        // sequence_pair_t::soft_area_to_w_h_m_5[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 5);
-        // sequence_pair_t::soft_area_to_w_h_m_9[i] = sequence_pair_t::find_w_h(soft_modules[i]->get_area(), 9);
         sequence_pair_t::modules_area[j] = soft_modules[i]->get_area();
         sequence_pair_t::seq_fixed_map[j] = nullptr;
         sequence_pair_t::seq_is_fix[j] = false;
@@ -161,11 +157,7 @@ void sequence_pair_t::build_constraint_graph() {
                 this->constraint_graph_v.push_back({i, j, static_cast<int>(this->modules_wh[i].get_y())});
             }
         }
-    }
-    // for(auto& e:this->constraint_graph_v){
-    //     cout<< e.from<<" "<<e.to<<" "<<endl;
-    // }
-    
+    }    
 }
 
 vector<vec2d_t> sequence_pair_t::get_LP_res_pos(){
@@ -215,9 +207,8 @@ bool sequence_pair_t::find_position(bool minimize_wirelength, bool load_result,i
     variable_n = 2*sequence_n + 5*soft_n;
     if(minimize_wirelength){
         variable_n += 4*sequence_pair_t::connections.size();
-        constraint_n += 2 * sequence_pair_t::connections.size() + 4 * sequence_pair_t::connection_graph_deg;
-        //constraint_n+=10*sequence_pair_t::connections.size();
     }
+        constraint_n += 2 * sequence_pair_t::connections.size() + 4 * sequence_pair_t::connection_graph_deg;
     x_module_offset = 1;
     y_module_offset = 1+sequence_n;
     shape_types.resize(5);
@@ -649,17 +640,6 @@ bool sequence_pair_t::is_completed() {
 }
 
 void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_area) {
-    // bool success;
-    // if(with_area){
-    //     success = this->find_position_with_area(minimize_wirelength,true,0, 0); //need result to calculate wirelength
-    // }
-    // else{
-    //     success = this->find_position_allow_illegal(minimize_wirelength,true,0, 0); //need result to calculate wirelength
-    // }
-    // if(success==false){
-    //     this->predicted_wirelength = -1;
-    //     return;
-    // }
     vector<vec2d_t> pos = this->modules_positions;
     double sum = 0;
     for(int i = 0; i<connections.size();++i){
@@ -682,23 +662,6 @@ void sequence_pair_t::predict_wirelength(bool minimize_wirelength, bool with_are
     // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
 }
 
-void sequence_pair_t::to_rectilinear(){
-    this->find_position(true, true, 0, 0);
-    this->find_position_with_area(true, true, 0, 0);
-    this->fill_near();
-    this->overlap_optimization();
-    this->carve();
-    //this->set_bounding_lines();
-    //visualizer_t::draw_bounding_line(SP.bouding_lines);
-    //visualizer_t::draw_bounding_line_connection(SP.bouding_lines);
-    // SP.print_inline();
-    // SP.print_result();
-    // cout<<"Rectangle wirelength: "<<SP.predicted_wirelength<<endl;
-    //cout<<"Rectilinear wirelength: "<<this->rectilinear_wirelength<<endl;
-    //cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
-    //SP.sequence_pair_validation();
-    //SP.to_fp().GUI_validation();
-}
 
 void sequence_pair_t::to_rectilinear_and_plot(){
 
@@ -1032,20 +995,6 @@ bool sequence_pair_t::find_position_allow_illegal_process()
     return true;
 }
 
-void sequence_pair_t::swap_seq_number(int a, int b,bool h,bool v) {
-    vector<int> v_map(sequence_pair_t::sequence_n), h_map(sequence_pair_t::sequence_n);
-    for(int i = 0; i<sequence_pair_t::sequence_n; ++i){
-        v_map[this->v_sequence[i]] = h_map[this->h_sequence[i]] = i;
-    }
-    if(v){
-        std::swap(this->v_sequence[v_map[a]], this->v_sequence[v_map[b]]);
-    }
-    if(h){
-        std::swap(this->h_sequence[h_map[a]], this->h_sequence[h_map[b]]);
-    }
-
-}
-
 vector<vec2d_t> sequence_pair_t::get_4_points(vec2d_t ll, vec2d_t wh){
     vec2d_t ul = vec2d_t(ll.get_x(), ll.get_y()+  wh.get_y());
     vec2d_t ur = vec2d_t(ll.get_x()+wh.get_x(), ll.get_y()+  wh.get_y());
@@ -1064,7 +1013,6 @@ void sequence_pair_t::fill_near()
     near_y_id = near_x_id = vector<vector<int>>(sequence_pair_t::sequence_n, vector<int>(sequence_n, -1));
     int ix,iy;
     ix = iy = 0;
-    //cout<<"Near x"<<endl;
     vector<int> area_comp = this->get_correct_area();
     for(int i = 0; i< this->sequence_n; ++i){
         if(area_comp[i]){continue;}
@@ -1096,7 +1044,6 @@ void sequence_pair_t::fill_near()
         }
     }
 
-    //cout<<"Near y"<<endl;
     for(int i = 0; i< this->sequence_n; ++i){
         if(area_comp[i]){continue;}
         for(int j = 0; j< this->sequence_n; ++j){
@@ -1188,124 +1135,7 @@ void sequence_pair_t::overlap_optimization(){
     }
 }
 
-void sequence_pair_t::carve(){
-    this->bouding_lines.clear();
-    this->bouding_lines.resize(sequence_n);
-    this->carved = vector<int>(sequence_n, false);
-    this->result_carving_x_enable = vector<bool>(this->result_carving_x.size(), false);
-    this->result_carving_y_enable = vector<bool>(this->result_carving_y.size(), false);
-    for(int i = 0; i<this->result_carving_x.size(); ++i){
-        int from = result_carving_x[i][0], to = result_carving_x[i][1], h = result_carving_x[i][2];
-        vec2d_t ll_from = this->modules_positions[from];
-        vec2d_t from_wh = this->modules_wh[from];
-        vec2d_t ll_to = this->modules_positions[to];
-        vec2d_t to_wh = this->modules_wh[to];
-        int car_top_y = std::min(ll_from.get_y()+from_wh.get_y(), ll_to.get_y()+to_wh.get_y());
-        int car_bot_y = std::max(ll_from.get_y(), ll_to.get_y());
-        int car_mid_y = (car_top_y+car_bot_y)/2;
 
-        if(car_top_y - car_bot_y < 2){
-            continue;
-        }
-        if( h/(car_top_y-car_mid_y)>3){
-            continue;
-        }
-        this->result_carving_x_enable[i] = true;
-        this->carved[from] = this->carved[to] = true;
-        vector<vec2d_t> from_4_points = this->get_4_points(ll_from, from_wh);
-        vector<vec2d_t> to_4_points = this->get_4_points(ll_to, to_wh);
-        vec2d_t c1 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_top_y);
-        vec2d_t c2 = vec2d_t(ll_from.get_x()+from_wh.get_x(),   car_top_y);
-        vec2d_t c3 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_top_y);
-        vec2d_t c4 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_mid_y);
-        vec2d_t c5 = vec2d_t(ll_from.get_x()+from_wh.get_x()  , car_mid_y);
-        vec2d_t c6 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_mid_y);
-        vec2d_t c7 = vec2d_t(ll_from.get_x()+from_wh.get_x()-h, car_bot_y);
-        vec2d_t c8 = vec2d_t(ll_from.get_x()+from_wh.get_x()  , car_bot_y);
-        vec2d_t c9 = vec2d_t(ll_from.get_x()+from_wh.get_x()+h, car_bot_y);
-
-        bounding_line_t bd_from = bounding_line_t(rect_t(this->modules_positions[from], this->modules_wh[from]).get_bounding_rect());
-        bounding_line_t bd_to   = bounding_line_t(rect_t(this->modules_positions[to]  , this->modules_wh[to]  ).get_bounding_rect());
-        if(ll_from.get_y() + from_wh.get_y() > ll_to.get_y() + to_wh.get_y()) {
-            bounding_line_t bd_upper_add = bounding_line_t({c5, c2, c3, c6});
-            bounding_line_t bd_upper_minus = bounding_line_t({c7, c4, c5, c8}, false);
-            bounding_line_t bd_lower_add = bounding_line_t({c7, c4, c5, c8});
-            bounding_line_t bd_lower_minus = bounding_line_t({c5, c2, c3, c6}, false);
-            bd_from = bounding_line_t::merge(bd_from, bd_upper_add).difference_pos_line[0];
-            bd_from = bounding_line_t::merge(bd_from, bd_upper_minus).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_lower_add).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_lower_minus).difference_pos_line[0];
-        } else {
-            bounding_line_t bd_upper_add = bounding_line_t({c8, c5, c6, c9});
-            bounding_line_t bd_upper_minus = bounding_line_t({c4, c1, c2, c5}, false);
-            bounding_line_t bd_lower_add = bounding_line_t({c4, c1, c2, c5});
-            bounding_line_t bd_lower_minus = bounding_line_t({c8, c5, c6, c9}, false);
-            bd_from = bounding_line_t::merge(bd_from, bd_upper_add).difference_pos_line[0];
-            bd_from = bounding_line_t::merge(bd_from, bd_upper_minus).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_lower_add).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_lower_minus).difference_pos_line[0];
-        }
-        this->bouding_lines[from] = {bd_from.get_nodes(), "s"+std::to_string(from)};
-        this->bouding_lines[to] = {bd_to.get_nodes(), "s"+std::to_string(to)};
-    }
-
-
-    for(int i = 0; i<this->result_carving_y.size(); ++i){
-        int from = result_carving_y[i][0], to = result_carving_y[i][1], h = result_carving_y[i][2];
-        vec2d_t ll_from = this->modules_positions[from];
-        vec2d_t from_wh = this->modules_wh[from];
-        vec2d_t ll_to = this->modules_positions[to];
-        vec2d_t to_wh = this->modules_wh[to];
-        int car_right_x = std::min(ll_from.get_x()+from_wh.get_x(), ll_to.get_x()+to_wh.get_x());
-        int car_left_x = std::max(ll_from.get_x(), ll_to.get_x());
-        int car_mid_x = (car_right_x+car_left_x)/2;
-        
-        if(car_right_x - car_left_x < 2){
-            continue;
-        }
-        if( h/(car_right_x-car_mid_x)>3){
-            continue;
-        }
-        this->result_carving_y_enable[i] = true;
-        this->carved[from] = this->carved[to] = true;
-        vector<vec2d_t> from_4_points = this->get_4_points(ll_from, from_wh);
-        vector<vec2d_t> to_4_points = this->get_4_points(ll_to, to_wh);
-        vec2d_t c1 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y()-h);
-        vec2d_t c2 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y());
-        vec2d_t c3 = vec2d_t(car_left_x, ll_from.get_y()+from_wh.get_y()+h);
-        vec2d_t c4 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y()-h);
-        vec2d_t c5 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y());
-        vec2d_t c6 = vec2d_t(car_mid_x, ll_from.get_y()+from_wh.get_y()+h);
-        vec2d_t c7 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y()-h);
-        vec2d_t c8 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y());
-        vec2d_t c9 = vec2d_t(car_right_x, ll_from.get_y()+from_wh.get_y()+h);
-
-        bounding_line_t bd_from = bounding_line_t(rect_t(this->modules_positions[from], this->modules_wh[from]).get_bounding_rect());
-        bounding_line_t bd_to   = bounding_line_t(rect_t(this->modules_positions[to]  , this->modules_wh[to]  ).get_bounding_rect());
-        std::cout << std::setprecision(16);
-        if(ll_from.get_x() + from_wh.get_x() > ll_to.get_x() + to_wh.get_x()) {
-            bounding_line_t bd_right_add = bounding_line_t({c8, c5, c6, c9});
-            bounding_line_t bd_right_minus = bounding_line_t({c4, c1, c2, c5}, false);
-            bounding_line_t bd_left_add = bounding_line_t({c4, c1, c2, c5});
-            bounding_line_t bd_left_minus = bounding_line_t({c8, c5, c6, c9}, false);
-            bd_from = bounding_line_t::merge(bd_from, bd_right_add).difference_pos_line[0];
-            bd_from = bounding_line_t::merge(bd_from, bd_right_minus).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_left_add).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_left_minus).difference_pos_line[0];
-        } else {
-            bounding_line_t bd_right_add = bounding_line_t({c5, c2, c3, c6});
-            bounding_line_t bd_right_minus = bounding_line_t({c7, c4, c5, c8}, false);
-            bounding_line_t bd_left_add = bounding_line_t({c7, c4, c5, c8});
-            bounding_line_t bd_left_minus = bounding_line_t({c5, c2, c3, c6}, false);
-            bd_from = bounding_line_t::merge(bd_from, bd_right_add).difference_pos_line[0];
-            bd_from = bounding_line_t::merge(bd_from, bd_right_minus).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_left_add).difference_pos_line[0];
-            bd_to = bounding_line_t::merge(bd_to, bd_left_minus).difference_pos_line[0];
-        }
-        this->bouding_lines[from] = {bd_from.get_nodes(), "s"+std::to_string(from)};
-        this->bouding_lines[to] = {bd_to.get_nodes(), "s"+std::to_string(to)};
-    }
-}
 
 void sequence_pair_t::deal_bounding_line() {
     int soft = chip_t::get_soft_modules().size();
@@ -1390,8 +1220,8 @@ void sequence_pair_t::update_wirelength_rectilinear(){
         sum+= (delta_x+delta_y)*connections[i].w;
     }
     this->rectilinear_wirelength = sum;
-    // cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
-    // cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
+    cout<< "Actual : "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
+    cout<< "LP result : "<<std::setprecision(16)<<this->ILP_result.z<<endl;
 }
 
 void sequence_pair_t::print_wirelength(bool minimize, bool with_area) {
@@ -1533,11 +1363,7 @@ void sequence_pair_t::mark_transitive_edge(){
                 simplified.push_back(e);
             }
         }
-        //this->constraint_graph_h = simplified;
     }
-    // for(auto& e:this->constraint_graph_v){
-    //     cout<< e.from<<" "<<e.to<<" "<<this->is_transitive_v[e.from][e.to]<<endl;
-    // }
 }
 
 vector<int> sequence_pair_t::get_correct_area() {
