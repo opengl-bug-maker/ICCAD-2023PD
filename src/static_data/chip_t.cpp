@@ -348,45 +348,27 @@ void chip_t::pd_file_input(std::string fileName) {
                 chip_t::fixed_modules[i - chip_t::softCount]->pins.push_back(pin);
             }
         }else if(temp == "CONNECTION"){
-            int connectionCount, index0, index1;
+            int connectionCount, index0, index1, nodeCount;
             file >> connectionCount;
             chip_t::connectionTable =
                     std::vector<std::vector<uint_fast32_t>>(chip_t::softCount + chip_t::fixedCount,
                                                             std::vector<uint_fast32_t>(chip_t::softCount + chip_t::fixedCount, 0));
             for (int i = 0; i < connectionCount; ++i) {
-                file >> temp;
-                index0 = chip_t::moduleNameToIndex[temp];
-                file >> temp;
-                index1 = chip_t::moduleNameToIndex[temp];
-                file >> iTemp;
-
-                chip_t::connectionTable[index0][index1] += iTemp;
-                chip_t::connectionTable[index1][index0] += iTemp;
-            }
-            for(int i = 0; i<chip_t::get_total_module_n(); ++i){
-                for(int j =i; j< chip_t::get_total_module_n(); ++j){
-                    if(chip_t::connectionTable[i][j]==0){continue;}
-                    multi_net_t* multi_net = new multi_net_t();
-                    multi_net->pins.push_back(chip_t::get_modules()[i]->pins[0]);
-                    multi_net->pins.push_back(chip_t::get_modules()[j]->pins[0]);
-                    multi_net->weight = chip_t::connectionTable[i][j];
-                    chip_t::get_modules()[i]->pins[0]->connect_net = multi_net;
-                    chip_t::get_modules()[j]->pins[0]->connect_net = multi_net;
-                    chip_t::multi_nets.push_back(multi_net);
+                multi_net_t* multi_net = new multi_net_t();
+                file >> nodeCount;
+                for(int i = 0; i < nodeCount; ++i) {
+                    file >> temp;
+                    index0 = chip_t::moduleNameToIndex[temp];
+                    multi_net->pins.push_back(chip_t::get_modules()[index0]->pins[0]);
+                    chip_t::get_modules()[index0]->pins[0]->connect_net = multi_net;
                 }
+                file >> iTemp;
+                multi_net->weight = iTemp;
+                chip_t::multi_nets.push_back(multi_net);
             }
 
         }else {
             throw std::exception();
-        }
-    }
-
-    for (int i = 0; i < chip_t::softCount + chip_t::fixedCount; ++i) {
-        for (int j = i; j < chip_t::softCount + chip_t::fixedCount; ++j) {
-            if(chip_t::connectionTable[i][j] != 0){
-                chip_t::modules[i]->connections.emplace_back(chip_t::modules[j], chip_t::connectionTable[i][j]);
-                chip_t::modules[j]->connections.emplace_back(chip_t::modules[i], chip_t::connectionTable[i][j]);
-            }
         }
     }
 
