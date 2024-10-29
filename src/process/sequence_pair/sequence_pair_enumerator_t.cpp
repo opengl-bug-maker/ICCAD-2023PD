@@ -22,6 +22,10 @@ void sequence_pair_enumerator_t::generate_sequence_pairs(int n) {
             cout<<"Failed in initialization"<<endl;
         }
     }
+    else{
+        bool success = this->seed_SP.find_position(true, true, 0, 0);
+        this->valid_sequence_pairs.push_back(this->seed_SP);
+    }
     this->init_timer.timer_end();
     this->init_timer.print_time_elapsed();
 }

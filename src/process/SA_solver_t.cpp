@@ -12,7 +12,7 @@
 #include <thread>
 #include <stack>
 #include <mutex>
-std::stack<sequence_pair_t> legal_neighbors;
+static std::stack<sequence_pair_t> legal_neighbors;
 std::mutex legal_neighbors_mutex;
 using std::cout;
 using std::endl;
@@ -33,7 +33,7 @@ void SA_solver_t::run(sequence_pair_enumerator_t & SPEN, double timeout, double 
 
     SPEN.updated_best_SP();
     sequence_pair_t best_sp = SPEN.best_SP;
-    double best_wirelength = best_sp.z;
+    double best_wirelength = best_sp.get_wirelength();
     int load_back_cnt = 0;
     int it = 1;
     while(true){
@@ -158,6 +158,7 @@ sequence_pair_t SA_solver_t::find_neighbor_parallel(sequence_pair_t SP, bool ove
     else{
         thread_n = 6;
     }
+    thread_n = std::min(thread_n, static_cast<double>(sequence_pair_t::sequence_n));
     while(legal_neighbors.size()){legal_neighbors.pop();}
     vector<std::thread> threads;
     double x = sequence_pair_t::sequence_n/thread_n;
