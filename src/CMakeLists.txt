@@ -1,5 +1,6 @@
 set(CMAKE_CXX_STANDARD 17)
 #SET(CMAKE_CXX_FLAGS "-O3")
+SET(CMAKE_CXX_FLAGS "-g")
 
 if (APPLE) 
        include_directories("/opt/homebrew/Cellar/glpk/5.0/include")
