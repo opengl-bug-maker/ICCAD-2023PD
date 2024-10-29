@@ -10,7 +10,6 @@ add_subdirectory(output_data)
 add_subdirectory(plugin)
 add_subdirectory(polygon)
 add_subdirectory(process)
-add_subdirectory(quadratic)
 add_subdirectory(static_data)
 add_subdirectory(utilities)
 
@@ -28,7 +27,6 @@ target_link_libraries(iccad2023PD
         output_data
         process
         bounding
-        quadratic
         polygon
         plugin
         static_data

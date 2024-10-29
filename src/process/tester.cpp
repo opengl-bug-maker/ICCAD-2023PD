@@ -1,14 +1,15 @@
 #include "tester.h"
 #include "process/case_table_t.h"
 #include "process/sequence_pair/sequence_pair_t.h"
-#include "process/quad_sequence/quad_sequence_t.h"
 #include "process/functional/random_helper.h"
-#include <iomanip>
 #include "SA_solver_t.h"
+#include <iomanip>
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
 tester_t::tester_t(){
     random_helper::set_seed(); //build up random table
-
-    floorplan_t::init(); //class initialization
 
     sequence_pair_t::init(); //class initialization
 
@@ -42,5 +43,8 @@ void tester_t::test_sp(){
         SP.sequence_pair_validation();
         SP.to_rectilinear_and_plot();
         SP.print_inline();
+    }
+    else{
+        cout<< "This is not a default testcase, can't load a predetermined sequence pair. "<<endl;
     }
 }

@@ -307,6 +307,7 @@ void sequence_pair_t::sequence_pair_validation() {
         bounding_lines.push_back({rect.first.to_bounding_point(), rect.second});
     }
     visualizer_t::draw_bounding_line_connection(bounding_lines);
+    cout<< "Sequence Pair is printed"<<endl;
 }
 
 void sequence_pair_t::sequence_pair_validation(int t) {
@@ -417,6 +418,7 @@ void sequence_pair_t::swap_h(int a, int b) {
 }
 
 void sequence_pair_t::print_inline() {
+    cout<<"Sequence Pair: "<<endl;
     cout<<"v: {";
     for(int i = 0; i<this->v_sequence.size(); ++i){
         cout<< v_sequence[i];
@@ -668,7 +670,10 @@ void sequence_pair_t::to_rectilinear_and_plot(){
     cout<<"Rectangle wirelength: "<<std::setprecision(16)<<this->predicted_wirelength<<endl;
     cout<<"Rectilinear wirelength: "<<std::setprecision(16)<<this->rectilinear_wirelength<<endl;
     cout<<std::setprecision(2)<<(this->predicted_wirelength-this->rectilinear_wirelength)/this->predicted_wirelength*100<<"% optimization"<<endl;
+    std::cout << "Rectilinear Flooplan is printed!" << std::endl;
+    std::cout << "Press any key to continue" << std::endl;
     fgetc(stdin);
+    
 }
 
 void sequence_pair_t::save_result(){
@@ -706,24 +711,6 @@ void sequence_pair_t::save_result(){
     
 }
 
-floorplan_t sequence_pair_t::to_fp() {
-    floorplan_t ret;
-    int placed_n = 0;
-//    if(this->is_completed()==false){
-//        return ret;
-//    }
-    for(int i = 0; i<soft_n; ++i){
-        bool ok = ret.place_soft_module(i, {
-                                                vec2d_t(static_cast<int32_t>(this->modules_positions[i].get_x()),static_cast<int32_t>(this->modules_positions[i].get_y()))},
-                                        {vec2d_t(static_cast<int32_t>(this->modules_wh[i].get_x()),static_cast<int32_t>(this->modules_wh[i].get_y()))});
-        if(ok){placed_n++;}
-    }
-    cout<<"placed "<<placed_n<<" modules"<<endl;
-    if(placed_n==chip_t::get_soft_modules().size()){
-        cout<< "Done!"<<endl;
-    }
-    return ret;
-}
 
 
 

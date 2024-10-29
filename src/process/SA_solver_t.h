@@ -22,7 +22,6 @@ public:
 
     double get_time_left();
 
-    sequence_pair_t post_process(sequence_pair_t);
 
 //    void find_greater(sequence_pair_t&, double timeout);
 

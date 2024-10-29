@@ -13,21 +13,16 @@
 #include "case_table_t.h"
 #include <iomanip>
 
-#include "quad_sequence/quad_sequence_t.h"
 
 using std::cout;
 using std::endl;
 using std::setw;
 
 
-floorplan_t& solver_t::get_best_fp() {
-    return best_fp;
-}
+
 
 solver_t::solver_t() {
     random_helper::set_seed(); //build up random table
-
-    floorplan_t::init(); //class initialization
 
     sequence_pair_t::init(); //class initialization
 
@@ -98,12 +93,6 @@ void solver_t::load_specific_best() {
     if(fnd_cases){
         SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
-        SP = SA_solver.post_process(SP);
-        floorplan_t loaded_fp = SP.to_fp();
-        if(loaded_fp.get_wirelength()<this->best_fp.get_wirelength()){
-            this->best_fp = loaded_fp;
-            cout<<"Apply the prepared SP..."<<endl;
-        }
     }
 
 }
@@ -119,12 +108,7 @@ void solver_t::load_specific_without_cmp() {
         for(auto& e:SP.is_in_seq){e = 1;}
         SP.find_position(true, true, 0, 0);
         SP.find_position_with_area(true, true, 0, 0);
-        SP = SA_solver.post_process(SP);
         SP.print_inline();
-        //t1.print_time_elapsed();
         SP.sequence_pair_validation();
-        floorplan_t loaded_fp = SP.to_fp();
-        this->best_fp = loaded_fp;
-        cout<< "Result : "<<std::setprecision(16)<<this->best_fp.get_wirelength()<<endl;
     }
 }

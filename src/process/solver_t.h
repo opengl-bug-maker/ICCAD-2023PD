@@ -6,9 +6,7 @@
 #define INC_2023PD_GENETIC_ALGO_T_H
 
 #include "polygon/polygon_forest_t.h"
-#include "process/floorplan/floorplan_t.h"
 #include "static_data/chip_t.h"
-#include "quadratic/quadratic_t.h"
 #include "process/sequence_pair/sequence_pair_t.h"
 #include <map>
 #include <set>
@@ -26,8 +24,6 @@ class solver_t {
 public:
     //essential functions
     solver_t();
-
-    floorplan_t& get_best_fp();
 
     void SA_process(sequence_pair_enumerator_t&);
 
@@ -48,7 +44,6 @@ public:
     double runtime = 40*60*1000, SA_runtime = 0.1*60*1000, init_timeout = 20*60*1000; // ms
     bool invalid_input = false;
     timer runtime_timer = timer("run time");
-    floorplan_t best_fp;
 };
 
 #endif //INC_2023PD_GENETIC_ALGO_T_H

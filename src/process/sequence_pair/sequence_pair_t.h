@@ -11,7 +11,6 @@
 #include "utilities/vec2d_t.h"
 #include"static_data/soft_module_t.h"
 #include"static_data/fixed_module_t.h"
-#include "process/floorplan/floorplan_t.h"
 #include "process/components/edge_t.h"
 #include "process/functional/ILP_solver_t.h"
 #include "process/components/timer.h"
@@ -20,7 +19,7 @@
 
 using std::vector;
 using std::unordered_map;
-
+using std::pair;
 class sequence_pair_t{
     friend class sp_ilp_settings_find_position_t;
     friend class sp_ilp_settings_find_position_with_area_t;
@@ -36,7 +35,6 @@ public:
     void predict_wirelength(bool, bool);
     void to_rectilinear_and_plot();
     void save_result();
-    floorplan_t to_fp();
 
 
     //get & set
