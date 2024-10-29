@@ -10,6 +10,7 @@
 #include <utility>
 #include <fstream>
 #include <cmath>
+#include <cstdint>
 #include "utilities/rect_t.h"
 #include "utilities/bounding_rectangle_t.h"
 #include "mcnc/pin_t.h"

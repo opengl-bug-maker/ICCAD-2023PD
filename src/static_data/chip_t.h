@@ -10,6 +10,7 @@
 #include <fstream>
 #include <exception>
 #include <unordered_map>
+#include <cstdint>
 #include "../utilities/vec2d_t.h"
 #include "static_data/mcnc/multi_net_t.h"
 //#include "static_data/module_t.h"
